@@ -47,3 +47,4 @@ git push 的时候出现了fatal: Could not read from remote repository.
 
 参考：
 [廖雪峰官网GIT教程](https://www.liaoxuefeng.com/wiki/896043488029600)
+[解决Github网页上图片显示失败的问题](https://blog.csdn.net/qq_38232598/article/details/91346392)
