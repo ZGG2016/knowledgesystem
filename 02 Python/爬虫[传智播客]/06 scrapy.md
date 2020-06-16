@@ -2,7 +2,12 @@
 
 Scrapy是用纯Python实现一个为了爬取网站数据、提取结构性数据而编写的应用框架。
 
-pip install Scrapy
+安装：pip install Scrapy
+
+官方文档：https://docs.scrapy.org/en/latest/
+
+中文文档：https://docs.pythontab.com/scrapy/scrapy0.24/
+         http://scrapy-chs.readthedocs.io/zh_CN/latest/index.html
 
 ## 1 架构图
 
