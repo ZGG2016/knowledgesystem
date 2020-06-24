@@ -5,9 +5,9 @@
 - 动态设置User-Agent（随机切换User-Agent，模拟不同用户的浏览器信息）
 
 - 禁用Cookies（也就是不启用cookies middleware，不向Server发送cookies，有些网站通过cookie的使用发现爬虫行为）
+  可以通过COOKIES_ENABLED 控制 CookiesMiddleware 开启或关闭
 
-- 可以通过COOKIES_ENABLED 控制 CookiesMiddleware 开启或关闭
-- 设置延迟下载（防止访问过于频繁，设置为 2秒 或更高）
+- 设置延迟下载（防止访问过于频繁，设置为 2秒 或更高） DOWNLOAD_DELAY = 3
 
 - Google Cache 和 Baidu Cache：如果可能的话，使用谷歌/百度等搜索引擎服务器页面缓存获取页面数据。
 
