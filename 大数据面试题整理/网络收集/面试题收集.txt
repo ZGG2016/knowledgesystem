@@ -1,0 +1,146 @@
+阿里菜鸟:
+（1）java虚拟机内存模型
+（2）内存溢出一般发生在哪个区？永久代会不会导致内存溢出？
+（5）栈会不会溢出？栈溢出一般抛什么异常？jvm在哪里设置栈的大小？设置的参数是什么？
+（6）用过哪些命令查看jvm的状态、堆栈信息？
+（7）jvm的垃圾回收机制？
+
+大疆后台:
+（1）ArrayList和LinkedList的区别，各个基本操作的复杂度是多少，
+方法是什么，ArrayList的底层结构是什么，如果数组容量不够怎么办，
+扩容之后get的复杂度是多少
+（2）Java里你还知道哪些数据结构？
+（3）HashMap底层的系列问题
+（4）多线程是怎么通信的？多线程哪些资源可以共享？还有很多多线程相关问题
+（5）多个进程可以怎么通信？
+（6）为什么会内存泄漏？
+（7）面向对象有什么特点？如何理解多态
+（8）接口和抽象类有什么区别
+（9）你知道哪些设计模式？并介绍
+https://www.nowcoder.com/discuss/87872?type=2&order=0&pos=11&page=1
+
+蚂蚁金服：
+（1）数据库索引原理
+（2）怎么用原生的JDBC访问数据库
+（3）算法 n个数找最小的k个数
+（4）liunx命令平时用的哪些，查看机器使用情况用哪个；
+（5）进程中断
+（6）进程饥饿
+（7）动态规划原理以及和分治法区别
+（8）二叉树深度求解
+（9）1000个列，列的值非0即1，求每一行值加起来大于300的数据行，全部select出来
+https://www.nowcoder.com/discuss/87308?type=2&order=0&pos=32&page=2
+
+京东数据挖掘岗：
+（1）自我介绍以后就开始问跟算法相关的项目。
+
+
+第一个项目是推荐系统相关的课程项目，问的比较细，比如数据怎么处理的，
+降维怎么降的，推荐算法原理，中间还有很多细节，
+比如你们这么做会不会效果不好，有没有想过做个xxx处理什么的。
+（2）然后就问了一下如果有个分类任务，但是样本标签都特别少怎么办，
+又问同样分类问题，某个样本标签很多，其他很少怎么办。
+https://www.nowcoder.com/discuss/87973?type=2&order=0&pos=16&page=1
+
+阿里中间件：
+（1）Java的线程池说一下，各个参数的作用，如何进行的。
+（2）Redis讲一下
+（3）kafka了解么，了解哪些消息队列。
+（4）排序算法
+https://www.nowcoder.com/discuss/87868?type=2&order=0&pos=15&page=2
+
+京东金融：
+1.SOA的理解
+
+2.SOA名词解释
+
+3.具体怎么分呢？
+
+4.dubbo用过吗？用什么做注册中心
+
+5.zookeeper的原理
+6.zookeeper怎么通信
+
+7.怎么监听，zk干嘛的
+
+8.zookeeper监听器了解吗？
+
+9.dubbo的原理
+
+10.juc包类了解吗？
+
+11.hashmap原理
+
+12.初始化bean干什么你知道吗？IOC容器初始化
+
+13.获取容器的引用，ApplicationContextAware（答错了，这个没了解过）
+
+14.activeMQ了解吗？怎么用
+
+15.activeMQ消息丢失？
+
+16.搭过activeMQ、zookeeper这些吗
+
+17.Redis了解吗
+
+18.Redis存对象知道吗
+
+19.Redis 的list
+
+20.了解到这里，有什么想问的
+https://www.nowcoder.com/discuss/83455?type=2&order=0&pos=38&page=1
+
+
+
+蚂蚁：
+（1）mysql哪些列需要加索引
+where  group by后面的字段，字段的区分度高的列 
+
+（2）多线程了解哪些类
+线程池，多线程map，lock之类的j.u.c下面的类
+https://www.nowcoder.com/discuss/88066?type=2&order=0&pos=18&page=1
+
+阿里：
+（1）
+
+Java基础
+
+3. Java读取一个文件, 有哪些方法, 考虑性能, 用哪一个类
+
+4. BIO, NIO, AIO区别
+
+5. NIO的组件, Selector (这个忘记了, 一脸懵逼!)
+
+6. 什么是序列化, IO的序列化方式, 为什么需要序列化(包括在网络传输的情况下)
+
+7. Error和Exception区别
+
+8. RuntimeException和非RuntimeException区别
+
+9. 什么叫线程安全, 保证线程安全的方法
+
+10. 加锁的方式, synchronized作用在方法上和代码块区别
+
+11. synchronized(this)和synchronized(Xx.class)区别
+（2）
+
+数据库:
+
+
+17. 你建过索引吗? 建索引的原则
+
+18. 索引的类型, 如主键索引
+
+19. 查看SQL执行计划
+
+20. 有十万条数据, 写SQL语句查询其中某字段较大值的几条数据
+
+21. 子查询与关联查询的区别
+https://www.nowcoder.com/discuss/87048?type=2&order=0&pos=22&page=2
+
+（3）handoop 集群任务失败之后会做哪些操作
+（4）zookpeer 是如何保证分布式一致性
+https://www.nowcoder.com/discuss/88063?type=2&order=0&pos=24&page=1
+
+（5）redis，mysql读写一致；
+（6）redis当掉怎么保持数据一致

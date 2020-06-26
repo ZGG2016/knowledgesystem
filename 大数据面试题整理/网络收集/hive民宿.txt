@@ -1,0 +1,12 @@
+create table result(id int,name string,latitude double,longitude double,sum int,price string)
+	row format delimited
+	fields terminated by '\t'
+	stored as textfile;
+
+load data local inpath '/tmp/fun_user.txt' into table fun_user_external;
+
+create table newTable as select * from oldTable where 2=1;  (提取民宿名、经纬度、评论数)
+
+统计每个民宿被入住的次数
+
+select 民宿名,sum（评论数）as s 经纬度 from A group by 民宿名 order by s limit 10
