@@ -32,7 +32,7 @@ HDFS在设计的时候就考虑到平台的可移植性。这种特性方便了H
 
 ## 三、NameNode and DataNodes
 
-HDFS 采用主从架构。一个 HDFS 集群是由一个 Namenode 和一定数目的 Datanodes 组成。Namenode 是一个中心服务器，负责 **管理文件系统的名字空间(namespace)以及客户端对文件的访问**。集群中的 Datanode 一般是一个节点一个，负责 **管理它所在节点上的存储**。HDFS暴露了文件系统的名字空间，用户能够以文件的形式在上面存储数据。从内部看，一个文件其实被分成一个或多个 blocks，这些 **blocks 存储在一组 Datanode 上** 。Namenode **操作 文件系统的名字空间**，比如打开、关闭、重命名文件或目录。它也 **负责确定 blocks 到具体 Datanode 节点的映射**。Datanode **负责处理文件系统客户端的读写请求**。**在 Namenode 的统一调度下进行 blocks 的创建、删除和复制**。
+HDFS 采用主从架构。一个 HDFS 集群是由一个 Namenode 和一定数目的 Datanodes 组成。Namenode 是一个中心服务器，负责 **管理文件系统的名字空间(namespace)以及客户端对文件的访问**。集群中的 Datanode 一般是一个节点一个，负责 **管理它所在节点上的存储**。HDFS暴露了文件系统的名字空间，用户能够以文件的形式在上面存储数据。从内部看，一个文件其实被分成一个或多个 blocks，这些 **blocks 存储在一组 Datanode 上** 。Namenode **操作文件系统的名字空间**，比如打开、关闭、重命名文件或目录。它也 **负责确定 blocks 到具体 Datanode 节点的映射**。Datanode **负责处理文件系统客户端的读写请求**。**在 Namenode 的统一调度下进行 blocks 的创建、删除和复制**。
 
 ![hdfs01](https://s1.ax1x.com/2020/06/25/NBsjNn.png)
 
@@ -88,9 +88,43 @@ Namenode启动后会进入一个称为安全模式的特殊状态。**处于安�
 
 ## 六、The Persistence of File System Metadata
 
+Namenode 上保存着 HDFS 的名字空间。**对于任何对文件系统元数据产生修改的操作，Namenode 都会使用一种称为 EditLog 的事务日志记录下来** 。例如，在 HDFS 中创建一个文件，Namenode 就会在 Editlog 中插入一条记录来表示；同样地，修改文件的副本系数也将往 Editlog 插入一条记录。Namenode在本地操作系统的文件系统中存储这个 Editlog。**整个文件系统的名字空间，包括数据块到文件的映射、文件系统的属性等，都存储在一个称为 FsImage 的文件中**，这个文件也是放在 Namenode 所在的本地文件系统上。
+
+Namenode 在内存中保存着整个文件系统的名字空间和文件数据块映射(file Blockmap)的映像。**当 Namenode 启动，或触发 checkpoint 时，它从硬盘中读取 Editlog 和 FsImage，将所有 Editlog 中的事务作用在内存中的 FsImage 上，并将这个新版本的 FsImage 从内存中保存到本地磁盘上，然后删除旧的Editlog，因为这个旧的Editlog的事务都已经作用在 FsImage 上了。这个过程称为一个检查点(checkpoint)。** 通过获取文件系统元数据的快照并将其保存到 FsImage 中，使得 HDFS 对文件系统元数据具有一致的视图。尽管读取一个 FsImage 是高效的，但是直接对一个 FsImage 进行增量编辑是低效的。我们 **不会每次编辑都修改 FsImage，而是将编辑记录保存在 Editlog 中，在 checkpoint 期间，便会把 Editlog 的变化作用在 FsImage。** checkpoint 可以在 **给定的时间间隔(dfs.namenode.checkpoint.period，以秒表示)** 被触发，或者在给定的 **文件系统事务数量达到一定的累计值(dfs.namenode.checkpoint.txns)**。如果这两种属性都设置了，将会使用设置的第一个阈值来触发 checkpoint。
+
+Datanode 将 HDFS 数据以文件的形式存储在本地文件系统中，它并不知道有关 HDFS 文件的信息。它把 **每个 HDFS block 存储在本地文件系统的一个单独的文件中**。Datanode 并不在同一个目录创建所有的文件，实际上，它用试探的方法来确定每个目录的最佳文件数目，并且在适当的时候创建子目录。在同一个目录中创建所有的本地文件并不是最优的选择，这是因为本地文件系统可能无法高效地在单个目录中支持大量的文件。**当一个 Datanode 启动时，它会扫描本地文件系统，产生一个这些本地文件对应的所有 HDFS 数据块的列表，然后作为报告发送到 Namenode，这个报告就是块状态报告(Blockreport)**。
+
 ## 七、The Communication Protocols
 
+所有的HDFS通讯协议都是建立在TCP/IP协议之上。客户端通过一个可配置的TCP端口连接到 Namenode，通过 ClientProtocol 协议与 Namenode 交互。而 Datanode 使用 DatanodeProtocol 协议与 Namenode 交互。一个远程过程调用(RPC)模型被抽象出来封装 ClientProtocol 和 Datanodeprotocol 协议。在设计上，Namenode 不会主动发起RPC，而是响应来自客户端或 Datanode 的 RPC 请求。
+
 ## 八、Robustness
+
+HDFS的主要目标就是即使在出错的情况下也要保证数据存储的可靠性。**常见的三种出错情况是：Namenode出错, Datanode出错和网络割裂(network partitions)**。
+
+### Data Disk Failure, Heartbeats and Re-Replication 磁盘数据错误，心跳检测和重新复制
+
+每个 Datanode 节点周期性地向 Namenode 发送心跳信号。网络割裂可能导致一部分 Datanode 跟 Namenode 失去联系。Namenode 通过心跳信号的缺失来检测这一情况，并将这些近期不再发送心跳信号 Datanode 标记为宕机，不会再将新的 IO 请求发给它们。任何存储在宕机 Datanode 上的数据将不再有效。**Datanode 的宕机可能会引起一些数据块的副本系数低于指定值，Namenode 不断地检测这些需要复制的数据块，一旦发现就启动复制操作**。在下列情况下，可能需要重新复制：**某个 Datanode 节点失效，某个副本遭到损坏，Datanode 上的硬盘错误，或者文件的副本系数增大**。
+
+保守地说，标记 datanode 为宕机的时间很长(默认超过10分钟)，以避免由于 datanode 的状态变化而导致频繁复制。对于性能敏感的工作负载，用户可以通过设置缩短 datanode 为宕机的时间，并避免将数据读取 和/或 写入宕机的节点。
+
+### Cluster Rebalancing 集群均衡
+
+HDFS 的架构支持 **数据均衡策略**。如果某个 Datanode 节点上的空闲空间低于特定的临界点，按照均衡策略系统就会自动地将数据从这个 Datanode 移动到其他空闲的 Datanode。当对某个文件的请求突然增加，那么就自动创建该文件新的副本，并且同时重新平衡集群中的其他数据。这些均衡策略目前还没有实现。
+
+### Data Integrity 数据完整性
+
+从某个 Datanode 获取的 block 有可能是损坏的，原因可能是 Datanode 的存储设备错误、网络错误或者软件bug。HDFS 客户端软件实现了对 HDFS 文件内容的 **校验和(checksum)检查。当客户端创建一个新的 HDFS 文件，会计算这个文件每个数据块的校验和，并将校验和作为一个单独的隐藏文件保存在同一个HDFS名字空间下。当客户端获取文件内容后，它会检验从 Datanode 获取的数据 跟相应的校验和文件中的校验和 是否匹配，如果不匹配，客户端可以选择从其他Datanode获取该数据块的副本。**
+
+### Metadata Disk Failure 元数据磁盘错误
+
+FsImage 和 Editlog 是 HDFS 的核心数据结构。如果这些文件损坏了，整个 HDFS 实例都将失效。因而，**Namenode 可以配置成支持维护多个 FsImage 和 Editlog 的副本**。任何对 FsImage 或者 Editlog 的修改，都将同步到它们的副本上。这种多副本的同步操作可能会降低 Namenode 每秒处理的名字空间事务数量。然而这个代价是可以接受的，因为即使 HDFS 的应用是数据密集的，它们的元数据也是非密集的。当 Namenode 重启的时候，它会选取最近的完整的 FsImage 和 Editlog 来使用。
+
+提高抗故障弹性另一个的措施就是 **通过设置多个 NameNodes 实现高可用性，要么基于 NFS 实现共享存储，要么使用一个分布式的 Edit log(Journal)。后者是推荐的方法**。
+
+### Snapshots 快照
+
+快照支持某一特定时刻的数据的备份。利用快照，可以让 HDFS 在数据损坏时恢复到过去一个已知正确的时间点。
 
 ## 九、Data Organization
 
