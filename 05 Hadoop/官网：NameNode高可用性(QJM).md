@@ -1,4 +1,6 @@
-# Hadoop高可用性(QJM) #
+# NameNode 高可用性(QJM) #
+
+v3.2.1
 
 ## 背景 ##
 
@@ -11,8 +13,8 @@ hadoop2.0之前，hadoop集群存在**单点故障**的问题。每个集群只�
 	（1）计划外的事件，例如机器宕机，集群不可用，直到重启NameNode.
 	（2）计划维护事件，例如NameNode机器上软硬件的更新，会导致windows of cluster downtime.(短期停用)
 
-hdfs的高可用性通过提供the option of running two redundant NameNodes in the same cluster 
-in an Active/Passive configuration with a hot standby. 
+hdfs的高可用性通过提供the option of running two redundant NameNodes in the same cluster
+in an Active/Passive configuration with a hot standby.
 
 ## 架构 ##
 
@@ -51,7 +53,7 @@ Active NameNode是仅有的可以往JNs写数据的NameNode。
 
 ## 部署 ##
 
-每个NameNode都会一个独立的NameNode ID。To support a single configuration file for all of the NameNodes, 
+每个NameNode都会一个独立的NameNode ID。To support a single configuration file for all of the NameNodes,
 
 the relevant configuration parameters are suffixed with the nameservice ID as well as the NameNode ID.
 
@@ -66,7 +68,7 @@ the relevant configuration parameters are suffixed with the nameservice ID as we
 	  <name>dfs.nameservices</name>
 	  <value>mycluster</value>
 	</property>
-	
+
 	=================================================
 	dfs.ha.namenodes.[nameservice ID] nameservice中的每个namenode的唯一的标识符。用逗号划分。让datanode知道哪些是namenode。
 		note:目前，每个nameservice最多只能配置两个NameNode。

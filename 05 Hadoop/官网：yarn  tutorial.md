@@ -1,4 +1,6 @@
-# yarn原理
+# yarn  tutorial
+
+v3.2.1
 
 ## 一、简介
 
