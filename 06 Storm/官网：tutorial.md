@@ -16,7 +16,7 @@ Storm 集群有主节点和工作节点两类节点。**主节点运行的进程
 
 每个工作节点运行的进程叫做 "Supervisor". **"Supervisor" 负责监听、接受分配的任务，基于 Nimbus 分配的任务，按需启动或停止工作进程。** 每个工作节点执行拓扑的一个子集。一个运行的拓扑由散布在多台机器上的工作进程组成。
 
-![storm08]()
+![storm08](https://s1.ax1x.com/2020/06/29/NfXSSO.png)
 
 **Nimbus 和 Supervisors 间的协调工作都通过 Zookeeper 集群完成**。另外，Nimbus 进程和 Supervisors进程都是 **fail-fast[任何异常情况发生时，进程自毁] 和 stateless[所有的状态保存在Zookeeper或本地硬盘上]**。所有的状态保存在Zookeeper或本地硬盘上，这意味着可以通过kill -9 杀死 Nimbus 和 Supervisors 进程。它们会自动恢复，就像没被杀死过一样。这个设计保证了Storm集群难以置信的稳定性。
 
@@ -31,7 +31,7 @@ storm jar all-my-code.jar org.apache.storm.MyTopology arg1 arg2
 
 运行了 org.apache.storm.MyTopology 类，参数为arg1、arg2。这个类的功能就是定义拓扑、提交给 Nimbus。storm jar 的部分负责链接 Nimbus，上传 jar 包。
 
-因为拓扑是 Thrift 结构，Nimbus 是一个 Thrift 服务，所以你可以使用任何编程语言创建、提交拓扑。上面的例子是基于JVM语言的，更多信息请阅[Running topologies on a production cluster](http://storm.apache.org/releases/2.1.0/Running-topologies-on-a-production-cluster.html)
+因为拓扑是 Thrift 结构，Nimbus 是一个 Thrift 服务，所以你可以使用任何编程语言创建、提交拓扑。上面的例子是基于JVM语言的，更多信息请阅 [Running topologies on a production cluster](http://storm.apache.org/releases/2.1.0/Running-topologies-on-a-production-cluster.html)
 
 ## Streams
 
@@ -45,7 +45,7 @@ Storm 使用 "spouts" 和 "bolts" 实现转换。你可以实现 spouts 和 bolt
 
 spouts 和 bolts 间的网络也被打包进拓扑，这是你提交到 Storm 集群执行的最高级别的抽象。**拓扑是一个流转换的图，图的每个节点可能是 spout，或者是 bolt。图的边表明 bolt 接收哪个流。** 当一个 spout 或 bolt 向一个流提交一个元组时，它就发送这个元组到每个订阅了这个流的bolt。
 
-![storm09]()
+![storm09](https://s1.ax1x.com/2020/06/29/NfXCOH.png)
 
 拓扑中，节点间的边表明了元组应该如何传递。例如，如果 Spout A 和 Bolt B 间有一个边， Spout A 和 Bolt C 间有一个边， Spout B 和 Bolt C 间有一个边，那么每当 Spout A 提交一个元组，它就会发送到 Bolt B 和 Bolt C。所有 Bolt B 的输出元组将流入Bolt C。
 
@@ -98,9 +98,9 @@ builder.setBolt("exclaim2", new ExclamationBolt(), 2)
 
 代码中使用了 setSpout 和 setBolt 方法定义了节点。这些方法的第一个参数为用户指定的id、第二个参数为包含了执行逻辑的对象，第三个参数为并行度。此例中，spout 设置的id 为 "words"，bolts 设置的id 为 "exclaim1" and "exclaim2"。
 
-包含处理逻辑的 spouts 对象实现了 IRichSpout 接口， bolts 对象实现了 IRichBolt 接口。并行度参数是可选。它表示集群中有多少执行线程，参数默认是1个线程。
+包含处理逻辑的 spouts 对象实现了 [IRichSpout](http://storm.apache.org/releases/2.1.0/javadocs/org/apache/storm/topology/IRichSpout.html) 接口， bolts 对象实现了 [IRichBolt](http://storm.apache.org/releases/2.1.0/javadocs/org/apache/storm/topology/IRichBolt.html) 接口。并行度参数是可选。它表示集群中有多少执行线程，参数默认是1个线程。
 
-setBolt 方法返回一个 InputDeclarer 对象，此对象定义了 Bolt 的输入。组件 "exclaim1" 声明了，它要读取组件 "words" 通过 shuffle grouping 提交的元组。组件 "exclaim2" 声明了，它要读取组件 "exclaim1" 通过 shuffle grouping 提交的元组。shuffle grouping表示元组将有输入任务随机分发到 bolt 的任务。在组件间有多种数据分组的方法。
+setBolt 方法返回一个 [InputDeclarer](http://storm.apache.org/releases/2.1.0/javadocs/org/apache/storm/topology/InputDeclarer.html) 对象，此对象定义了 Bolt 的输入。组件 "exclaim1" 声明了，它要读取组件 "words" 通过 shuffle grouping 提交的元组。组件 "exclaim2" 声明了，它要读取组件 "exclaim1" 通过 shuffle grouping 提交的元组。shuffle grouping表示元组将有输入任务随机分发到 bolt 的任务。在组件间有多种数据分组的方法。
 
 如果你想组件 "exclaim2" 读取由 "words" 和 "exclaim1" 提交的元组，那么你应该这么写：
 ```
@@ -157,7 +157,7 @@ execute 方法从 bolt 输入中接收一个元组。ExclamationBolt 从元组�
 
 输入元组作为第一个参数提交，并在最后一行响应输入元组，这就是 Storm 可靠性API的一部分，以保证没有数据丢失。后面会讲。
 
-cleanup 方法是在一个 bolt 停止后调用，用来清理资源。这个方法不一定会被调用。例如，当执行任务的机器宕机，则不会调用这个方法[if the machine the task is running on blows up, there's no way to invoke the method.]。cleanup 适用于local模式，也适用于你想在不泄露资源的情况下，运行、杀死许多拓扑的情况。
+cleanup 方法是在一个 bolt 停止后调用，用来清理资源。这个方法不一定会被调用。例如，当执行任务的机器宕机，则不会调用这个方法[if the machine the task is running on blows up, there's no way to invoke the method.]。cleanup 适用于 [local模式](http://storm.apache.org/releases/2.1.0/Local-mode.html)，也适用于你想在不泄露资源的情况下，运行、杀死许多拓扑的情况。
 
 declareOutputFields 方法声明了 ExclamationBolt 提交带有一个 "word" 域的1-tuples。
 
@@ -188,7 +188,7 @@ public static class ExclamationBolt extends BaseRichBolt {
 
 ## Running ExclamationTopology in local mode
 
-Storm 有两种操作模式：本地模式和分布式模式。本地模式中，Storm 通过使用线程模拟工作节点来执行。本地模式可以用来测试和开发。可以深入阅读[Local mode](http://storm.apache.org/releases/2.1.0/Local-mode.html)
+Storm 有两种操作模式：本地模式和分布式模式。本地模式中，Storm 通过使用线程模拟工作节点来执行。本地模式可以用来测试和开发。可以深入阅读 [Local mode](http://storm.apache.org/releases/2.1.0/Local-mode.html)
 
 在本地模式下，要使用 storm local 命令，而不是 storm jar.
 
@@ -196,11 +196,11 @@ Storm 有两种操作模式：本地模式和分布式模式。本地模式中�
 
 stream grouping 的作用就是 **告诉拓扑，在两个组件间如何发送元组**。spouts 和 bolts总是并行在集群中执行任务，拓扑的执行流程如下图所示：
 
-![storm10]()
+![storm11](https://s1.ax1x.com/2020/06/29/NfXGt0.png)
 
 当 Bolt A 的一个任务向 Bolt B 发送元组时，应该发到 Bolt B 的哪个任务呢？
 
-**stream groupings 就是用来告诉 Storm 如何在任务间发送元组**。在深入了解不同类的stream groupings之前，先看看 storm-starter 中的另一个拓扑。WordCountTopology 从 spout 中读取句子，WordCountBolt 统计单词出现的次数。
+**stream groupings 就是用来告诉 Storm 如何在任务间发送元组**。在深入了解不同类的stream groupings之前，先看看 [storm-starter](https://github.com/apache/storm/tree/v2.1.0/examples/storm-starter) 中的另一个拓扑。[WordCountTopology]https://github.com/apache/storm/blob/v2.1.0/examples/storm-starter/src/jvm/org/apache/storm/starter/WordCountTopology.java) 从 spout 中读取句子，WordCountBolt 统计单词出现的次数。
 ```
 TopologyBuilder builder = new TopologyBuilder();
 
@@ -220,7 +220,7 @@ SplitSentence 将句子里的每个单词封装成一个元组，进行提交，
 
 另一个有趣的分组就是 "fields grouping"。此例中 WordCountTopology 从 SplitSentence bolt 发送元组到 WordCount bolt 就是用的 fields grouping。对于 WordCount bolt 来说，相同的单词总会进入相同的任务是非常重要的。否则，多个任务将看到相同的单词，并且它们各自会发出不正确的值，所以每个任务都有不完整的信息。**fields grouping 能够根据它的域分组一个数据流。这就可以实现相同值的域子集进入相同的任务。** 由于 WordCount 在 "word" 域上使用了 fields grouping 分组 SplitSentence 的输出流，相同的单词总会进入相同的任务，bolt 产生正确的结果。
 
-Fields groupings是实现 streaming joins 和 streaming aggregations 的基础，**底层实现利用了mod hashing**。其他的分组方式见[Concepts](http://storm.apache.org/releases/2.1.0/Concepts.html)。
+Fields groupings是实现 streaming joins 和 streaming aggregations 的基础，**底层实现利用了mod hashing**。其他的分组方式见 [Concepts](http://storm.apache.org/releases/2.1.0/Concepts.html)。
 
 ## Defining Bolts in other languages
 
@@ -253,16 +253,16 @@ class SplitSentenceBolt(storm.BasicBolt):
 
 SplitSentenceBolt().run()
 ```
-其他语言开发拓扑，见[Using non-JVM languages with Storm](http://storm.apache.org/releases/2.1.0/Using-non-JVM-languages-with-Storm.html)
+其他语言开发拓扑，见 [Using non-JVM languages with Storm](http://storm.apache.org/releases/2.1.0/Using-non-JVM-languages-with-Storm.html)
 
 ## Guaranteeing message processing
 
-见[Guaranteeing Message Processing](http://storm.apache.org/releases/2.1.0/Guaranteeing-message-processing.html)
+见 [Guaranteeing Message Processing](http://storm.apache.org/releases/2.1.0/Guaranteeing-message-processing.html)
 
 ## Transactional topologies
 
-见[Trident Tutorial](http://storm.apache.org/releases/2.1.0/Trident-tutorial.html)
+见 [Trident Tutorial](http://storm.apache.org/releases/2.1.0/Trident-tutorial.html)
 
 ## Distributed RPC
 
-见[Distributed RPC](http://storm.apache.org/releases/2.1.0/Distributed-RPC.html)
+见 [Distributed RPC](http://storm.apache.org/releases/2.1.0/Distributed-RPC.html)
