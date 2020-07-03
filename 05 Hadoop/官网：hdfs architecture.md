@@ -38,7 +38,7 @@ HDFS 采用主从架构。一个 HDFS 集群是由一个 Namenode 和一定数�
 
 ![hdfs01](https://s1.ax1x.com/2020/06/25/NBsjNn.png)
 
-Namenode 和 Datanode 被设计成可以在普通的商用机器上运行。这些机器一般运行着GNU/Linux操作系统(OS)。HDFS 采用 Java 语言开发，因此 **任何支持 Java 的机器都可以部署 Namenode 或 Datanode** 。由于采用了可移植性极强的 Java 语言，使得 HDFS 可以部署到多种类型的机器上。**一个典型的部署场景是一台机器上只运行一个 Namenode 实例，而集群中的其它机器分别运行一个 Datanode 实例** 。这种架构并不排斥在一台机器上运行多个Datanode，只不过这样的情况比较少见。
+Namenode 和 Datanode 被设计成可以在普通的商用机器上运行。这些机器一般运行着 GNU/Linux 操作系统(OS)。HDFS 采用 Java 语言开发，因此 **任何支持 Java 的机器都可以部署 Namenode 或 Datanode** 。由于采用了可移植性极强的 Java 语言，使得 HDFS 可以部署到多种类型的机器上。**一个典型的部署场景是一台机器上只运行一个 Namenode 实例，而集群中的其它机器分别运行一个 Datanode 实例** 。这种架构并不排斥在一台机器上运行多个Datanode，只不过这样的情况比较少见。
 
 集群中单一 Namenode 的结构大大简化了系统的架构。**Namenode 是所有HDFS元数据的仲裁者和管理者**，这样，用户数据永远不会流过Namenode。
 
@@ -90,7 +90,7 @@ Namenode启动后会进入一个称为安全模式的特殊状态。**处于安�
 
 ## 六、The Persistence of File System Metadata
 
-Namenode 上保存着 HDFS 的名字空间。**对于任何对文件系统元数据产生修改的操作，Namenode 都会使用一种称为 EditLog 的事务日志记录下来** 。例如，在 HDFS 中创建一个文件，Namenode 就会在 Editlog 中插入一条记录来表示；同样地，修改文件的副本系数也将往 Editlog 插入一条记录。Namenode在本地操作系统的文件系统中存储这个 Editlog。**整个文件系统的名字空间，包括数据块到文件的映射、文件系统的属性等，都存储在一个称为 FsImage 的文件中**，这个文件也是放在 Namenode 所在的本地文件系统上。
+Namenode 上保存着 HDFS 的名字空间。**对于任何对文件系统元数据产生修改的操作，Namenode 都会使用一种称为 EditLog 的事务日志记录下来** 。例如，在 HDFS 中创建一个文件，Namenode 就会在 Editlog 中插入一条记录来表示；同样地，修改文件的副本系数也将往 Editlog 插入一条记录。Namenode在本地操作系统的文件系统中存储这个 Editlog。**整个文件系统的名字空间，包括数据块到文件的映射、文件系统的属性等，都存储在一个称为 FsImage 的文件中，这个文件也是放在 Namenode 所在的本地文件系统上。**
 
 Namenode 在内存中保存着整个文件系统的名字空间和文件数据块映射(file Blockmap)的映像。**当 Namenode 启动，或触发 checkpoint 时，它从硬盘中读取 Editlog 和 FsImage，将所有 Editlog 中的事务作用在内存中的 FsImage 上，并将这个新版本的 FsImage 从内存中保存到本地磁盘上，然后删除旧的Editlog，因为这个旧的Editlog的事务都已经作用在 FsImage 上了。这个过程称为一个检查点(checkpoint)。** 通过获取文件系统元数据的快照并将其保存到 FsImage 中，使得 HDFS 对文件系统元数据具有一致的视图。尽管读取一个 FsImage 是高效的，但是直接对一个 FsImage 进行增量编辑是低效的。我们 **不会每次编辑都修改 FsImage，而是将编辑记录保存在 Editlog 中，在 checkpoint 期间，便会把 Editlog 的变化作用在 FsImage。** checkpoint 可以在 **给定的时间间隔(dfs.namenode.checkpoint.period，以秒表示)** 被触发，或者在给定的 **文件系统事务数量达到一定的累计值(dfs.namenode.checkpoint.txns)**。如果这两种属性都设置了，将会使用设置的第一个阈值来触发 checkpoint。
 
@@ -116,7 +116,7 @@ HDFS 的架构支持 **数据均衡策略**。如果某个 Datanode 节点上的
 
 ### Data Integrity 数据完整性
 
-从某个 Datanode 获取的 block 有可能是损坏的，原因可能是 Datanode 的存储设备错误、网络错误或者软件bug。HDFS 客户端软件实现了对 HDFS 文件内容的 **校验和(checksum)检查。当客户端创建一个新的 HDFS 文件，会计算这个文件每个数据块的校验和，并将校验和作为一个单独的隐藏文件保存在同一个HDFS名字空间下。当客户端获取文件内容后，它会检验从 Datanode 获取的数据 跟相应的校验和文件中的校验和 是否匹配，如果不匹配，客户端可以选择从其他Datanode获取该数据块的副本。**
+从某个 Datanode 获取的 block 有可能是损坏的，原因可能是 Datanode 的存储设备错误、网络错误或者软件bug。HDFS 客户端软件实现了对 HDFS 文件内容的 **校验和(checksum)检查。当客户端创建一个新的 HDFS 文件，会计算这个文件每个数据块的校验和，并将校验和作为一个单独的隐藏文件保存在同一个HDFS名字空间下。当客户端获取文件内容后，它会检验从 Datanode 获取的数据 跟相应的校验和文件中的校验和 是否匹配，如果不匹配，客户端可以选择从其他 Datanode 获取该数据块的副本。**
 
 ### Metadata Disk Failure 元数据磁盘错误
 
