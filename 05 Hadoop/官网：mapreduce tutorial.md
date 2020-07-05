@@ -1,4 +1,4 @@
-# mapreduce  tutorial
+# mapreduce tutorial
 
 v3.2.1
 
@@ -14,7 +14,7 @@ MapReduce 框架由 **一个master ResourceManager、多个worker NodeManager �
 
 **整体流程：** 在完成程序、配置完等参数(main函数里的configuration)之后，Hadoop job client **向ResourceManager提交job (jar/executable etc.) 和配置参数**，进行分发到worker节点，调度任务，并向客户端反馈状态和诊断信息。
 
-## 二、Inputs  Outputs
+## 二、Inputs Outputs
 
 MapReduce 以 <key, value> 作为基本的操作单位，输入一组 <key, value>，会输出一组 <key, value>，**类型可以不同**。
 
@@ -82,7 +82,7 @@ Shuffle和Sort两个阶段是同时进行的；**map的输出也是一边被取�
 
 ##### Secondary Sort
 
-如果 **中间结果的key的分组规则(上一步的Sort)和reduce前对key的分组规则(mapper阶段的分组)不同**，那么可以通过  Job.setSortComparatorClass(Class) 来指定一个Comparator，控制中间结果的key如何被分组，所以结合两者可以实现按值的二次排序。
+如果在reduce前，想要将中间的键的分组规则与键的分组等价规则不同，那么可以通过  Job.setSortComparatorClass(Class) 来指定一个Comparator，控制中间结果的key如何被分组，所以结合两者可以实现按**值的二次排序**。
 
 ##### Reduce
 
@@ -114,7 +114,7 @@ Reduce 的数目建议是 **0.95或1.75乘以 (<no. of nodes> * <no. of maximum 
 
 Partitioner 用于 **划分键值空间（key space）**。
 
-Partitioner 负责控制 Map 输出结果 key 的分割。Key（或者一个key子集）通常使用 Hash 函数产生分区，。分区的数目与一个作业的 Reducer 任务的数目是一样的。因此，它控制将中间过程的key（也就是这条记录）应该发送给m个reduce任务中的哪一个来进行reduce操作。
+Partitioner 负责控制 Map 输出结果 key 的分割。Key（或者一个key子集）通常使用 Hash 函数产生分区。分区的数目与一个作业的 Reducer 任务的数目是一样的。因此，它控制将中间过程的key（也就是这条记录）应该发送给m个reduce任务中的哪一个来进行reduce操作。
 
 HashPartitioner是默认的 Partitioner。
 
@@ -132,19 +132,19 @@ Mapper and Reducer 类可以使用 Counter 汇报统计信息。
 
 ### 5、Job Input
 
-InputFormat 为 MapReduce Job 描述 输入的细节规范。
+InputFormat 为 MapReduce Job 描述输入的细节规范。
 
 MapReduce框架根据 Job 的 InputFormat 做以下工作：
 
     - 检查 Job 输入的有效性。
-    - 把输入文件切分成多个逻辑InputSplit实例， 并分别分发每个InputSplit给一个 Mapper。
+    - 把输入文件切分成多个逻辑InputSplit实例，并分别分发每个InputSplit给一个 Mapper。
     - 提供RecordReader，RecordReader从逻辑InputSplit中获得输入记录，交由Mapper处理。
 
-基于文件的InputFormat（通常是 FileInputFormat的子类） 默认行为是按照输入文件的字节大小，把输入数据切分成逻辑InputSplit 。	**InputSplit的上限是文件系统的block的大小，下限通过 mapreduce.input.fileinputformat.split.minsize 设置。**
+基于文件的InputFormat（通常是 FileInputFormat的子类）** 默认行为是按照输入文件的字节大小，把输入数据切分成逻辑InputSplit 。InputSplit的上限是文件系统的block的大小，下限通过 mapreduce.input.fileinputformat.split.minsize 设置。**
 
 考虑到边界情况，对于很多应用程序来说，很明显 **按照输入文件大小进行逻辑分片是不能满足需求的。 在这种情况下，应用程序需要实现一个RecordReader** 来处理记录的边界并为每个任务提供一个逻辑分块的面向记录的视图。
 
-TextInputFormat 是默认的InputFormat。
+**TextInputFormat 是默认的InputFormat。**
 
 如果一个作业的Inputformat是TextInputFormat， 并且框架检测到输入文件的后缀是.gz，就会使用对应的CompressionCodec自动解压缩这些文件。 但是需要注意，上述 **带后缀的压缩文件不会被切分，并且整个压缩文件会分给一个mapper来处理** 。
 
@@ -154,7 +154,7 @@ InputSplit 表示一个独立Mapper要处理的数据。
 
 一般的 **InputSplit 是字节样式输入(byte-oriented)**，然后由 RecordReader 处理、转化成记录样式(record-oriented)。
 
-FileSplit 是默认的 InputSplit。 设置 mapreduce.map.input.file 为输入文件的路径，输入文件是逻辑分块文件。
+FileSplit 是默认的 InputSplit。 设置 mapreduce.map.input.file 为输入文件的路径。
 
 #### RecordReader
 
@@ -169,7 +169,7 @@ OutputFormat 描述 MapReduce Job的输出样式。
 MapReduce 框架根据 Job 的 OutputFormat 做以下工作：
 
     - 检验作业的输出，例如检查输出路径是否已经存在。
-    - 提供一个RecordWriter的实现，用来输出 Job 结果。 输出文件保存在FileSystem上。
+    - 提供一个 RecordWriter 的实现，用来输出 Job 结果。输出文件保存在 FileSystem 上。
 
 TextOutputFormat是默认的 OutputFormat。
 
