@@ -138,6 +138,12 @@ Integer 类在对象中包装了一个基本类型 int 的值。
 该类提供了多个方法，能在 int 类型和 String 类型之间互相转换，
 还提供了处理 int 类型时非常有用的其他一些常量和方法。
 
+	static int MAX_VALUE 
+			  值为 231－1 的常量，它表示 int 类型能够表示的最大值。 
+	static int MIN_VALUE 
+			  值为 －231 的常量，它表示 int 类型能够表示的最小值。 
+
+
 ### 1、构造方法
 
 public Integer(int value)
