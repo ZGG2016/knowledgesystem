@@ -12,11 +12,11 @@
 
 ## 2、安装lein
 
-(1)  ```wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein```
+(1)  `wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein`
 
 (2)  将其放到$PATH目录下。（ ~/bin）
 
-(3)  ```chmod a+x ~/bin/lein```
+(3)  `chmod a+x ~/bin/lein`
 
 (4)  Run it (lein) and it will download the self-install package。如下图：
 

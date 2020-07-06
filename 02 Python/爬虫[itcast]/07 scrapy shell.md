@@ -7,7 +7,7 @@ Scrapy终端是一个交互终端，我们可以在未启动spider的情况下�
 ##### 启动Scrapy Shell
 
 进入项目的根目录，执行下列命令来启动shell:
-```
+```python
 scrapy shell "http://www.itcast.cn/channel/teacher.shtml"
 ```
 

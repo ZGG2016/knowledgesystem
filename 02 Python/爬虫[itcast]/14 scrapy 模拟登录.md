@@ -6,7 +6,7 @@ COOKIES_ENABLED = True 或 # COOKIES_ENABLED = False
 ## 策略一：直接POST数据（比如需要登陆的账户信息)
 
 只要是需要提供post数据的，就可以用这种方法。下面示例里post的数据是账户密码：
-```
+```python
 import scrapy
 
 class Renren1Spider(scrapy.Spider):
@@ -34,10 +34,8 @@ class Renren1Spider(scrapy.Spider):
 
 然后和账户密码一起post到服务器，登录成功
 
-```
+```python
 import scrapy
-
-
 
 class Renren2Spider(scrapy.Spider):
     name = "renren2"
@@ -73,8 +71,7 @@ class Renren2Spider(scrapy.Spider):
 
 如果实在没办法了，可以用这种方法模拟登录，虽然麻烦一点，但是成功率100%
 
-```
-
+```python
 import scrapy
 
 class RenrenSpider(scrapy.Spider):

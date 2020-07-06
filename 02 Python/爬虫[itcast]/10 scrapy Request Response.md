@@ -3,7 +3,7 @@
 ## Request
 
 Request 部分源码：
-```
+```python
 class Request(object_ref):
 
     def __init__(self, url, callback=None, method='GET', headers=None, body=None,
@@ -69,7 +69,7 @@ class Request(object_ref):
     errback: 指定错误处理函数
 
 ## Response
-```
+```python
 class Response(object_ref):
     def __init__(self, url, status=200, headers=None, body='', flags=None, request=None):
         self.headers = Headers(headers or {})
@@ -100,7 +100,7 @@ self.request = request
 可以使用 **yield scrapy.FormRequest(url, formdata, callback)**方法发送POST请求。
 
 **如果希望程序执行一开始就发送POST请求，可以重写Spider类的start_requests(self) 方法，并且不再调用start_urls里的url。**
-```
+```python
 class mySpider(scrapy.Spider):
     # start_urls = ["http://www.example.com/"]
 
@@ -126,7 +126,7 @@ class mySpider(scrapy.Spider):
 使用Scrapy抓取网页时，如果想要预填充或重写像用户名、用户密码这些表单字段， 可以使用 FormRequest.from_response() 方法实现。
 
 下面是使用这种方法的爬虫例子:
-```
+```python
 import scrapy
 
 class LoginSpider(scrapy.Spider):
@@ -153,7 +153,7 @@ class LoginSpider(scrapy.Spider):
 
 zhihuSpider.py爬虫代码
 
-```
+```python
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 from scrapy.spiders import CrawlSpider, Rule
@@ -222,7 +222,7 @@ class ZhihuSipder(CrawlSpider) :
         return item
 ```
 Item类设置
-```
+```python
 from scrapy.item import Item, Field
 
 class ZhihuItem(Item):
@@ -236,7 +236,7 @@ class ZhihuItem(Item):
 ```
 
 setting.py 设置抓取间隔
-```
+```python
 BOT_NAME = 'zhihu'
 
 SPIDER_MODULES = ['zhihu.spiders']

@@ -50,7 +50,7 @@ config.put("kafka.topic.wildcard.match",true);
 ## 综合一起
 
 For the bolt :
-```
+```java
 TopologyBuilder builder = new TopologyBuilder();
 
 Fields fields = new Fields("key", "message");
@@ -80,7 +80,7 @@ Config conf = new Config();
 StormSubmitter.submitTopology("kafkaboltTest", conf, builder.createTopology());
 ```
 For Trident:
-```
+```java
 Fields fields = new Fields("word", "count");
 FixedBatchSpout spout = new FixedBatchSpout(fields, 4,
         new Values("storm", "1"),
@@ -134,7 +134,7 @@ bootstrapServers 与 Kafka 消费者属性里的 "bootstrap.servers" 相同。 �
 #### 创建一个简单的不可靠spout。
 
 以下将消费发布到 "topic" 的所有事件，并将其发送到 MyBolt，其中包含"topic"、"partition"、"offset"、"key"、"value"。
-```
+```java
 final TopologyBuilder tp = new TopologyBuilder();
 tp.setSpout("kafka_spout", new KafkaSpout<>(KafkaSpoutConfig.builder("127.0.0.1:" + port, "topic").build()), 1);
 tp.setBolt("bolt", new myBolt()).shuffleGrouping("kafka_spout");
@@ -143,14 +143,14 @@ tp.setBolt("bolt", new myBolt()).shuffleGrouping("kafka_spout");
 #### 通配符 Topics
 
 通配符 topics 将消费所有符合通配符的 topics. 在下面的例子中 "topic"、 "topic_foo" 和 "topic_bar" 适配通配符 `"topic.*"`， 但是 "not_my_topic" 并不适配.
-```
+```java
 final TopologyBuilder tp = new TopologyBuilder();
 tp.setSpout("kafka_spout", new KafkaSpout<>(KafkaSpoutConfig.builder("127.0.0.1:" + port, Pattern.compile("topic.*")).build()), 1);
 tp.setBolt("bolt", new myBolt()).shuffleGrouping("kafka_spout");
 ...
 ```
 #### 多个 Streams
-```
+```java
 final TopologyBuilder tp = new TopologyBuilder();
 //默认情况下，spout 消费但未被match到的topic的message的"topic"、"key"和"value"将发送到"STREAM_1"
 ByTopicRecordTranslator<String, String> byTopic = new ByTopicRecordTranslator<>(
@@ -165,7 +165,7 @@ tp.setBolt("another", new myOtherBolt()).shuffleGrouping("kafka_spout", "STREAM_
 ...
 ```
 #### Trident
-```
+```java
 final TridentTopology tridentTopology = new TridentTopology();
 final Stream spoutStream = tridentTopology.newStream("kafkaSpout",
     new KafkaTridentSpoutOpaque<>(KafkaSpoutConfig.builder("127.0.0.1:" + port, Pattern.compile("topic.*")).build()))
@@ -184,7 +184,7 @@ storm-kafka-client 中使用的实例拓扑可以在 [examples/storm-kafka-clien
 
 适用的要点是 使用 ConsumerRecord 并将其转换为可以提交的 List <object> 。难点是如何告诉 spout 将其发送到指定的 stream 中。为此，您将需要返回一个 "org.apache.storm.kafka.spout.KafkaTuple" 的实例. 这提供了一个方法 **routedTo，它将说明 tuple 将要发送到哪个特定 stream** 。
 
-```
+```java
 return new KafkaTuple(1, 2, 3, 4).routedTo("bar");
 ```
 
@@ -245,7 +245,7 @@ Kafka consumer config 参数也可能对 spout 的性能产生影响。以下Kaf
 ## Tuple Tracking
 
 **当处理保证是 AT_LEAST_ONCE 时，默认情况下，spout 会追踪提交的元组**。使用其他的处理保证对于跟踪已发出的元组来说是有必要的，以受益于 Storm 特性，比如在UI中显示完整的延迟，或者使用 Config.TOPOLOGY_MAX_SPOUT_PENDING启用backpressure。[It may be necessary to track emitted tuples with other processing guarantees to benefit from Storm features such as showing complete latency in the UI, or enabling backpressure with Config.TOPOLOGY_MAX_SPOUT_PENDING.]
-```
+```java
 KafkaSpoutConfig<String, String> kafkaConf = KafkaSpoutConfig
   .builder(String bootstrapServers, String ... topics)
   .setProcessingGuarantee(ProcessingGuarantee.AT_MOST_ONCE)

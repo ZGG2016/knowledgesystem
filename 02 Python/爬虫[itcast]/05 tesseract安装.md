@@ -13,7 +13,7 @@ https://github.com/tesseract-ocr/tessdoc
 
 4、测试
 
-```
+```python
 import pytesseract
 from PIL import Image
 

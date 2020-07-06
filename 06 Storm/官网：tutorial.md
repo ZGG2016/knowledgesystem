@@ -58,7 +58,7 @@ Storm 拓扑中的每个节点都是并行运行。在拓扑中，你 **可以�
 **Storm 的数据模型是元组。一个元组是一个值列表，元组中的域[field]可以是任意类型的对象。Storm 支持所有基本类型、字符串和字节数组，作为元组域值。你可以通过实现serializer接口，使用其他数据类型。**
 
 拓扑中的每个节点必须为提交的元组的事先声明输出域。例如，这个 bolt 声明了两个带有 "double" 和 "triple" 域的元组。
-```
+```java
 public class DoubleAndTripleBolt extends BaseRichBolt {
     private OutputCollectorBase _collector;
 
@@ -86,7 +86,7 @@ declareOutputFields 函数声明了输出域 ["double", "triple"]。
 ## A simple topology
 
 ExclamationTopology 的定义:
-```
+```java
 TopologyBuilder builder = new TopologyBuilder();        
 builder.setSpout("words", new TestWordSpout(), 10);        
 builder.setBolt("exclaim1", new ExclamationBolt(), 3)
@@ -103,7 +103,7 @@ builder.setBolt("exclaim2", new ExclamationBolt(), 2)
 setBolt 方法返回一个 [InputDeclarer](http://storm.apache.org/releases/2.1.0/javadocs/org/apache/storm/topology/InputDeclarer.html) 对象，此对象定义了 Bolt 的输入。组件 "exclaim1" 声明了，它要读取组件 "words" 通过 shuffle grouping 提交的元组。组件 "exclaim2" 声明了，它要读取组件 "exclaim1" 通过 shuffle grouping 提交的元组。shuffle grouping表示元组将有输入任务随机分发到 bolt 的任务。在组件间有多种数据分组的方法。
 
 如果你想组件 "exclaim2" 读取由 "words" 和 "exclaim1" 提交的元组，那么你应该这么写：
-```
+```java
 builder.setBolt("exclaim2", new ExclamationBolt(), 5)
             .shuffleGrouping("words")
             .shuffleGrouping("exclaim1");
@@ -111,7 +111,7 @@ builder.setBolt("exclaim2", new ExclamationBolt(), 5)
 所以，一个 bolt 可以有多个输入源。
 
 下面看下 spouts 和 bolts 的实现。Spouts 的作用就是提交新的消息到拓扑。TestWordSpout 就是从 ["nathan", "mike", "jackson", "golda", "bertels"] 列表中随机选一个单词作为一个元组提交，时间间隔为100ms. TestWordSpout 中 nextTuple() 的实现如下所示：
-```
+```java
 public void nextTuple() {
     Utils.sleep(100);
     final String[] words = new String[] {"nathan", "mike", "jackson", "golda", "bertels"};
@@ -121,7 +121,7 @@ public void nextTuple() {
 }
 ```
 ExclamationBolt 在它的输入后追加了字符串 "!!!"。实现如下：
-```
+```java
 public static class ExclamationBolt implements IRichBolt {
     OutputCollector _collector;
 
@@ -164,7 +164,7 @@ declareOutputFields 方法声明了 ExclamationBolt 提交带有一个 "word" �
 getComponentConfiguration 方法可以配置组件运行的方法。[Configuration](http://storm.apache.org/releases/2.1.0/Configuration.html) 中会讲。
 
 在 bolt 中，cleanup 和 getComponentConfiguration 不是必须的。你可以通过继承基类更简洁地定义 bolt，基类提供了一些默认的方法。ExclamationBolt 也可以这么写：
-```
+```java
 public static class ExclamationBolt extends BaseRichBolt {
     OutputCollector _collector;
 
@@ -201,7 +201,7 @@ stream grouping 的作用就是 **告诉拓扑，在两个组件间如何发送�
 当 Bolt A 的一个任务向 Bolt B 发送元组时，应该发到 Bolt B 的哪个任务呢？
 
 **stream groupings 就是用来告诉 Storm 如何在任务间发送元组**。在深入了解不同类的stream groupings之前，先看看 [storm-starter](https://github.com/apache/storm/tree/v2.1.0/examples/storm-starter) 中的另一个拓扑。[WordCountTopology]https://github.com/apache/storm/blob/v2.1.0/examples/storm-starter/src/jvm/org/apache/storm/starter/WordCountTopology.java) 从 spout 中读取句子，WordCountBolt 统计单词出现的次数。
-```
+```java
 TopologyBuilder builder = new TopologyBuilder();
 
 builder.setSpout("sentences", new RandomSentenceSpout(), 5);        
@@ -228,7 +228,7 @@ Bolts 可以使用任意语言开发，用 JVM-based 以外的语言开发的 Bo
 
 下面是 WordCountTopology 定义的 SplitSentence bolt：
 
-```
+```java
 public static class SplitSentence extends ShellBolt implements IRichBolt {
     public SplitSentence() {
         super("python", "splitsentence.py");
@@ -242,7 +242,7 @@ public static class SplitSentence extends ShellBolt implements IRichBolt {
 
 SplitSentence 重写了 ShellBolt 的方法，声明使用 python 语言，参数是 splitsentence.py。splitsentence.py实现如下：
 
-```
+```java
 import storm
 
 class SplitSentenceBolt(storm.BasicBolt):

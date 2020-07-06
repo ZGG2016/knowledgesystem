@@ -1,14 +1,14 @@
 # CrawlSpiders
 
 通过下面的命令可以快速创建 CrawlSpider模板 的代码：
-```
+```python
 scrapy genspider -t crawl tencent tencent.com
 ```
 
 class scrapy.spiders.CrawlSpider 是Spider的派生类，Spider类的设计原则是只爬取start_url列表中的网页，而CrawlSpider类**定义了一些规则(rule)来提供跟进link的方便的机制，从爬取的网页中获取link并继续爬取的工作更适合**
 
 源码参考
-```
+```python
 class CrawlSpider(Spider):
     rules = ()
     def __init__(self, *a, **kw):
@@ -157,12 +157,12 @@ Link Extractors要实例化一次，并且 extract_links 方法会根据不同�
 继续用腾讯招聘为例，给出配合rule使用CrawlSpider的例子:
 
 首先运行
-```
+```python
 scrapy shell "http://hr.tencent.com/position.php?&start=0#a"
 ```
 
 导入LinkExtractor，创建LinkExtractor实例对象。
-```
+```python
 from scrapy.linkextractors import LinkExtractor
 page_lx = LinkExtractor(allow=('position.php?&start=\d+'))
 ```
@@ -172,7 +172,7 @@ page_lx = LinkExtractor(allow=('position.php?&start=\d+'))
     deny : 用法同allow，只不过与这个正则表达式匹配的URL不会被提取)｡它的优先级高于 allow 的参数，如果没有给出(或None), 将不排除任何链接｡
 
 调用LinkExtractor实例的extract_links()方法查询匹配结果：
-```
+```python
 page_lx.extract_links(response)
 ```
 
@@ -182,7 +182,7 @@ page_lx.extract_links(response)
 
 注意转义字符的问题，继续重新匹配：
 
-```
+```python
 page_lx = LinkExtractor(allow=('position\.php\?&start=\d+'))
  # page_lx = LinkExtractor(allow = ('start=\d+'))
 
@@ -192,7 +192,7 @@ page_lx = LinkExtractor(allow=('position\.php\?&start=\d+'))
 #### CrawlSpider 版本
 
 那么，scrapy shell测试完成之后，修改以下代码
-```
+```python
 #提取匹配 'http://hr.tencent.com/position.php?&start=\d+'的链接
 page_lx = LinkExtractor(allow = ('start=\d+'))
 
@@ -205,7 +205,7 @@ rules = [
 
 不对！千万记住 callback 千万不能写 parse，再次强调：由于CrawlSpider使用parse方法来实现其逻辑，如果覆盖了 parse方法，crawl spider将会运行失败。
 
-```
+```python
 #tencent.py
 
 import scrapy
@@ -259,7 +259,7 @@ class TencentSpider(CrawlSpider):
 Scrapy提供了log功能，可以通过 logging 模块使用。
 
 可以修改配置文件settings.py，任意位置添加下面两行，效果会清爽很多。
-```
+```python
 LOG_FILE = "TencentSpider.log"
 LOG_LEVEL = "INFO"
 Log levels

@@ -15,7 +15,7 @@ class scrapy.Spider是最基本的类，所有编写的爬虫必须继承这个�
 ### 源码参考
 
 所有爬虫的基类，用户定义的爬虫必须从这个类继承
-```
+```python
 class Spider(object_ref):
 
     #定义spider名字的字符串(string)。spider的名字定义了Scrapy如何定位(并初始化)spider，所以其必须是唯一的。

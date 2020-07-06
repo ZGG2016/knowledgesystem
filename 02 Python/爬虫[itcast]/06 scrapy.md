@@ -75,7 +75,7 @@ Item 定义结构化数据字段，用来保存爬取到的数据，有点像Pyt
 可以通过继承一个 scrapy.Item 类， 并且定义类型为 scrapy.Field的类属性来定义一个Item子类（可以理解成类似于ORM的映射关系）。
 
 接下来，创建一个SpiderScrapy01Item 类，和构建item模型（model）。
-```    
+```python 
 import scrapy
 
 class SpiderScrapy01Item(scrapy.Item):
@@ -91,13 +91,13 @@ info = scrapy.Field()
 爬虫功能要分两步：爬数据、解析数据
 
 在当前目录下输入命令，执行如下命令，将在mySpider/spider目录下创建一个名为itcast的爬虫，并指定爬取域的范围：
-```
+```python
 scrapy genspider itcast "itcast.cn"
 ```
 
 打开 spider_scrapy01/spider目录里的 itcast.py，默认增加了下列代码:
-```
 
+```python
 import scrapy
 from spider_scrapy01 import items
 
@@ -142,7 +142,7 @@ class ItcastSpider(scrapy.Spider):
 ###  保存数据
 
 scrapy保存信息的最简单的方法主要有四种，-o 输出指定格式的文件，，命令如下：
-```
+```python
 # json格式，默认为Unicode编码
 scrapy crawl itcast -o teachers.json
 
@@ -158,7 +158,7 @@ scrapy crawl itcast -o teachers.xml
 ### 查看结果
 
 执行完后，会出现 teachers.json 文件，打开后，在json.cn 打开如下所示：
-
+```
     [
     {
         "name":"王老师",
@@ -171,7 +171,7 @@ scrapy crawl itcast -o teachers.xml
         "info":"互联网高级产品管理师、PMP资格认证，近10年的互联网产品和团队管理工作经历，曾担任工信部及大型电商产品负责人，大学生创新创业大赛评委，对产品的设计、交互、数据分析、用户增长等拥有资深造诣和分享经验，对教育、电商、金融等行业领域有深刻研究。"
     },
     ......
-
+```
 ### pycharm下配置启动文件
 
 ![scrapy03](https://s1.ax1x.com/2020/06/14/NSTr2q.png)
@@ -195,7 +195,7 @@ item写入JSON文件
 
 以下pipeline将所有(从所有'spider'中)爬取到的item，存储到一个独立地items.json 文件，每行包含一个序列化为'JSON'格式的'item':
 
-```
+```python
 import json
 
 # pipeline将所有(从所有'spider'中)爬取到的item，存储到一个独立地items.json 文件，
@@ -217,14 +217,14 @@ class ItcastjsonPipelins(object):
 启用一个Item Pipeline组件
 
 为了启用Item Pipeline组件，必须将它的类添加到 settings.py文件ITEM_PIPELINES 配置，就像下面这个例子:
-    ```
-    # Configure item pipelines
-    # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-    ITEM_PIPELINES = {
-        #'mySpider.pipelines.SomePipeline': 300,
-        "mySpider.pipelines.ItcastJsonPipeline":300
-    }
-    ```
+```python
+# Configure item pipelines
+# See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
+ITEM_PIPELINES = {
+	#'mySpider.pipelines.SomePipeline': 300,
+	"mySpider.pipelines.ItcastJsonPipeline":300
+}
+```
 
 分配给每个类的整型值，确定了他们运行的顺序，item按数字从低到高的顺序，通过pipeline，通常将这些数字定义在0-1000范围内（0-1000随意设置，数值越低，组件的优先级越高）
 

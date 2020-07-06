@@ -14,7 +14,7 @@
 - 使用IP地址池：VPN和代理IP，现在大部分网站都是根据IP来ban的。
 
 - 使用 Crawlera（专用于爬虫的代理组件）:正确配置和设置下载中间件后，项目所有的request都是通过crawlera发出。
-```
+```python
   DOWNLOADER_MIDDLEWARES = {
       'scrapy_crawlera.CrawleraMiddleware': 600
   }
@@ -34,14 +34,14 @@
 要激活下载器中间件组件，**将其加入到 DOWNLOADER_MIDDLEWARES 设置中**。 该设置是一个字典(dict)，键为中间件类的路径，值为其中间件的顺序(order)。
 
 这里是一个例子:
-```
+```python
 DOWNLOADER_MIDDLEWARES = {
     'mySpider.middlewares.MyDownloaderMiddleware': 543,
 }
 ```
 
 编写下载器中间件十分简单。每个中间件组件是一个定义了以下一个或多个方法的Python类:
-```
+```python
 class scrapy.contrib.downloadermiddleware.DownloaderMiddleware
 ```
 
@@ -86,7 +86,7 @@ process_response() 必须返回以下其中之一: 返回一个 Response 对象�
 (1) 创建middlewares.py文件
 
 Scrapy代理IP、Uesr-Agent的切换都是通过DOWNLOADER_MIDDLEWARES进行控制，我们在settings.py同级目录下创建middlewares.py文件，包装所有请求。
-```
+```python
 # middlewares.py
 
 #!/usr/bin/env python
@@ -137,7 +137,7 @@ OK，客户端收到收面的信令后表示成功建立连接，接下来要发
 (2) 修改settings.py配置USER_AGENTS和PROXIES
 
 添加USER_AGENTS：
-```
+```python
 　　USER_AGENTS = [
     "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET CLR 2.0.50727; Media Center PC 6.0)",
     "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; WOW64; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; .NET CLR 1.0.3705; .NET CLR 1.1.4322)",
@@ -153,7 +153,7 @@ OK，客户端收到收面的信令后表示成功建立连接，接下来要发
 添加代理IP设置PROXIES：
 
 免费代理IP可以网上搜索，或者付费购买一批可用的私密代理IP：
-```
+```python
 PROXIES = [
     {'ip_port': '111.8.60.9:8123', 'user_passwd': 'user1:pass1'},
     {'ip_port': '101.71.27.120:80', 'user_passwd': 'user2:pass2'},

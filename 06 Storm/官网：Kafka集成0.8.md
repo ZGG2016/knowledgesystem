@@ -19,7 +19,7 @@ Storm-kafka 在未来的版本会被弃用。请更新到 storm-kafka-client。�
 ##### ZkHosts
 
 如果你想要动态的跟踪Kafka broker partition 映射关系，你应该使用ZkHosts。这个类使用 Kafka Zookeeper entries 跟踪 brokerHost -> partition 映射。你可以调用下面的方法来得到一个实例.
-```
+```java
 public ZkHosts(String brokerZkStr, String brokerZkPath)
 public ZkHosts(String brokerZkStr)
 ```
@@ -34,7 +34,7 @@ brokerZkPath 是存储所有 topic 和 partition信息的根目录。
 ##### StaticHosts
 
 这是一种可替代的实现，broker->partition 是静态的.要构造这个类的实例，你需要先构造一个 GlobalPartitionInformation 的实例。
-```
+```java
 	Broker brokerForPartition0 = new Broker("localhost");//localhost:9092
 
 	Broker brokerForPartition1 = new Broker("localhost", 9092);//localhost:9092 but we specified the port explicitly
@@ -55,7 +55,7 @@ brokerZkPath 是存储所有 topic 和 partition信息的根目录。
 ## KafkaConfig
 
 构造一个 KafkaSpout 的实例，第二件事情就是要实例化 KafkaConfig。
-```
+```java
 public KafkaConfig(BrokerHosts hosts, String topic)
 public KafkaConfig(BrokerHosts hosts, String topic, String clientId)
 ```
@@ -65,14 +65,14 @@ BrokerHosts 可以是上述 BrokerHosts 的任意实现。topic 就是 Kafka top
 
 SpoutConfig 是 KafkaConfig 的子类，支持带有 Zookeeper 连接信息的其他的 fields，控制 KafkaSpout 的行为。Zkroot 被用来存储你的消费者的offset的源。id是识别你的spout的唯一的认证。
 
-```
+```java
 public SpoutConfig(BrokerHosts hosts, String topic, String clientId, String zkRoot, String id);
 public SpoutConfig(BrokerHosts hosts, String topic, String zkRoot, String id);
 public SpoutConfig(BrokerHosts hosts, String topic, String id);
 ```
 
 除此之外，SpoutConfig 包含下面这些 fields，用来控制 KafkaSpout 的行为：
-```
+```java
 	// 设置多久向ZooKeeper存储当期那kafka offet
 	public long stateUpdateIntervalMs = 2000;
 
@@ -96,7 +96,7 @@ Core KafkaSpout 只接受 SpoutConfig 实例化的对象。
 TridentKafkaConfig是KafkaConfig的另一个子类。TridentKafkaEmitter 只接受TridentKafkaConfig。
 
 KafkaConfig类也有一些公共变量来控制你的应用程序的行为。以下是默认值：
-```
+```java
 public int fetchSizeBytes = 1024 * 1024;
 public int socketTimeoutMs = 10000;
 public int fetchMaxWait = 10000;
@@ -113,7 +113,7 @@ Most of them are self explanatory except MultiScheme.
 ## MultiScheme
 
 MultiScheme 是一个接口，暗示了 ByteBuffer 如何消费来自 kafka 的数据，并将其转成一个 storm 元组。它也控制着你的输出域的命名。
-```
+```java
 	public Iterable<List<Object>> deserialize(ByteBuffer ser);
 	public Fields getOutputFields();
 ```
@@ -121,7 +121,7 @@ MultiScheme 是一个接口，暗示了 ByteBuffer 如何消费来自 kafka 的�
 默认的 RawMultiScheme 接受 ByteBuffer 参数，并返回一个 tuple.就是将ByteBuffer 转换成 byte[].outPutField 的名称是 “bytes”。还有可选的的实现，像 SchemeAsMultiScheme 和 KeyValueSchemeAsMultiScheme，他们会将 ByteBuffer 转换成 String.
 
 还有一个 SchemeAsMultiScheme 的子类 --MessageMetadataSchemeAsMultiScheme，它有一个额外的反序列化方法
-```
+```java
 	public Iterable<List<Object>> deserializeMessageWithMetadata(ByteBuffer message, Partition partition, long offset)
 ```
 上面这个方法对于 auditing/replaying Kafka topic 上任意一个点的消息非常有用，保存了每条消息的 partition和 offset，而不是保留整个消息.
@@ -129,7 +129,7 @@ MultiScheme 是一个接口，暗示了 ByteBuffer 如何消费来自 kafka 的�
 ## Failed message retry
 
 FailedMsgRetryManager 是一个定义发送失败的消息重发策略的接口，默认的实现是ExponentialBackoffMsgRetryManager，它在连续两次重试之间以指数延迟重试。要使用自定义实现，请将SpoutConfig.failedMsgRetryManagerClass设置为完整的实现类名称。
-```
+```java
 	 // Spout initialization can go here. This can be called multiple times during lifecycle of a worker.
     void prepare(SpoutConfig spoutConfig, Map stormConf);
 
@@ -167,7 +167,7 @@ FailedMsgRetryManager 是一个定义发送失败的消息重发策略的接口�
 ## Examples
 
 Core Spout
-```
+```java
 	BrokerHosts hosts = new ZkHosts(zkConnString);
 
 	SpoutConfig spoutConfig = new SpoutConfig(hosts, topicName, "/" + topicName, UUID.randomUUID().toString());
@@ -177,7 +177,7 @@ Core Spout
 	KafkaSpout kafkaSpout = new KafkaSpout(spoutConfig);
 ```
 Trident Spout
-```
+```java
 	TridentTopology topology = new TridentTopology();
 
 	BrokerHosts zk = new ZkHosts("localhost");
@@ -245,7 +245,7 @@ The kafka client selected by you should be wire compatible with the broker. e.g.
 ### TupleToKafkaMapper and TridentTupleToKafkaMapper
 
 这个接口有下面两个方法:
-```
+```java
     K getKeyFromTuple(Tuple/TridentTuple tuple);
     V getMessageFromTuple(Tuple/TridentTuple tuple);
 ```
@@ -256,7 +256,7 @@ The kafka client selected by you should be wire compatible with the broker. e.g.
 KafkaTopicSelector：
 
 这个接口只有一个方法：
-```
+```java
 	public interface KafkaTopicSelector {
 	    String getTopics(Tuple/TridentTuple tuple);
 	}
@@ -272,13 +272,13 @@ FieldNameTopicSelector 和 FieldIndexTopicSelector 用于支持决定哪个 topi
 #### Using wildcard kafka topic match
 
 可以指定一个指定通配符topic来匹配多个topic。
-```
+```java
 	Config config = new Config();
 	config.put("kafka.topic.wildcard.match",true);
 ```
 
 ### 整合
-```
+```java
 	TopologyBuilder builder = new TopologyBuilder();
 
 	Fields fields = new Fields("key", "message");
@@ -308,7 +308,7 @@ FieldNameTopicSelector 和 FieldIndexTopicSelector 用于支持决定哪个 topi
 	StormSubmitter.submitTopology("kafkaboltTest", conf, builder.createTopology());
 ```
 For Trident:
-```
+```java
 	Fields fields = new Fields("word", "count");
 	FixedBatchSpout spout = new FixedBatchSpout(fields, 4,
 	        new Values("storm", "1"),
