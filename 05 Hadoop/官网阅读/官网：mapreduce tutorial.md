@@ -46,7 +46,7 @@ Mapper 将输入键值对映射到一组中间格式的键值对集合。
 
 框架随后会把与一个特定 key 关联的所有中间过程的值（value）**分组** ，然后把它们传给 Reducer 以产出最终的结果。用户可以通过 Job.setGroupingComparatorClass(Class) 来指定具体负责分组的 Comparator。
 
-Mapper的输出，**先后经过排序、分区** ，进入 Reducer。分区的总数目和一个作业的 reduce 任务的数目是一样的。用户可以通过实现自定义的 Partitioner来控制哪个 key 被分配给哪个 Reducer。
+Mapper的输出，**经过排序、分区** ，进入 Reducer。分区的总数目和一个作业的 reduce 任务的数目是一样的。用户可以通过实现自定义的 Partitioner来控制哪个 key 被分配给哪个 Reducer。
 
 **combine过程可选** ，用户通过 Job.setCombinerClass(Class)指定一个 combiner，它负责对中间过程的输出进行本地的聚集，这会有助于降低从 Mapper 到 Reducer 数据传输量。
 
