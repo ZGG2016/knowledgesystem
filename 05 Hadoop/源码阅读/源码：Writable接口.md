@@ -53,7 +53,7 @@ import org.apache.hadoop.classification.InterfaceStability;
  */
 @InterfaceAudience.Public
 @InterfaceStability.Stable
-public interface Writable {  //接口
+public interface Writable {  //接口，顶层.类似于 Comparable(自然排序接口)。
   /** 
    * Serialize the fields of this object to <code>out</code>.
    *  将此对象写到输出流

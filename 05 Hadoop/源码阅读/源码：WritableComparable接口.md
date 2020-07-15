@@ -8,7 +8,7 @@ import org.apache.hadoop.classification.InterfaceStability;
 
 /**
  * A {@link Writable} which is also {@link Comparable}. 
- * Writable 类似于 Comparable。
+ * Writable 类似于 Comparable(自然排序接口)。
  * <p><code>WritableComparable</code>s can be compared to each other, typically 
  * via <code>Comparator</code>s. Any type which is to be used as a 
  * <code>key</code> in the Hadoop Map-Reduce framework should implement this

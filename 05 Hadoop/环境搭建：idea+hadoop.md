@@ -23,6 +23,7 @@ HADOOP_HOME=D:\software\hadoop-2.7.7
 
 (7)写个wordcount测试
 
+```java
     import java.io.FileWriter;
     import java.io.IOException;
     import java.net.URI;
@@ -109,3 +110,4 @@ HADOOP_HOME=D:\software\hadoop-2.7.7
        }
 
     }
+```

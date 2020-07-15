@@ -148,7 +148,7 @@ MapReduce框架根据 Job 的 InputFormat 做以下工作：
 
 如果一个作业的Inputformat是TextInputFormat， 并且框架检测到输入文件的后缀是.gz，就会使用对应的CompressionCodec自动解压缩这些文件。 但是需要注意，上述 **带后缀的压缩文件不会被切分，并且整个压缩文件会分给一个mapper来处理** 。
 
-#### InputSplit
+#### (1)InputSplit
 
 InputSplit 表示一个独立Mapper要处理的数据。
 
@@ -156,7 +156,7 @@ InputSplit 表示一个独立Mapper要处理的数据。
 
 FileSplit 是默认的 InputSplit。 设置 mapreduce.map.input.file 为输入文件的路径。
 
-#### RecordReader
+#### (2)RecordReader
 
 RecordReader 从 InputSlit 读入 <key, value> 对。
 
@@ -173,7 +173,7 @@ MapReduce 框架根据 Job 的 OutputFormat 做以下工作：
 
 TextOutputFormat是默认的 OutputFormat。
 
-#### OutputCommitter
+#### (1)OutputCommitter
 
 OutputCommitter 确保了 MapReduce Job 任务结果的提交。
 
@@ -188,7 +188,7 @@ MapReduce 框架根据 Job 的 OutputCommitter 做以下工作：
 
 FileOutputCommitter 是默认的 OutputCommitter. Job 的设置和清理任务会占用 map 或 reduce 的 containers，且具有最好的优先级。
 
-#### Task Side-Effect Files
+#### (2)Task Side-Effect Files
 
 在一些应用程序中，子任务需要产生一些附属文件(Side-Effect Files)，这些文件与 Job 实际输出结果的文件不同。
 
@@ -202,7 +202,7 @@ FileOutputCommitter 是默认的 OutputCommitter. Job 的设置和清理任务�
 
 对于只使用map不使用reduce的作业，这个结论也成立。这种情况下，map的输出结果直接生成到HDFS上。
 
-#### RecordWriter
+#### (3)RecordWriter
 
 RecordWriter 生成<key, value> 对到输出文件。
 
@@ -210,4 +210,34 @@ RecordWriter 把 Job 的输出结果写到 FileSystem。
 
 ### 7、Other Useful Features
 
+#### (1)Data Compression
+
+Hadoop MapReduce 提供了压缩算法，可以对map的输出和job的输出进行压缩。它还
+与 [zlib](http://www.zlib.net/) 压缩算法的 [CompressionCodec](https://hadoop.apache.org/docs/stable/api/org/apache/hadoop/io/compress/CompressionCodec.html) 
+实现绑定在一起。同时也支持 [gzip](http://www.gzip.org/)，[bzip2](http://www.bzip.org/)，
+[snappy](https://code.google.com/archive/p/snappy/) 和 [lz4](https://github.com/lz4/lz4) 文件格式。
+
+考虑到 Java 库的性能和不可用性 Hadoop 提供了上述压缩算法的原生实现。
+更多详细信息请见[此](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/NativeLibraries.html)
+
+##### Intermediate Outputs
+
+通过 `Configuration.set(MRJobConfig.MAP_OUTPUT_COMPRESS, boolean)` 
+和 `Configuration.set(MRJobConfig.MAP_OUTPUT_COMPRESS_CODEC, Class)`
+可以控制map输出的压缩。
+
+##### Job Outputs
+
+通过 `FileOutputFormat.setCompressOutput(Job, boolean)` 
+和 `FileOutputFormat.setOutputCompressorClass(Job, Class)`
+可以控制 job 输出的压缩。
+
+
+如果 job 输出需要是 `SequenceFileOutputFormat` 格式,那么可以设置
+`SequenceFileOutputFormat.setOutputCompressionType(Job, SequenceFile.CompressionType)` 
+(例如:RECORD / BLOCK - 默认是 RECORD)属性来实现.
+
+
 ### 8、Example: WordCount v2.0
+
+
