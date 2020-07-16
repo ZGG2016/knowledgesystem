@@ -1,5 +1,6 @@
 # 源码：LineRecordReader
 
+```java
 package org.apache.hadoop.mapreduce.lib.input;
 
 import java.io.IOException;
@@ -247,3 +248,4 @@ public class LineRecordReader extends RecordReader<LongWritable, Text> {
     }
   }
 }
+```

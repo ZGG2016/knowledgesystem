@@ -1,7 +1,6 @@
 # 源码：LineReader
 
-
-
+```java
 package org.apache.hadoop.util;
 
 import java.io.Closeable;
@@ -443,3 +442,4 @@ public class LineReader implements Closeable {
     // see MAPREDUCE-6549 for details
   }
 }
+```

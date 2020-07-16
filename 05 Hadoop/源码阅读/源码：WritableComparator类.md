@@ -1,5 +1,6 @@
 # 源码：WritableComparator类
 
+```java
 package org.apache.hadoop.io;
 
 import java.io.DataInput;
@@ -259,3 +260,4 @@ public class WritableComparator implements RawComparator, Configurable {
     return (int) readVLong(bytes, start);
   }
 }
+```

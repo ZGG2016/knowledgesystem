@@ -1,6 +1,6 @@
 # 源码：FileInputFormat类
 
-
+```java
 package org.apache.hadoop.mapreduce.lib.input;
 
 import java.io.IOException;
@@ -632,3 +632,4 @@ public abstract class FileInputFormat<K, V> extends InputFormat<K, V> {
   }
 
 }
+```
