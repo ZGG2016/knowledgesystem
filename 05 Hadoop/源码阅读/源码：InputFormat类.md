@@ -89,8 +89,8 @@ public abstract class InputFormat<K, V> {
    * Create a record reader for a given split. The framework will call
    * {@link RecordReader#initialize(InputSplit, TaskAttemptContext)} before
    * the split is used.
-   * 创建一个记录阅读器。在分片被使用之前，框架将会调用 
-   * RecordReader#initialize(InputSplit, TaskAttemptContext) 方法
+   * 为给定的一个分片，创建一个记录阅读器。在分片被使用之前，框架将会调用 
+   * RecordReader#initialize(InputSplit, TaskAttemptContext) 方法进行初始化。
    *
    * @param split the split to be read  待读取的分片
    * @param context the information about the task
