@@ -28,7 +28,7 @@ public abstract class RecordReader<KEYIN, VALUEIN> implements Closeable {
    * Called once at initialization.
    * 仅在初始化时调用
    * @param split the split that defines the range of records to read
-   *        划分的split，它定义了读取记录的范围
+   *        划分的split，它定义了读取记录的范围（逻辑分片，一个起始位置和一个偏移量）
    * @param context the information about the task
    * @throws IOException
    * @throws InterruptedException
