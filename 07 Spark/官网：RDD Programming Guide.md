@@ -196,6 +196,18 @@ distFile.map(lambda s: len(s)).reduce(lambda a, b: a + b).
 
 ### 3、RDD Operations  操作
 
+RDDs 支持两种类型的操作： **transformations（转换）和 actions（动作）**。transformations 是根据已存在的数据集创建一个
+新的数据集，actions 是将在 数据集上执行计算后，将值返回给驱动程序。例如，map 就是一个 transformation，它将每个数据集元素
+传递给一个函数，并返回一个的新 RDD 。 reduce 是一个 action， 它通过执行一些函数，聚合 RDD 中所有元素，并将最终结果给返
+回驱动程序（虽然也有一个并行 reduceByKey 返回一个分布式数据集）。
+
+Spark 中所有的 **transformations 都是懒加载的**，因此它不会立刻计算出结果。只有当需要返回结果给驱动程序时，
+transformations 才开始计算。这种设计使 Spark 的运行更高效。例如，map 所创建的数据集将被用在 reduce 中，并且只有 reduce 的计算结果返回给驱动程序，而不是映射一个更大的数据集.
+
+**默认情况下，对于一个已转换的 RDD，每次你在这个 RDD 运行一个 action 时，它都会被重新计算。** 但是，可以使用 persist/cache 方法将 RDD 持久化到内存中；在这种情况下，Spark 为了下次查询时可以更快地访问，会把数据保存在集群上。此外，还支持持
+续持久化 RDDs 到磁盘，或跨多个节点复制。
+
+
 #### （1）Basics 基础
 
 **A. 对于scala**
@@ -203,3 +215,152 @@ distFile.map(lambda s: len(s)).reduce(lambda a, b: a + b).
 **B. 对于java**
 
 **C. 对于python**
+
+```python
+lines = sc.textFile("data.txt")
+lineLengths = lines.map(lambda s: len(s))
+totalLength = lineLengths.reduce(lambda a, b: a + b)
+```
+
+- 第一行从外部文件读取数据，创建一个基本的 RDD，但这个数据集并未加载到内存中或即将被操作：lines 仅仅是一个类似指针的东西，指向该文件。
+
+- 第二行定义了 lineLengths 作为 map transformation 的结果。请注意，由于延迟加载，lineLengths 不会被立即计算。
+
+- 最后，运行 reduce，这是一个 action。此时，Spark 分发计算任务到不同的机器上运行，每台机器都运行 map 的一部分，并执行本地运行聚合。仅仅返回它聚合后的结果给驱动程序。
+
+如果我们也希望以后再次使用 lineLengths，我们还可以添加:
+
+```python
+lineLengths.persist()
+```
+在 reduce 之前，这将导致 lineLengths 在第一次计算之后就被保存在 memory 中。
+
+#### （2）Passing Functions to Spark  给 Spark 传函数
+
+当驱动程序在集群上运行时，Spark 的 API 在很大程度上依赖于传递函数。有3种推荐的方式来做到这一点:
+
+- [Lambda expressions](https://docs.python.org/2/tutorial/controlflow.html#lambda-expressions) 适用于一些简单的函数。（Lambdas 不支持多条语句，或没有返回值的语句）
+
+- Local defs inside the function calling into Spark, for longer code.下例描述的情况
+
+- Top-level functions in a module. ？？？
+
+例如，传递一个比 lambda 函数更长的函数，思考如下代码：
+
+```python
+"""MyScript.py"""
+if __name__ == "__main__":
+    def myFunc(s):
+        words = s.split(" ")
+        return len(words)
+
+    sc = SparkContext(...)
+    sc.textFile("file.txt").map(myFunc)
+```
+
+请注意，虽然也有可能传递一个类的实例（与单例对象相反）的方法的引用，这需要发送整个对象，包括类中其它方法。例如，考虑:
+
+```python
+class MyClass(object):
+    def func(self, s):
+        return s
+    def doStuff(self, rdd):
+        return rdd.map(self.func)
+```
+
+这里，如果我们创建一个新的 MyClass 类，并调用 doStuff 方法。在 map 内有 MyClass 实例的 func1 方法的引用，所以整个对象
+需要被发送到集群的。
+
+类似的方式，访问外部对象的字段将引用整个对象:
+
+```python
+class MyClass(object):
+	def __init__(self):
+        self.field = "Hello"
+    def doStuff(self, rdd):
+        return rdd.map(lambda s: self.field + s)
+```     
+
+为了避免这个问题，最简单的方式是复制 field 到一个本地变量，而不是外部访问它:
+
+```python
+def doStuff(self, rdd):
+    field = self.field
+    return rdd.map(lambda s: field + s)
+```
+
+### 4、Understanding closures  理解闭包
+
+在集群中执行代码时，一个关于 Spark 更难的事情是理解变量和方法的范围和生命周期。在其作用域之外修改变量的RDD操作经常会造成
+混淆。在下面的例子中，我们将看一下使用的 foreach() 代码递增累加计数器，但类似的问题，也可能会出现其他操作上.
+
+
+#### （1）Example
+
+考虑一个简单的 RDD 元素求和，**在不同一个 JVM 中执行，产生的结果可能不同。** 一个常见的例子是当 Spark 运行在 local 本地模式（--master = local[n]）时，与部署 Spark 应用到群集（例如，通过 spark-submit 到 YARN）:
+
+```python
+counter = 0
+rdd = sc.parallelize(data)
+
+# Wrong: Don't do this!!
+def increment_counter(x):
+    global counter
+    counter += x
+rdd.foreach(increment_counter)
+
+print("Counter value: ", counter)
+
+```
+
+##### Local vs. cluster modes
+
+上面的代码行为是不确定的，并且可能无法按预期正常工作。为了执行作业，**Spark 将 RDD 操作的处理分解为 tasks，每个 task 由 executor 执行。** 在执行之前，Spark 计算任务的 closure（闭包）。**闭包是指 executor 在 RDD 上执行计算的时候必须可见的
+那些变量和方法**（在这种情况下是foreach()）。闭包被序列化并被发送到每个 executor。
+
+发送给每个 executor 的闭包中的变量是副本，因此，当 foreach 函数内使用计数器时，它不再是 driver 节点上的计数器。driver 节点的内存中仍有一个计数器，但该变量是 executors 不可见的！ executors 只能看到序列化闭包的副本。因此，计数器的最终值仍
+然为零，因为计数器上的所有操作都引用了序列化闭包内的值。**【每个 executor 中的变量都是副本，在其中的操作改变的都只是副本的
+值，而不是 driver 节点上的值】**
+
+**在本地模式下，在某些情况下，该 foreach 函数实际上将在与 driver 相同的 JVM 内执行，并且会引用相同的原始计数器，并可能
+实际更新它。**
+
+为了确保在这些场景中明确定义的行为，**应该使用一个 Accumulator**。 Spark 中的累加器专门用于提供一种机制，**用于在集群中
+的工作节点之间执行拆分时安全地更新变量**。
+
+一般来说，closures - constructs像循环或本地定义的方法，不应该被用来改变一些全局状态。Spark并没有定义或保证从闭包外引用的对象的改变行为。这样做的一些代码可以在本地模式下工作，但这只是偶然，并且这种代码在分布式模式下的行为不会像你想的那样。如果需要某些全局聚合，请改用累加器。
+
+##### Printing elements of an RDD   打印RDD元素
+
+**单台机器**：rdd.foreach(println) 或 rdd.map(println) 用于打印 RDD 的所有元素。在一台机器上，这将产生预期的输出和打印 RDD 的所有元素。
+
+**集群**：然而，在集群 cluster 模式下，输出被写入到 executors 的标准输出，而不是驱动程序上的。因此，结果不会输出到驱动
+程序的标准输出中。要打印驱动程序的所有元素，可以使用的 collect() 方法首先把 RDD 放到驱动程序节点上，再执行foreach(println)，如：`rdd.collect().foreach(println)`。但这样做可能会导致驱动程序内存耗尽，因为 collect() 的结果是整个 RDD 到一台机器上， 如果你只需要打印 RDD 的几个元素，一个更安全的方法是使用 take()：`rdd.take(100).foreach(println)`。
+
+
+### 5、Working with Key-Value Pairs  操作键值对
+
+**A. 对于scala**
+
+**B. 对于java**
+
+**C. 对于python**
+
+虽然大多数 Spark 操作的对象是包含任何类型 RDDs ，只有少数特殊的操作可用于键值对的 RDDs。最常见的是分布式 “shuffle” 操作，如通过元素的 key 来进行 grouping 或 aggregating 操作.
+
+在 Python 中，这些操作在包含内置 Python 元组的 RDDs 上工作，例如(1,2)。创建这样的元组后，再调用相关的操作。
+
+例如，下面的代码使用 reduceByKey 操作统计文本文件中每一行出现了多少次:
+
+```python
+lines = sc.textFile("data.txt")
+pairs = lines.map(lambda s: (s, 1))
+counts = pairs.reduceByKey(lambda a, b: a + b)
+
+```
+
+也可以使用 `counts.sortByKey()` ，按字母表的顺序进行排序，再使用 `counts.collect()` 将结果以对象列表的形式带回驱动程序。
+
+### 6、Transformations
+
+### 7、Actions
