@@ -21,6 +21,31 @@ JVM的默认处理方案:
 			运行期问题:RuntimeException	这种问题我们也不处理，因为是你的问题，
 			           而且这个问题出现肯定是我们的代码不够严谨，需要修正代码的。
 
+Error：
+
+	IOError：当发生严重的 I/O 错误时，抛出此错误。
+	VirtualMachineError：当 Java 虚拟机崩溃或用尽了它继续操作所需的资源时，抛出该错误。
+		OutOfMemoryError：因为内存溢出或没有可用的内存提供给垃圾回收器时，Java
+		        	     虚拟机无法分配一个对象，这时抛出该异常。 
+		StackOverflowError：当应用程序递归太深而发生堆栈溢出时，抛出该错误。
+
+Exception:
+	
+	运行期问题RuntimeException:
+		索引越界异常 IndexOutOfBoundsException
+		当出现异常的运算条件(除数为0) ArithmeticException 
+		空指针异常 NullPointerException
+		类型转换异常 ClassCastException
+		非法参数异常 IllegalArgumentException
+		数组下标越界 ArrayIndexOutOfBoundsException 
+
+	编译期问题：
+		ClassNotFoundException：加载类时,但没有找到具有指定名称的类的定义
+		TimeoutException：阻塞操作超时时，抛出该异常。
+		IOException：当发生某种 I/O 异常时，抛出此异常。此类是失败或中断的 I/O 操作生成的异常的通用类。 
+			FileNotFoundException：当试图打开指定路径名表示的文件失败时，抛出此异常。 
+			EOFException：当输入过程中意外到达文件或流的末尾时，抛出此异常。 
+
 编译时异常、运行时异常区别
 
 	编译时异常
