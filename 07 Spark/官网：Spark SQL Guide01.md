@@ -1,5 +1,6 @@
 # 官网：Spark SQL Guide01
 
+[TOC]
 
 Spark SQL 是处理结构化数据的模块。和基本的 Spark RDD API 不同，Spark SQL 为 Spark 提供了关于数据和执行计算的更多结构化信息。在内部，Spark SQL 使用这个额外的信息去执行额外的优化。 可以使用 SQL 和 Dataset API 跟 Spark SQL 交互。无论你使用哪种 API/语言，都会使用同一个引擎执行计算。这就意味着开发者可以在不同 APIs 间来回切换。
 

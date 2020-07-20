@@ -1,5 +1,7 @@
 # 官网：Spark SQL Guide03--Data Sources--Hive Tables
 
+[TOC]
+
 *Spark SQL also supports reading and writing data stored in Apache Hive. However, since Hive has a large number of dependencies, these dependencies are not included in the default Spark distribution. If Hive dependencies can be found on the classpath, Spark will load them automatically. Note that these Hive dependencies must also be present on all of the worker nodes, as they will need access to the Hive serialization and deserialization libraries (SerDes) in order to access data stored in Hive.*
 
 读写 Hive 需要在 classpath 添加许多依赖，Spark 会自动载入。这些依赖也必须添加在所有的 worker 节点。

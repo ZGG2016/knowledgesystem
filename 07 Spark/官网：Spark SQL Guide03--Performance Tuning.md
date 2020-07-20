@@ -1,5 +1,7 @@
 # 官网：Spark SQL Guide03--Performance Tuning
 
+[TOC]
+
 *For some workloads, it is possible to improve performance by either caching data in memory, or by turning on some experimental options.*
 
 考虑到工作负载，可以通过缓存数据到内存，或开启一些实验性选项，来优化性能。
@@ -98,7 +100,7 @@ Spark 3.0 ，有三种主要特性：
 - converting sort-merge join to broadcast join
 - skew join optimization
 
-### 6.1、Coalescing Post Shuffle Partitions  合并Shuffle后分区
+### 5.1、Coalescing Post Shuffle Partitions  合并Shuffle后分区
 
 *This feature coalesces the post shuffle partitions based on the map output statistics when both spark.sql.adaptive.enabled and spark.sql.adaptive.coalescePartitions.enabled configurations are true. This feature simplifies the tuning of shuffle partition number when running queries. You do not need to set a proper shuffle partition number to fit your dataset. Spark can pick the proper shuffle partition number at runtime once you set a large enough initial number of shuffle partitions via spark.sql.adaptive.coalescePartitions.initialPartitionNum configuration.*
 
@@ -114,14 +116,14 @@ spark.sql.adaptive.coalescePartitions.initialPartitionNum | 200 | The initial nu
 spark.sql.adaptive.advisoryPartitionSizeInBytes | 64 MB | The advisory size in bytes of the shuffle partition during adaptive optimization (when spark.sql.adaptive.enabled is true). It takes effect when Spark coalesces small shuffle partitions or splits skewed shuffle partition.	自适应优化期间，shuffle 分区的建议大小(以字节为单位) | 3.0.0
 
 
-### 6.2、Converting sort-merge join to broadcast join
+### 5.2、Converting sort-merge join to broadcast join
 
 *AQE converts sort-merge join to broadcast hash join when the runtime statistics of any join side is smaller than the broadcast hash join threshold. This is not as efficient as planning a broadcast hash join in the first place, but it’s better than keep doing the sort-merge join, as we can save the sorting of both the join sides, and read shuffle files locally to save network traffic(if spark.sql.adaptive.localShuffleReader.enabled is true)*
 
 当任意 join 侧的运行时间小于 broadcast hash join 阈值时，AQE 转换 sort-merge join 到 broadcast hash join。 这和一开始就设置 broadcast hash join相比，并不高效，但这比继续执行 sort-merge join 要好，因为我们可以保存 join 两边的排序，并在本地读取 shuffle 文件以节省网络流量(if spark.sql.adaptive.localShuffleReader.enabled is true).
 
 
-### 6.3、Optimizing Skew Join  优化倾斜join
+### 5.3、Optimizing Skew Join  优化倾斜join
 
 *Data skew can severely downgrade the performance of join queries. This feature dynamically handles skew in sort-merge join by splitting (and replicating if needed) skewed tasks into roughly evenly sized tasks. It takes effect when both spark.sql.adaptive.enabled and spark.sql.adaptive.skewJoin.enabled configurations are enabled.*
 

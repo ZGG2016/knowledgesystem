@@ -1,5 +1,7 @@
 # 官网：Spark SQL Guide03--Data Sources--Parquet Files
 
+[TOC]
+
 *Parquet is a columnar format that is supported by many other data processing systems. Spark SQL provides support for both reading and writing Parquet files that automatically preserves the schema of the original data. When reading Parquet files, all columns are automatically converted to be nullable for compatibility reasons.*
 
 Parquet 是柱状格式。Spark SQL 支持读写 Parquet 文件，可自动保存原始数据的结构。当读取 Parquet 文件时，出于兼容性原因，所有列都将自动转换为可为空的。

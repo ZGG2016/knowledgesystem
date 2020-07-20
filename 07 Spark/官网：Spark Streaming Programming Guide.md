@@ -1,5 +1,7 @@
 # 官网：Spark Streaming Programming Guide
 
+[TOC]
+
 ## 1、Overview
 
 *Spark Streaming is an extension of the core Spark API that enables scalable, high-throughput, fault-tolerant stream processing of live data streams. Data can be ingested from many sources like Kafka, Kinesis, or TCP sockets, and can be processed using complex algorithms expressed with high-level functions like map, reduce, join and window. Finally, processed data can be pushed out to filesystems, databases, and live dashboards. In fact, you can apply Spark’s [machine learning](http://spark.apache.org/docs/latest/ml-guide.html) and [graph processing algorithms](http://spark.apache.org/docs/latest/graphx-programming-guide.html) on data streams.*
@@ -13,13 +15,13 @@ Spark Streaming 是 Spark core API 的扩展，具有可扩展性、高吞吐、
 
 - 处理后的数据可以输出到文件系统、数据库、实时 dashboards
 
-![spark02](https://s1.ax1x.com/2020/07/20/UhI810.png)
+![spark02](./image/spark02.png)
 
 *Internally, it works as follows. Spark Streaming receives live input data streams and divides the data into batches, which are then processed by the Spark engine to generate the final stream of results in batches.*
 
 内部流程是：Spark Streaming接收实时输入数据流，将其划分成多个批次，Spark 引擎处理批次，生成各批次的最终的结果流。
 
-![spark03](https://s1.ax1x.com/2020/07/20/UhI3pq.png)
+![spark03](./image/spark03.png)
 
 *Spark Streaming provides a high-level abstraction called discretized stream or DStream, which represents a continuous stream of data. DStreams can be created either from input data streams from sources such as Kafka, and Kinesis, or by applying high-level operations on other DStreams. Internally, a DStream is represented as a sequence of RDDs.*
 

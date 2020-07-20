@@ -1,5 +1,7 @@
 # 官网：Spark SQL Guide03--Data Sources--Generic File Source Options
 
+[TOC]
+
 *These generic options/configurations are effective only when using file-based sources: parquet, orc, avro, json, csv, text.*
 
 只要在使用基于文件的源(如，parquet, orc, avro, json, csv, text)时，这些通用配置才有效。

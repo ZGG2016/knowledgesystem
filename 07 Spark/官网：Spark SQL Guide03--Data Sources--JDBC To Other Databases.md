@@ -1,5 +1,7 @@
 # 官网：Spark SQL Guide03--Data Sources--JDBC To Other Databases
 
+[TOC]
+
 *Spark SQL also includes a data source that can read data from other databases using JDBC. This functionality should be preferred over using JdbcRDD. This is because the results are returned as a DataFrame and they can easily be processed in Spark SQL or joined with other data sources. The JDBC data source is also easier to use from Java or Python as it does not require the user to provide a ClassTag. (Note that this is different than the Spark SQL JDBC server, which allows other applications to run queries using Spark SQL).*
 
 Spark SQL 还包含了一个使用 JDBC 从其他数据库读取数据的数据源。这个功能更倾向使用的是 JdbcRDD。因为返回的是 DataFrame ，可以很容易地在 Spark SQL 处理，或者和其他数据源 join。 
