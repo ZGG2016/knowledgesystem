@@ -1,14 +1,14 @@
-# 总览
+# Overview：ZooKeeper分布式应用程序的分布式协调服务
 
-v3.6
+[TOC]
 
-## ZooKeeper：分布式应用程序的分布式协调服务
+**v3.6**
 
 ZooKeeper 是一种 **应用于分布式应用程序的、开源的分布式协调服务**。 它提供了一组简单的原语，即 **分布式应用程序可以构建更高级别的服务，如同步服务、配置维护、组服务和命名服务**[groups and naming]。 它是易于编程的，并 **使用了传统的文件系统目录树结构** [uses a data model styled after the familiar directory tree structure of file systems]。运行在 Java 中，但提供 Java 和 C 的接口。
 
 协调服务是很难正确实现的。很容易出现资源竞争、死锁等错误。 ZooKeeper 的目的就是缓解分布式应用程序从一开始就执行协调服务的责任。
 
-## Design Goals 设计目标
+## 1、Design Goals 设计目标
 
 **ZooKeeper is simple.** ZooKeeper 允许分布式进程通过 **共享的层级命名空间**[namespace]来相互协调，这个命名空间与标准文件系统类似。**命名空间由 znodes 组成，而 znodes 类似于标准文件系统的文件和目录。** 与专为存储设计的标准文件系统不同的是， **ZooKeeper 数据保存在内存中**，这意味着 ZooKeeper可以实现高吞吐量和低延迟。
 
@@ -26,7 +26,7 @@ ZooKeeper 对实现高性能、高可用性、严格有序的访问非常重要�
 
 **Zookeeper is fast.** ZooKeeper 在 **读数据时非常快**。 ZooKeeper 应用程序在数千台机器上运行，当在读取次数是写入次数的10倍时，性能最好。
 
-## Data model and the hierarchical namespace 数据模型和层级命名空间
+## 2、Data model and the hierarchical namespace 数据模型和层级命名空间
 
 ZooKeeper 命名空间与标准文件系统类似。 **名称是以斜杠（/）分隔的路径元素序列** 。 命名空间的每个节点都由路径标识。
 
@@ -34,7 +34,7 @@ ZooKeeper 层级命名空间如下图所示：
 
 ![zk05](https://s1.ax1x.com/2020/06/27/NcQPQs.jpg)
 
-## Nodes and ephemeral nodes 节点和临时节点
+## 3、Nodes and ephemeral nodes 节点和临时节点
 
 与标准文件系统不同的是，ZooKeeper 命名空间中的 **每个节点都有与其相关联的数据和子节点**，就像是文件系统的文件既是文件也是目录。（ZooKeeper 用于存储协调数据：状态信息，配置，位置信息等，因此存储在每个节点上的数据通常很小，B到KB范围）。我们 **使用 znode 来表示 ZooKeeper 数据节点**。
 
@@ -44,13 +44,13 @@ Znodes **维护统计结构信息**，包括数据更改，ACL 更改和时间�
 
 ZooKeeper 还包括了临时节点。**只要创建 znode 的 session 处于活动状态，这些临时 znodes 就会存在。 当 session 结束时，临时znode 被删除。**
 
-## Conditional updates and watches 有条件的更新和监听器
+## 4、Conditional updates and watches 有条件的更新和监听器
 
 ZooKeeper 支持监听器[watches]的概念。客户端可以 **在一个 znode 上设置一个监听器。 当 znode 更改时，这个监听器将被触发并移除。当监听器被触发时，客户端接收到一个数据包，说明 znode 已经改变了**。 并且如果客户端与其中一个 ZooKeeper 服务器的连接断开，客户端将收到本地通知。
 
 在版本3.6.0：客户端 **可以设置参数，递归的监听znode**，这个znode是在触发监听后未被移除的。这会递归地触发对已注册的znode以及任何子znodes的更改。[Clients can also set permanent, recursive watches on a znode that are not removed when triggered and that trigger for changes on the registered znode as well as any children znodes recursively.]
 
-## Guarantees 保证
+## 5、Guarantees 保证
 
 ZooKeeper 非常快速、简单。 由于其目标是为建设更为复杂的服务提供基础服务，如同步化，它提
 供了一套保证。 这些是：
@@ -65,7 +65,7 @@ ZooKeeper 非常快速、简单。 由于其目标是为建设更为复杂的服
 
 - 及时性 : 系统的客户端视图在一定时间内保证是最新的。
 
-## Simple API 简单的 API
+## 6、Simple API 简单的 API
 
 ZooKeeper 的设计目标之一是提供一个非常简单的编程接口。 因此，它仅支持以下操作：
 
@@ -83,7 +83,7 @@ ZooKeeper 的设计目标之一是提供一个非常简单的编程接口。 因
 
 - sync : 等待数据传播
 
-## Implementation
+## 7、Implementation
 
 [ZooKeeper Components](https://zookeeper.apache.org/doc/current/zookeeperOver.html#zkComponents)显示 ZooKeeper 服务的高级组件。 除了请求处理器之外，组成 ZooKeeper 服务的每个服务器都会将每个组件的副本复制到自己服务器上。
 
@@ -98,10 +98,10 @@ replicated database 是包含整个数据树的内存数据库。Updates are log
 ZooKeeper 使用自定义的原子消息协议。 由于消息层是原子的，所以 ZooKeeper 可以保证本地副
 本不会发散[diverge]。 当 leader 收到写请求时， it calculates what the state of the system is when the write is to be applied and transforms this into a transaction that captures this new state.
 
-## Uses
+## 8、Uses
 
-## Performance
+## 9、Performance
 
-## Reliability
+## 10、Reliability
 
-## The ZooKeeper Project
+## 11、The ZooKeeper Project
