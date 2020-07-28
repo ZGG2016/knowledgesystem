@@ -79,6 +79,8 @@ object Partitioner {
       None
     }
 
+    // 若配置了 spark.default.parallelism，那么就取这个。
+    // 否则，选择具有最大分区数的rdds 的并行度，
     val defaultNumPartitions = if (rdd.context.conf.contains("spark.default.parallelism")) {
       rdd.context.defaultParallelism
     } else {
@@ -87,6 +89,7 @@ object Partitioner {
 
     // If the existing max partitioner is an eligible one, or its partitions number is larger
     // than the default number of partitions, use the existing partitioner.
+    // 首先不空，然后 具有最大分区数，或者分区数大于默认分区数 的分区器
     if (hasMaxPartitioner.nonEmpty && (isEligiblePartitioner(hasMaxPartitioner.get, rdds) ||
         defaultNumPartitions < hasMaxPartitioner.get.getNumPartitions)) {
       hasMaxPartitioner.get.partitioner.get
