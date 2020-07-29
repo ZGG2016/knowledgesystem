@@ -1,4 +1,4 @@
-# 大数据面试题整理01
+# 大数据面试题整理01--hadoop
 
 [TOC]
 
@@ -556,8 +556,8 @@ $$ cos\theta = \frac{\sum_{k=1}^{n}x_{1k}x_{2k}}{\sqrt{\sum_{k=1}^{n}x_{1k}^{2}}
 
 ## hive往表中导入数据的方式
 
-## hive 分区
+## hive分区
 
-## hive的分桶
+## hive分桶
 
 ## 对hbase的理解

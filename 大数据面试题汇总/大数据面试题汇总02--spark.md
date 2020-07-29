@@ -1,4 +1,6 @@
-# 大数据面试题整理02
+# 大数据面试题整理02--spark
+
+[TOC]
 
 ## spark数据分区
 
@@ -438,11 +440,27 @@ rdd 是一个弹性分布式数据集，是容错的、分区的、可以执行�
 
 ## reduceByKey和groupByKey的区别
 
-【用个实例演示】
-
 groupByKey 仅仅是根据key分组。如果要执行聚合，需要先用groupByKey生成RDD，然后才能对此RDD通过map进行自定义函数操作。
 
 reduceByKey 传入一个func，聚合相同key的value。能够在本地先进行聚合操作。
+
+```python
+>>> data = [('tom',90),('jerry',97),('luck',92),('tom',78),('luck',64),('jerry',50)]
+>>> rdd1 = sc.parallelize(data)
+>>> rddg = rdd1.groupByKey()
+>>> rddg.collect()
+[('tom', <pyspark.resultiterable.ResultIterable object at 0x7feb3d9af7d0>), ('jerry', <pyspark.resultiterable.ResultIterable object at 0x7feb3d9bcb50>), ('luck', <pyspark.resultiterable.ResultIterable object at 0x7feb3be00d50>)]
+>>> rddg.map(lambda x:(x[0],sum(x[1]))).collect()
+[('tom', 168), ('jerry', 147), ('luck', 156)]
+
+>>> from  operator import add
+>>> rdd1.reduceByKey(add).collect()
+[('tom', 168), ('jerry', 147), ('luck', 156)]
+```
+
+![spark05](./image/spark05.png)
+
+![spark06](./image/spark06.png)
 
 算子|含义
 ---|:---
@@ -453,17 +471,38 @@ aggregateByKey(zeroValue)(seqOp, combOp, [numPartitions]) | 当一个(K,V)对数
 如果仅仅是分组处理，那么以下函数应该优先于 groupByKey ：
 
 	（1）combineByKey 组合数据，但是组合之后的数据类型与输入时值的类型不一样。
-	（2）foldByKey合并每一个 key 的所有值，在级联函数和“零值”中使用。
+	（2）foldByKey 合并每一个 key 的所有值，在级联函数和“零值”中使用。
 
 ## map、mapPartitions的区别
-
-【用个实例演示】
 
 map 的输入函数是应用于RDD中每个元素
 
 mapPartitions 的输入函数是应用于每个分区。mapPartitions性能高但会内容OOM异常
 
 举例：假设一个rdd有10个元素，分成3个分区。如果使用map方法，map中的输入函数会被调用10次；而使用mapPartitions方法的话，其输入函数会只会被调用3次，每个分区调用1次。
+
+```python
+>>> rdd = sc.parallelize([1, 2, 3, 4], 2)
+>>> rdd.getNumPartitions()
+2
+>>> rdd.glom().collect()
+[[1, 2], [3, 4]]
+
+>>> def f(iterator): yield sum(iterator)
+... 
+>>> rdd1 = rdd.mapPartitions(f)
+>>> rdd1.getNumPartitions()
+2
+>>> rdd1.glom().collect()
+[[3], [7]]
+
+
+>>> rdd2 = rdd.map(lambda x:x+1)
+>>> rdd2.getNumPartitions()
+2
+>>> rdd2.glom().collect()
+[[2, 3], [4, 5]]
+```
 
 算子|含义
 ---|:---
@@ -496,16 +535,324 @@ Spark不适合的场景，如：
 
 ## spark shuffle
 
+### 1、什么是shuffle
+
+数据从 map task 输出到 reduce task 输入的过程。
+【shuffle read task 从 shuffle write task 复制数据的过程】
+
+shuffle 的性能高低直接影响了整个程序的性能和吞吐量。
+
+因为在分布式情况下，reduce task需要跨节点(或分区)去拉取其它节点上的map task结果。这一过程将会产生网络资源消耗和内存，磁盘IO的消耗。
+
+### 2、spark shuffle
+
+![spark07](./image/spark07.png)
+
+宽依赖之间会划分 stage，而 stage 间就是 Shuffle，如图中的 stage0，stage1 和 stage3 之间就会产生 Shuffle。
+
+在 Spark 中，负责 shuffle 过程的执行、计算和处理的组件主要就是 ShuffleManager。
+
+ShuffleManager随着Spark的发展有两种实现的方式，分别为 HashShuffleManager 和 SortShuffleManager ，因此spark的Shuffle有 Hash Shuffle 和 Sort Shuffle 两种。
+
+在 Spark 1.2 以后的版本中，默认的 ShuffleManager 由 HashShuffleManager 改成了 SortShuffleManager。
+
+### 3、Hash shuffle
+
+分成两种，一种是普通运行机制，另一种是合并的运行机制。
+
+合并机制主要是通过复用buffer来优化Shuffle过程中产生的小文件的数量。
+
+### 4、Sort Shuffle
+
+主要分成两种，一种是普通运行机制，另一种是bypass运行机制。
+
+当 shuffle read task 的数量小于等于 `spark.shuffle.sort.bypassMergeThreshold` 参数的值时(默认为200)，就会启用 bypass 机制。
+
+#### 4.1、普通运行机制
+
+![spark08](./image/spark08.png)
+
+(1)写入内存数据结构
+
+数据会先写入一个内存数据结构中(默认5M)，接着，**每写一条数据进入内存数据结构之后，就会判断一下，是否达到了某个临界阈值**。如果达到临界阈值的话，那么就会尝试将内存数据结构中的数据**溢写到磁盘，然后清空内存数据结构**。
+
+此时根据不同的 shuffle 算子，可能选用不同的数据结构。如果是 reduceByKey 这种聚合类的 shuffle 算子，那么会选用 Map 数据结构，一边通过 Map 进行聚合，一边写入内存;如果是 join 这种普通的 shuffle 算子，那么会选用 Array 数据结构，直接写入内存。
+
+注意：
+
+  shuffle 中的定时器：定时器会检查内存数据结构的大小，如果内存数据结构空间不够，那么会申请额外的内存，申请的大小满足如下公式：
+
+  applyMemory=nowMenory*2-oldMemory
+
+  申请的内存=当前的内存情况*2-上一次的内嵌情况
+
+意思就是说内存数据结构的大小的动态变化，如果存储的数据超出内存数据结构的大小，将申请`内存数据结构存储的数据*2-内存数据结构的设定值的内存大小空间`。**申请到了，内存数据结构的大小变大，内存不够，申请不到，则发生溢写**
+
+(2)排序
+
+在溢写到磁盘文件之前，会先**根据 key 对内存数据结构中已有的数据进行排序**。
+
+(3)溢写
+
+排序过后，会**分批将数据写入磁盘文件**。默认的 batch 数量是10000条，也就是说，排序好的数据，会以每批1万条数据的形式分批写入磁盘文件。
+
+写入磁盘文件是通过Java的 BufferedOutputStream 实现的。BufferedOutputStream 是 Java 的缓冲输出流，首先会将数据缓冲在内存中，当内存缓冲满溢之后再一次写入磁盘文件中，这样可以减少磁盘IO次数，提升性能。
+
+(4)合并
+
+一个task将所有数据写入内存数据结构的过程中，会发生多次磁盘溢写操作，也就会产生多个临时文件。最后会**将之前所有的临时磁盘文件都进行合并，这就是merge过程**。
+
+此时会将之前所有临时磁盘文件中的数据读取出来，然后依次写入最终的磁盘文件之中。
+
+此外，由于一个 task 就只对应一个磁盘文件，也就意味着该 task 为 Reduce 端的 stage 的 task 准备的数据都在这一个文件中，因此还**会单独写一份索引文件，其中标识了下游各个 task 的数据在文件中的 start offset 与 end offset**。
+
+SortShuffleManager 由于有一个磁盘文件 merge 的过程，因此大大减少了文件数量。比如第一个stage有50个task，总共有10个Executor，每个Executor执行5个task，而第二个stage有100个task。由于每个task最终只有一个磁盘文件，因此此时每个Executor上只有5个磁盘文件，所有Executor只有50个磁盘文件。
+
+#### 4.2、bypass运行机制
+
+![spark09](./image/spark09.png)
+
+bypass 运行机制的触发条件如下：
+
+  1) shuffle map task 数量小于 `spark.shuffle.sort.bypassMergeThreshold` 参数的值。
+
+  2)不是聚合类的 shuffle 算子(比如reduceByKey)。
+
+此时 task 会为每个 reduce 端的 task 都创建一个临时磁盘文件，并将数据按 key 进行 hash 然后根据 key 的 hash 值，将 key 写入对应的磁盘文件之中。当然，写入磁盘文件时也是先写入内存缓冲，缓冲写满之后再溢写到磁盘文件的。最后，同样会将所有临时磁盘文件都合并成一个磁盘文件，并创建一个单独的索引文件。
+
+该过程的磁盘写机制其实跟未经优化的 HashShuffleManager 是一模一样的，因为都要创建数量惊人的磁盘文件，只是在最后会做一个磁盘文件的合并而已。因此少量的最终磁盘文件，也让该机制相对未经优化的 HashShuffleManager 来说，shuffle read 的性能会更好。
+
+而该机制与普通 SortShuffleManager 运行机制的不同在于：
+
+  第一，磁盘写机制不同;
+
+  第二，不会进行排序。也就是说，启用该机制的最大好处在于，shuffle write过程中，不需要进行数据的排序操作，也就节省掉了这部分的性能开销。
+
+### 5、优化方向
+
+    - 压缩：对数据进行压缩，减少写读数据量；
+    - 内存化：对于具有较大内存的集群来讲，还是尽量地往内存上写吧，内存放不下了再放磁盘。
+
+[关于hash shuffle的更多介绍](https://www.2cto.com/net/201712/703242.html)
+
+[腾讯大数据之TDW计算引擎解析——Shuffle](https://data.qq.com/article?id=543)
+
 ## 解释kafka的lead和follower
 
-## kafka 数据倾斜
+如果 Kafka topic 的分区有 N 个副本，这 N 个副本中，其中一个为 leader ，其他都为 follower ，leader 处理分区的所有读写请求，follower 可以作为普通的消费者从 leader 中消费消息并应用到自己的日志中，也允许 follower 从 leader 拉取批量日志应用到自己的日志。
+
+follower 的日志完全等同于 leader 的日志，即相同的顺序、相同的偏移量和消息（当然，在任何一个时间点上，leader 比 follower 多几条消息，尚未同步到follower）
+
+如果 leader 故障了，那么就需要从 follower 中选举新的 leader，但是 follower 
+自己可能落后或崩溃，所以我们必须选择一个最新的 follower。
+
+一台服务器可能同时是一个分区的leader，另一个分区的follower。
+
+leader 选举：
+
+Kafka 的 leader 选举是通过在 zookeeper 上创建 controller临时节点来实现的，并在该节点中写入当前 broker 的信息 
+
+    {“version”:1,”brokerid”:1,”timestamp”:”1512018424988”} 
+
+利用 Zookeeper 的强一致性特性，一个节点只能被一个客户端创建成功，创建成功的 broker 即为 leader，即先到先得原则，leader 也就是集群中的 controller，负责集群中所有大小事务。 
+
+当 leader 和 zookeeper 失去连接时，临时节点会删除，而其他 broker 会监听该节点的变化，当节点删除时，其他 broker 会收到事件通知，重新发起 leader 选举。
+
+## kafka数据倾斜
+
+一般由于生产者的分区分的不均匀，可以从 Producer 入手，弄清楚 Producer 生成的 Msg，是如何选择传输到哪个 Partition 的。再根据实际情况，设置 key ，可以设置 key 为随机数。
 
 ## kafka分区
 
+Topic 是发布的消息的类别名，一个 topic 可以有零个，一个或多个消费者订阅该主题的消息。
+
+对于每个 topic，Kafka 集群都会维护一个分区 log，就像下图中所示：
+
+![spark10](./image/spark10.png)
+
+每一个分区都是一个顺序的、不可变的消息队列， 并且可以持续的添加。分区中的消息都被分了一个序列号，称之为偏移量(offset)，在每个分区中此偏移量都是唯一的。
+
+Kafka集群保持所有的消息，直到它们过期（无论消息是否被消费）。实际上消费者所持有的仅有的元数据就是这个offset（偏移量）。
+
+也就是说offset由消费者来控制：正常情况当消费者消费消息的时候，偏移量也线性的的增加。但是实际偏移量由消费者控制，消费者可以将偏移量重置为更早的位置，重新读取消息。
+
+可以看到这种设计对消费者来说操作自如，一个消费者的操作不会影响其它消费者对此log的处理。
+
+Kafka中采用分区的设计有几个目的。一是可以处理更多的消息，不受单台服务器的限制。Topic拥有多个分区意味着它可以不受限的处理更多的数据。第二，分区可以作为并行处理的单元。
+
 ## Kafka用途
+
+### 1、kafka作为一个消息系统
+
+kafka中消费者组有两个概念：队列：消费者组允许同名的消费者组成员瓜分处理。发布订阅：允许你广播消息给多个消费者组（不同名）。
+
+有比传统的消息系统更强的顺序保证。
+
+通过并行topic的parition —— kafka提供了顺序保证和负载均衡。每个partition仅由同一个消费者组中的一个消费者消费到。并确保消费者是该partition的唯一消费者，并按顺序消费数据。每个topic有多个分区，则需要对多个消费者做负载均衡，但请注意，相同的消费者组中不能有比分区更多的消费者，否则多出的消费者一直处于空等待，不会收到消息。
+
+### 2、kafka作为一个存储系统
+
+任何允许发布消息而不消费消息的消息队列都可以有效地充当未被消费的消息的存储系统。
+
+写入到kafka的数据将写到磁盘并复制到集群中保证容错性。并允许生产者等待消息应答，直到消息完全写入。
+
+kafka的磁盘结构 - 无论你服务器上有50KB或50TB，执行是相同的。
+
+client来控制读取数据的位置。你还可以认为kafka是一种专用于高性能，低延迟，提交日志存储，复制，和传播特殊用途的分布式文件系统。
+
+### 3、流处理
+
+在kafka中，流处理持续获取输入topic的数据，进行处理加工，然后写入输出topic。例如，一个零售APP，接收销售和出货的输入流，统计数量或调整价格后输出。
+
+可以直接使用producer和consumer API进行简单的处理。对于复杂的转换，Kafka提供了更强大的Streams API。可构建聚合计算或连接流到一起的复杂应用程序。
+
+Sterams API在Kafka中的核心：使用producer和consumer API作为输入，利用Kafka做状态存储，使用相同的组机制在stream处理器实例之间进行容错保障。
 
 ## flume的三个组件，自定义source
 
+source、channel、sink
+
+- source 接收来自外部源的事件，外部源要以flume source 能识别的格式发送事件。例如，Avro 客户端或者其他 flume agent 的 sink 发送 Avro 事件，Avro flume source 接收。
+
+- 当一个source接收到一个事件，可能会将它存到一个或多个channel中。Channel是一个活跃的存储介质，它会保存事件，直到事件被sink消费。文件channel就是一个例子，它是将事件保存到本地文件系统。
+
+- Sink则是把channel中的事件发送到一个外部源，或者传递到下一层的source中，并将其从channel中删除。在一个agent中，Source和sink异步运行，事件分层存储。
+ 
+自定义的消息有两种类型的 Source：PollableSource 与 EventDrivenSource。
+
+两者的区别在于：
+
+  PollableSource是通过线程不断去调用process方法，主动拉取消息。
+  EventDrivenSource是需要触发一个调用机制，即被动等待。
+
+```java
+public class MySource extends AbstractSource implements Configurable, PollableSource {
+  private String myProp;
+
+  @Override
+  public void configure(Context context) {
+    String myProp = context.getString("myProp", "defaultValue");
+
+    // Process the myProp value (e.g. validation, convert to another type, ...)
+
+    // Store myProp for later retrieval by process() method
+    this.myProp = myProp;
+  }
+
+  @Override
+  public void start() {
+    // Initialize the connection to the external client
+  }
+
+  @Override
+  public void stop () {
+    // Disconnect from external client and do any additional cleanup
+    // (e.g. releasing resources or nulling-out field values) ..
+  }
+
+  @Override
+  public Status process() throws EventDeliveryException {
+    Status status = null;
+
+    try {
+      // This try clause includes whatever Channel/Event operations you want to do
+
+      // Receive new data
+      Event e = getSomeData();
+
+      // Store the Event into this Source's associated Channel(s)
+      getChannelProcessor().processEvent(e);
+
+      status = Status.READY;
+    } catch (Throwable t) {
+      // Log exception, handle individual exceptions as needed
+
+      status = Status.BACKOFF;
+
+      // re-throw all Errors
+      if (t instanceof Error) {
+        throw (Error)t;
+      }
+    } finally {
+      txn.close();
+    }
+    return status;
+  }
+}
+
+```
+
+程序编写万后，打成 jar 包，添加到 FLUME_CLASSPATH 下。再在配置文件中配置使用：
+
+  a1.sources = r1
+  a1.channels = c1
+  a1.sources.r1.type = org.example.MySource
+  a1.sources.r1.channels = c1
+
+[自定义channel\sink](http://flume.apache.org/releases/content/1.9.0/FlumeDeveloperGuide.html)
+
 ## Flume和kafka的区别
 
+Flume 是一个分布式的海量日志采集、传输系统，可以使用拦截器Interceptor屏蔽或过滤数据。
+【基础组件有source、channel、sink】
+
+Kafka 是一个分布式消息系统，用作中间件，缓存数据。
+
+【生产者发布数据到一个或者多个 topic，消费者订阅一个或多个 topic ，并且对发布给他们的流式数据进行处理。】
+
+Flume 不支持副本策略。当 Flume 的一个节点宕机了，会丢失这些数据，而 kafka 则支持副本策略。
+
+比较流行 flume+kafka 模式，如果为了利用 flume 写 hdfs 的能力，也可以采用 kafka+flume 的方式。
+
+扩展阅读：[flume，kafka区别、协同与详解](https://my.oschina.net/u/2996334/blog/3059293)
+
+[flume和kafka区别](https://www.leiue.com/flume-vs-kafka)
+
 ## redis存储数据的时候需要注意什么
+
+### 1、冷热数据分离，不要将所有数据全部都放到Redis中
+
+Redis的数据存储全部都是在内存中的，成本昂贵。
+
+建议根据业务只将高频热数据存储到Redis中【QPS大于5000】，
+
+对于低频冷数据可以使用MySQL/ElasticSearch/MongoDB等基于磁盘的存储方式，不仅节省内存成本，而且数据量小在操作时速度更快、效率更高！
+
+### 2、不同的业务数据要分开存储
+
+不要将不相关的业务数据都放到一个Redis实例中，建议新业务申请新的单独实例。因为Redis为单线程处理，独立存储会减少不同业务相互操作的影响，提高请求响应速度；同时也避免单个实例内存数据量膨胀过大，在出现异常情况时可以更快恢复服务！
+
+### 3、规范Key的格式
+
+合适的key，便于查看，统计，排错。
+
+  例如：GW:TRADE:USERID
+
+  GW是新网关，TRADE是交易项目，USERID为业务ID。
+
+  “平台缩写“+“:”+“项目名”+“:”+“业务含义”
+
+  ":"-作为key分隔符，方便客户端工具作为目录分级
+
+### 4、存储的Key一定要设置超时时间
+
+如果应用将Redis定位为缓存Cache使用，对于存放的Key一定要设置超时时间！因为若不设置，这些Key会一直占用内存不释放，造成极大的浪费，而且随着时间的推移会导致内存占用越来越大，直到达到服务器内存上限！另外Key的超时长短要根据业务综合评估，而不是越长越好！(某些业务要求key长期有效。可以在每次写入时，都设置超时时间，让超时时间顺延。)
+
+
+### 5、对于必须要存储的大文本数据一定要压缩后存储
+
+对于大文本【超过500字节】写入到Redis时，一定要压缩后存储！大文本数据存入Redis，除了带来极大的内存占用外，在访问量高时，很容易就会将网卡流量占满，进而造成整个服务器上的所有服务不可用，并引发雪崩效应，造成各个系统瘫痪！
+
+### 6、线上Redis禁止使用Keys正则匹配操作
+
+Redis是单线程处理，在线上KEY数量较多时，操作效率极低【时间复杂度为O(N)】，该命令一旦执行会严重阻塞线上其它命令的正常请求，而且在高QPS情况下会直接造成Redis服务崩溃！如果有类似需求，请使用scan命令代替！
+
+### 7、谨慎全量操作Hash、Set等集合结构
+
+在使用HASH结构存储对象属性时，开始只有有限的十几个field，往往使用HGETALL获取所有成员，效率也很高，但是随着业务发展，会将field扩张到上百个甚至几百个，此时还使用HGETALL会出现效率急剧下降、网卡频繁打满等问题【时间复杂度O(N)】,此时建议根据业务拆分为多个Hash结构；或者如果大部分都是获取所有属性的操作,可以将所有属性序列化为一个STRING类型存储！同样在使用SMEMBERS操作SET结构类型时也是相同的情况！
+
+### 8、根据业务场景合理使用不同的数据结构类型
+
+目前Redis支持的数据库结构类型较多：字符串（String），哈希（Hash），列表（List），集合（Set），有序集合（Sorted Set）, Bitmap, HyperLogLog和地理空间索引（geospatial）等,需要根据业务场景选择合适的类型，常见的如：String可以用作普通的K-V、计数类；Hash可以用作对象如商品、经纪人等，包含较多属性的信息；List可以用作消息队列、粉丝/关注列表等；Set可以用于推荐；Sorted Set可以用于排行榜等！
+
+原文链接：[Redis开发常用规范](https://blog.csdn.net/sinat_16381803/article/details/79092920)

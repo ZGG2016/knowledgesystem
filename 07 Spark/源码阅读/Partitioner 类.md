@@ -102,6 +102,8 @@ object Partitioner {
    * Returns true if the number of partitions of the RDD is either greater than or is less than and
    * within a single order of magnitude of the max number of upstream partitions, otherwise returns
    * false.
+   *
+   * 如果RDD的分区数量大于或小于上游分区的最大数量，并在一个数量级内，则返回true，否则返回false。
    */
   private def isEligiblePartitioner(
      hasMaxPartitioner: RDD[_],
@@ -113,10 +115,10 @@ object Partitioner {
 
 /**
  * A [[org.apache.spark.Partitioner]] that implements hash-based partitioning using
- * Java's `Object.hashCode`.
+ * Java's `Object.hashCode`.  使用 hashCode 分区
  *
- * Java arrays have hashCodes that are based on the arrays' identities rather than their contents,
- * so attempting to partition an RDD[Array[_]] or RDD[(Array[_], _)] using a HashPartitioner will
+ * Java arrays have hashCodes that are based on the arrays' identities rather than their contents, java 数组的 hashCodes 不是基于它的内容计算的，而是identities
+ * so attempting to partition an RDD[Array[_]] or RDD[(Array[_], _)] using a HashPartitioner will 所以使用 HashPartitioner 分区 数组RDD会有错误结果
  * produce an unexpected or incorrect result.
  */
 class HashPartitioner(partitions: Int) extends Partitioner {
