@@ -18,6 +18,8 @@
 
 ## 列出常见的运行异常
 
+![java39](https://s1.ax1x.com/2020/07/12/U85kIe.png)
+
 编译时异常和运行时异常区别：
 
 	编译时异常
@@ -283,7 +285,59 @@ public class CallableDemo {
 
 - 代码稍微复杂一些，若要访问当前线程，必须使用Thread.currentThread()方法。
 
-## hashmap、hashtable、TreeMap、LinkedHashMap区别
+## hashmap、hashtable区别
 
+1、hashmap 支持 null 键和 null 值，允许一个 null 键和多个 null 值。而 HashTable 不允许 null 键值，在遇到null时，会抛出 NullPointerException 异常。 hashmap 将 null 的 hashCode 值定为了 0。
+
+2、 hashmap 采用的是数组+链表+红黑树结构（jdk1.8之后），而 hashtable 中采用的是数组+链表。
+
+3、hashmap 中默认容量的大小是 16，每次扩充为原来的2倍，而 hashtable 中默认数组容量是 11，每次扩充为原来的2n+1。
+
+4、hashmap 不是线程安全的，如果要保持线程安全可以选用 ConcurrentHashMap。而 hashtable 是线程安全的，hashtable 中的方法均采用了synchronized 关键字进行了方法同步。
+
+5、hashmap 中出现 hash 冲突时，如果链表节点数小于8时是将新元素加入到链表的末尾，而 hashtable 中出现 hash 冲突时采用的是将新元素加入到链表的开头。
+
+6、hashmap 先调用 hashCode 方法计算出来一个 hash 值，再将该值与右移16位后相异或，从而得到最终值。hashtable 通过计算 key 的 hashCode() 来得到的 hash 值就为最终 hash 值。
+
+7、hashmap 在求 hash 值对应的位置索引是 index = (n - 1) & hash。
+hashtable 则是 index = (hash & 0x7FFFFFFF) % tab.length;
+
+原文链接：
+
+[HashMap和Hashtable的区别](https://blog.csdn.net/xuhuaabc/article/details/91475761?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param)
+
+[JDK1.8中HashMap与HashTable的区别](https://blog.csdn.net/zhouxcwork/article/details/81631399)
 
 ## arraylist、linkedlist区别
+
+ArrayList:
+
+    底层数据结构是动态数组，可以扩容
+    查询快：使用索引在数组中搜索和读取数据
+    增删慢：因为这需要移动数组中插入位置之后的的所有元素
+    线程不安全，效率高。
+      若想在多线程下使用，应该使用Colletions类中的静态方法synchronizedList()对ArrayList进行调用即可。
+
+LinkedList:
+
+    底层数据结构是双向链表
+    查询慢：因为需要遍历链表
+    增删快：只需要改变指针指向即可
+    线程不安全，效率高。
+
+总结：
+
+  - ArrayList是实现了基于动态数组的数据结构，LinkedList基于链表的数据结构。
+  - 对于随机访问get和set，ArrayList觉得优于LinkedList，因为LinkedList要移动指针。
+  - 对于新增和删除操作add和remove，LinedList比较占优势，因为ArrayList要移动数据。
+
+Vector:
+
+    底层数据结构是数组，查询快，增删慢。
+    线程安全，效率低。
+
+扩展阅读：
+
+[ArrayList和LinkedList集合有什么区别?](https://blog.csdn.net/qq_33300026/article/details/79232006)
+
+[Java 常见面试题之“Arraylist和Linkedlist的区别”](https://blog.csdn.net/weixin_42468526/article/details/81178698?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param)
