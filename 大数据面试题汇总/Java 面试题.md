@@ -299,6 +299,13 @@ public class CallableDemo {
 
 6、hashmap 先调用 hashCode 方法计算出来一个 hash 值，再将该值与右移16位后相异或，从而得到最终值。hashtable 通过计算 key 的 hashCode() 来得到的 hash 值就为最终 hash 值。
 
+```java
+static final int hash(Object key) {
+        int h;
+        return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+    }
+```
+
 7、hashmap 在求 hash 值对应的位置索引是 index = (n - 1) & hash。
 hashtable 则是 index = (hash & 0x7FFFFFFF) % tab.length;
 
@@ -307,6 +314,8 @@ hashtable 则是 index = (hash & 0x7FFFFFFF) % tab.length;
 [HashMap和Hashtable的区别](https://blog.csdn.net/xuhuaabc/article/details/91475761?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param)
 
 [JDK1.8中HashMap与HashTable的区别](https://blog.csdn.net/zhouxcwork/article/details/81631399)
+
+[0x7FFFFFFF 理解](https://blog.csdn.net/MChuajian/article/details/84313304?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param)
 
 ## arraylist、linkedlist区别
 
@@ -333,7 +342,7 @@ LinkedList:
 
 Vector:
 
-    底层数据结构是数组，查询快，增删慢。
+    底层数据结构是动态数组，查询快，增删慢。
     线程安全，效率低。
 
 扩展阅读：
@@ -341,3 +350,75 @@ Vector:
 [ArrayList和LinkedList集合有什么区别?](https://blog.csdn.net/qq_33300026/article/details/79232006)
 
 [Java 常见面试题之“Arraylist和Linkedlist的区别”](https://blog.csdn.net/weixin_42468526/article/details/81178698?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param)
+
+## 各类排序优缺点
+
+![排序：复杂度分析.PNG](./image/排序：复杂度分析.PNG)
+
+冒泡排序
+
+	优点:稳定
+	缺点：慢，每次只能移动相邻两个数据
+
+插入排序
+
+	优点:对部分有序的数组十分高效，适合小规模数组。
+	缺点：比较次数不一定，比较次数越少，插入点后的数据移动越多，特别是当数据总量庞大的时候
+
+	稳定
+
+选择排序
+
+	运行时间和输入无关：一个有序地数组和一个无序地数组所需时间一样长。
+	数据移动次数最少：每次交换都会改变两个数组元素地值，因此用了N次交换
+
+	不稳定
+
+快速排序
+
+	优点：
+        快速：用一个递增的索引n将数组元素和一个定值比较，这个短小的内循环提高了排序的速度。而希尔和归并排序在内循环中移动了数据，所以相比会慢。
+             另一个速度优势就是比较的次数少，而这依赖于切分元素的划分。
+
+    缺点：在切分不平衡时，程序会比较低效。比如 第一次从最小的元素切分，
+          第二次从第二小的元素切分，...，每次只移除一个元素，导致一个大子数组切分多次。
+    
+    不稳定
+
+归并排序
+
+	优点：速度快：保证任意长度为 N 的数组排序所需时间和 NlogN 成正比。
+	缺点：占空间：所需空间和 N 成正比，因为需要与待排序序列一样多的辅助空间
+
+	稳定
+
+堆排序
+
+	不稳定，但速度快，占用空间少。
+
+## 斐波那契数列  效率
+
+写循环
+
+```java
+public int f(int n){
+	if(n==0 || n==1) return 1;
+
+	return f(n-1) + f(n-2);
+}
+
+public int fLoop(int n){
+	int first = 1;
+	int second = 1;
+	int rlt = 0;
+	int i = 3;
+	while(i<=n){
+		rlt = first+second;
+		first = second;
+		second = rlt;
+		i++;
+	}
+	return rlt;
+}
+
+```
