@@ -2,6 +2,80 @@
 
 [TOC]
 
+## Flume和kafka的区别
+
+Flume 是一个分布式的海量日志采集、传输系统，可以使用拦截器Interceptor屏蔽或过滤数据。
+【基础组件有source、channel、sink】
+
+Kafka 是一个分布式消息系统，用作中间件，缓存数据。
+
+【生产者发布数据到一个或者多个 topic，消费者订阅一个或多个 topic ，并且对发布给他们的流式数据进行处理。】
+
+Flume 不支持副本策略。当 Flume 的一个节点宕机了，会丢失这些数据，而 kafka 则支持副本策略。
+
+比较流行 flume+kafka 模式，如果为了利用 flume 写 hdfs 的能力，也可以采用 kafka+flume 的方式。
+
+扩展阅读：[flume，kafka区别、协同与详解](https://my.oschina.net/u/2996334/blog/3059293)
+
+[flume和kafka区别](https://www.leiue.com/flume-vs-kafka)
+
+## kafka如何记录（存储）数据
+
+(1)假设实验环境中Kafka集群只有一个broker，xxx/message-folder为数据文件存储根目录
+
+创建2个topic名称分别为report_push、launch_info, partitions数量都为partitions=4
+
+存储路径和目录规则为：xxx/message-folder
+
+	  |--report_push-0
+	  |--report_push-1
+	  |--report_push-2
+	  |--report_push-3
+	  |--launch_info-0
+	  |--launch_info-1
+	  |--launch_info-2
+	  |--launch_info-3
+
+在Kafka文件存储中，同一个topic下有多个不同partition，每个partition为一个目录。
+
+partiton命名规则为 `topic名称+有序序号`，第一个partiton序号从0开始，序号最大值为partitions数量减1。
+
+(2)每个partition(目录)相当于一个巨型文件被平均分配到多个大小相等segment file中。
+
+![kafka01](./image/kafka01.png)
+
+(3)segment file组成：由index file和data file组成，此2个文件一一对应，成对出现，分别表示为segment索引文件、数据文件.
+
+![kafka02](./image/kafka02.png)
+
+(4)以上图中一对segment file文件为例，说明segment中index<—->data file对应关系物理结构如下：
+
+说明：index中的1,0。对应log中的文件个数和offset
+
+![kafka03](./image/kafka03.png)
+
+其中以索引文件中元数据3,497为例，依次在数据文件中表示第3个message(在全局partiton表示第368772个message)、以及该消息的物理偏移地址为497。
+
+以下具体说明message物理结构例如以下：
+
+![kafka04](./image/kafka04.png)
+
+> message参数说明
+
+关键字 | 解释说明
+---|:---
+8 byte offset | 在parition(分区)内的每条消息都有一个有序的id号，这个id号被称为偏移(offset),它可以唯一确定每条消息在parition(分区)内的位置。即offset表示partiion的第多少message
+4 byte message size | message大小
+4 byte CRC32 | 用crc32校验message
+1 byte “magic" | 表示本次发布Kafka服务程序协议版本号
+1 byte “attributes" | 表示为独立版本、或标识压缩类型、或编码类型。
+4 byte key length | 表示key的长度,当key为-1时，K byte key字段不填
+K byte key | 可选
+value bytes payload	 | 表示实际消息数据。
+
+
+原文链接：[Kafka文件的存储机制](https://blog.csdn.net/silentwolfyh/article/details/55095146)
+
 ## 解释kafka的lead和follower
 
 如果 Kafka topic 的分区有 N 个副本，这 N 个副本中，其中一个为 leader ，其他都为 follower ，leader 处理分区的所有读写请求，follower 可以作为普通的消费者从 leader 中消费消息并应用到自己的日志中，也允许 follower 从 leader 拉取批量日志应用到自己的日志。

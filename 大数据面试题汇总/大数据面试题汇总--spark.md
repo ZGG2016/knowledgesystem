@@ -637,20 +637,5 @@ bypass 运行机制的触发条件如下：
 
 [腾讯大数据之TDW计算引擎解析——Shuffle](https://data.qq.com/article?id=543)
 
-## Flume和kafka的区别
 
-Flume 是一个分布式的海量日志采集、传输系统，可以使用拦截器Interceptor屏蔽或过滤数据。
-【基础组件有source、channel、sink】
-
-Kafka 是一个分布式消息系统，用作中间件，缓存数据。
-
-【生产者发布数据到一个或者多个 topic，消费者订阅一个或多个 topic ，并且对发布给他们的流式数据进行处理。】
-
-Flume 不支持副本策略。当 Flume 的一个节点宕机了，会丢失这些数据，而 kafka 则支持副本策略。
-
-比较流行 flume+kafka 模式，如果为了利用 flume 写 hdfs 的能力，也可以采用 kafka+flume 的方式。
-
-扩展阅读：[flume，kafka区别、协同与详解](https://my.oschina.net/u/2996334/blog/3059293)
-
-[flume和kafka区别](https://www.leiue.com/flume-vs-kafka)
 
