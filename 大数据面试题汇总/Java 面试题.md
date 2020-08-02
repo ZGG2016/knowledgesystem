@@ -422,3 +422,85 @@ public int fLoop(int n){
 }
 
 ```
+
+## synchronized
+
+同步的前提
+
+	多个线程
+	多个线程使用的是同一个锁对象
+
+同步的好处
+
+	同步的出现解决了多线程的安全问题。
+
+同步的弊端
+
+	当线程相当多时，因为每个线程都会去判断同步上的锁，这是很耗费资源的，
+	无形中会降低程序的运行效率。
+
+
+- 同步代码块的锁对象是任意对象
+
+- 同步方法的锁对象this
+
+- 态方法的锁对象是类的字节码文件对象
+
+
+## 线程池
+
+当程序中要创建大量生存期很短的线程时，应该考虑使用线程池。
+
+线程池里的每一个线程代码结束后，并不会死亡，而是再次回到线程池中成为空闲状态，等待下一个对象来使用。
+
+在JDK5之前，我们必须手动实现自己的线程池，从JDK5开始，Java内置支持线程池。
+
+JDK5新增了一个 Executors 工厂类来产生线程池，有如下几个方法：
+
+	public static ExecutorService newCachedThreadPool()
+	public static ExecutorService newFixedThreadPool(int nThreads)
+	public static ExecutorService newSingleThreadExecutor()
+
+这些方法的返回值是 ExecutorService 对象，该对象表示一个线程池，
+可以执行Runnable对象或者Callable对象代表的线程。它提供了如下方法：
+
+	Future<?> submit(Runnable task)
+	<T> Future<T> submit(Callable<T> task)
+
+创建过程：
+
+	A:创建一个线程池对象，控制要创建几个线程对象。
+		public static ExecutorService newFixedThreadPool(int nThreads)
+	B:这种线程池的线程可以执行：
+		可以执行Runnable对象或者Callable对象代表的线程
+		做一个类实现Runnable接口。
+	C:调用如下方法即可
+		Future<?> submit(Runnable task)
+		<T> Future<T> submit(Callable<T> task)
+	D:结束 shutdown
+
+```java
+public class MyRunnable implements Runnable {
+
+	@Override
+	public void run() {
+		for (int x = 0; x < 100; x++) {
+			System.out.println(Thread.currentThread().getName() + ":" + x);
+		}
+	}
+}
+
+public class ExecutorsDemo {
+	public static void main(String[] args) {
+		// 创建一个线程池对象，控制要创建几个线程对象。
+		ExecutorService pool = Executors.newFixedThreadPool(2);
+
+		// 可以执行Runnable对象或者Callable对象代表的线程
+		pool.submit(new MyRunnable());
+		pool.submit(new MyRunnable());
+
+		//结束线程池
+		pool.shutdown();
+	}
+}
+```

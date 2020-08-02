@@ -2,6 +2,34 @@
 
 [TOC]
 
+## spark Dataframe的优点
+
+(1)相比rdd，DataFrame记录了数据的结构信息，即schema，可以知道每列的名称和类型各是什么。
+
+(2)性能上比RDD要高。
+
+- 数据以二进制的方式存在于非堆内存，节省了大量空间之外，还摆脱了GC的限制
+- 查询计划通过Spark catalyst optimiser进行优化，降低执行时间。
+
+原文链接：
+
+[RDD和DataFrame和DataSet三者间的区别](https://blog.csdn.net/weixin_43087634/article/details/84398036?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.channel_param)
+
+[RDD、dataframe、dataset区别（优缺点）-- Spark面试常问问题](https://blog.csdn.net/qq_21539671/article/details/104480222)
+
+## spark版本
+
+spark2.x 增加了如下特性：
+
+  - 新增 Structured Streaming 特性
+  - 引入了 SparkSession，统一了旧的SQLContext与HiveContext。
+  - 1.3 版本引入 DataFrame，1.6版本引入Dataset，在 spark 2.0 中，把 dataframes 当作是一种特殊的 datasets，dataframes = datasets[row]，把两者统一为datasets。
+  - mllib 里的计算用 DataFrame-based API 代替以前的 RDD 计算逻辑，提供更多的 R 语言算法，默认使用 Scala 2.11 编译与运行
+
+[spark3.0新特性](https://blog.csdn.net/qq_16038125/article/details/106987136) 
+
+[SPARK各个版本新特性](https://www.cnblogs.com/fuyiming/p/6270406.html)
+
 ## spark数据分区
 
 Spark 中的 RDD 就是一个分区了的数据集合，所以可以执行并行操作。

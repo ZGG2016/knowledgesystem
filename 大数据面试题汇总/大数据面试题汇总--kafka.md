@@ -119,6 +119,24 @@ Kafka集群保持所有的消息，直到它们过期（无论消息是否被消
 
 Kafka中采用分区的设计有几个目的。一是可以处理更多的消息，不受单台服务器的限制。Topic拥有多个分区意味着它可以不受限的处理更多的数据。第二，分区可以作为并行处理的单元。
 
+## Kafka元数据存在哪
+
+MetadataCache 组件
+
+在每个 Broker 的 KafkaServer 对象中都会创建 MetadataCache 组件, 负责缓存所有的 metadata 信息;
+```scala
+val metadataCache: MetadataCache = new MetadataCache(config.brokerId)
+```
+
+所有的metadata信息存储在map里, key是topic, value又是一个map, 其中key是parition id, value是PartitionStateInfo
+
+```scala
+private val cache: mutable.Map[String, mutable.Map[Int, PartitionStateInfo]] =
+    new mutable.HashMap[String, mutable.Map[Int, PartitionStateInfo]]()
+```
+
+原文链接：[MetadataCache](https://zhuanlan.zhihu.com/p/50839869)
+
 ## Kafka用途
 
 ### 1、kafka作为一个消息系统

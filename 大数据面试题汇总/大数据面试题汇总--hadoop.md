@@ -2,6 +2,58 @@
 
 [TOC]
 
+## Hadoop的启动进程，运行进程
+
+启动：
+
+方式1：`sbin/start-all.sh` `[sbin/stop-all.sh]`
+
+方式2：`sbin/start-dfs.sh` 、 `sbin/start-yarn.sh` `[sbin/stop-dfs.sh 、sbin/stop-yarn.sh]`
+
+高可用情况下，还需启动 `hadoop-daemon.sh start journalnode` `hadoop-daemon.sh start zkfc`
+
+进程有：
+
+- NameNode：管理文件系统的名字空间(namespace)，以及接收客户端对文件的访问请求。
+
+- DataNode：管理它所在节点上的存储，执行客户端的读写请求。
+
+- JournalNode：在高可用模式下，两类 NameNode 通过一组 JournalNodes(JNs) 进程保持通信，以此使 Standy NameNode 和 Active NameNode
+保持同步。
+
+- ResourceManager:为所有 application 裁决(arbitrates)资源
+
+- NodeManager:监控container的使用情况，并汇报给ResourceManager/Scheduler。
+
+- DFSZKFailoverController:一个Zookeeper客户端，周期性地监测本地 NameNode；Zookeeper Session 管理；NameNode的选举，及启动故障转移
+
+- [secondarynamenode]:设置一个checkpoint来辅助NameNode更好的工作
+
+- QuorumPeerMain: zookeeper独立的进程
+
+## hadoop版本
+
+hadoop1.x版本：
+
+	hadoop1.x由hdfs和mapreduce组成，
+	其中hdfs由一个NameNode和多个DateNode组成，
+	mapreduce由一个JobTracker和多个TaskTracker组成。
+
+	(1)JobTracker 不仅负责作业控制，还负责资源管理。
+
+	(2)存在单点故障问题
+
+hadoop2.x版本：
+
+	(1)将JobTracker的资源管理功能单独形成一个组件yarn，它不仅可以运行在hadoop平台，也可以运行在其他的平台，如spark。
+
+	(2)hdfs ha：配置两个机器作为 NameNode 节点。在任意时刻，一个处在 Active 状态，其他的处在 Standyby 状态。Active NameNode负责处理客户端操作，Standyby NameNode 仅仅作为一个工作节点维持自身足够的状态，在必要时候，实现 fast failover。两类 NameNode 通过一组 JournalNodes(JNs) 进程保持通信。
+
+	(3)Federation:多个NameNode，每个NameNode管理不同类型文件的元数据
+
+[hadoop3.x版本](https://blog.csdn.net/czz1141979570/article/details/97501290)
+
+
 ## mapreduce的底层原理
 
 ![mapreduce01](https://s1.ax1x.com/2020/06/22/NGO3ZD.jpg)

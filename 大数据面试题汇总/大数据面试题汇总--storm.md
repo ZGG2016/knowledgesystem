@@ -2,20 +2,68 @@
 
 [TOC]
 
+## Storm并行度设置
+
+- worker 数量：通过 config.setNumWorkers(workers)设置。(优先级更高)
+
+- executor 数量：setSpout和setBolt最后一个参数
+
+- task 数量：通过 spout/boltDeclarer.setNumTasks(num)设置
+
+默认情况下，每个supervisor启动4个worker，每个worker启动1个executor，每个executor中会有1个task。
+
+翻译成人类语言：  每台机器启动4个进程，每个进程里面跑一个线程，每个线程来具体执行一个 bolt/spout的实例
+
+即： 可以通过 config设置进程个数  通过TopologyBuilder设置spout/bolt 各自的线程个数， 也能通过TopologyBuilder创建的对应的
+Spout/BoltDecvlarer 来设置每个线程运行的具体task个数。
+
+动态调整并行度: `storm rebalance topology-name [-w wait-time-secs] [-n new-num-workers] [-e component=parallelism]`
+
+    -n : 调整的是 worker 的数量。
+
+    -e : 调整的是Bolt, Spout 的 executor 数量, 最多不能超过 预先设定 task的数量, 若设置为超过task 的数量会调整 task 的上限。
+
+    示例：storm rebalance transfer_base  -w 60 -n 6
+
+```java
+public class MyLocalStormTopology {
+
+    public static void main(String[] args) throws Exception {
+
+        
+        TopologyBuilder topologyBuilder = new TopologyBuilder();
+        SpoutDeclarer spoutDeclarer = topologyBuilder.setSpout("1", new MySpout2()); 
+        spoutDeclarer.setNumTasks(val);  // 设置task数量
+        //topologyBuilder.setSpout(id, spout, parallelism_hint); // 动态设置 spout的executor数量
+        BoltDeclarer boltDeclarer = topologyBuilder.setBolt("2", new MyBolt1()).shuffleGrouping("1"); 
+        boltDeclarer.setNumTasks(num); //动态设置 task数量
+        //topologyBuilder.setBolt(id, bolt, parallelism_hint); 动态设置 bolt的executor数量
+        
+        StormSubmitter stormSubmitter = new StormSubmitter();
+        
+        Config config = new Config();
+        config.setNumWorkers(workers); //动态设置每台机器运行work进程数
+        stormSubmitter.submitTopology(MyLocalStormTopology.class.getSimpleName(), config, topologyBuilder.createTopology());
+        
+    }
+```
+原文链接：[Storm并行度](https://www.iteye.com/blog/chengjianxiaoxue-2188864)
+
+
 ## storm都从哪输入
 
 **kafka**
 
 （1）在pom文件中添加依赖
 （2）
-```
+```java
 final TopologyBuilder tp = new TopologyBuilder();
 tp.setSpout("kafka_spout", new KafkaSpout<>(KafkaSpoutConfig.builder("127.0.0.1:" + port, "topic").build()), 1);
 tp.setBolt("bolt", new myBolt()).shuffleGrouping("kafka_spout");
 ```
 （3）也可以通过通配符匹配topic.
 （4）一个 KafkaSpout 流入多个 bolt
-```
+```java
 final TopologyBuilder tp = new TopologyBuilder();
 //默认情况下，spout 消费但未被match到的topic的message的"topic"、"key"和"value"将发送到"STREAM_1"
 ByTopicRecordTranslator<String, String> byTopic = new ByTopicRecordTranslator<>(
@@ -34,7 +82,7 @@ tp.setBolt("another", new myOtherBolt()).shuffleGrouping("kafka_spout", "STREAM_
 JMS Spout 连接到 JMS Destination(主题或队列)，并根据收到的 JMS Messages 的内容发送给 Storm "Tuple" 对象。
 
 JMS Bolt **连接到 JMS Destination，并根据接收的 Storm "Tuple" 对象发布 JMS 消息**。
-```
+```java
 // JMS Queue Provider
         JmsProvider jmsQueueProvider = new SpringJmsProvider(
                 "jms-activemq.xml", "jmsConnectionFactory",
