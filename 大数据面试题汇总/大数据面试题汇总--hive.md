@@ -2,82 +2,6 @@
 
 [TOC]
 
-## join ##
-
-inner join
-
-    内连接，只连接匹配的行（CROSS JOIN、INNER JOIN与JOIN是相同）
-
-left join
-
-    返回左表的全部行和右表满足ON条件的行，如果左表的行在右表中没有匹配，那么这一行右表中对应数据用NULL代替。
-
-right join
-
-    返回右表的全部行和左表满足ON条件的行，如果右表的行在左表中没有匹配，那么这一行左表中对应数据用NULL代替。
-    
-full join
-
-    从左表 和右表 那里返回所有的行。如果其中一个表的数据行在另一个表中没有匹配的行，那么对面的数据用NULL代替
-    
-
-## union ##
-
-合并两个或多个 SELECT 语句的结果集。
-
-注意：
-
-    UNION 内部的 SELECT 语句必须拥有相同数量的列。列也必须拥有相似的数据类型。
-    同时，每条 SELECT 语句中的列的顺序必须相同。
-
-UNION 和 UNION ALL 的区别：
-
-对重复结果的处理：
-
-    UNION 在进行表链接后会筛选掉重复的记录
-    UNION ALL 不会去除重复记录。
-
-对排序的处理：
-
-    UNION 交换两个SELECT语句的顺序后结果仍然是一样的
-    UNION ALL 在交换了SELECT语句的顺序后结果则不相同
-
-join 和 union 的区别：
-
-    join 是两张表根据条件相同的部分合并生成一个记录集。
-    union是两个记录集(字段要一样的)合并在一起，成为一个新的记录集 。
-
-## 提高查询效率的方式 ##
-
-1、in 和 not in 要慎用，否则会导致全表扫描，如：
-
-    select id from t where num in(1,2,3)
-    对于连续的数值，能用 between 就不要用 in 了：
-    select id from t where num between 1 and 3
-
-2、应尽量避免在 where 子句中对字段进行表达式操作，这将导致引擎放弃使用索引而进行全表扫描。如：
-
-    select id from t where num/2=100
-    应改为:
-    select id from t where num=100*2
-
-3、应尽量避免在 where 子句中使用 or 来连接条件，否则将导致引擎放弃使用索引而进行全表扫描，如：
-
-    select id from t where num=10 or num=20
-    可以这样查询：
-    select id from t where num=10
-    union all
-    select id from t where num=20
-
-4、当索引列有大量数据重复时，SQL查询可能不会去利用索引，如一表中有字段sex，male、female几乎各一半，那么即使在sex上建了索引也对查询效率起不了作用。
-
-5、索引并不是越多越好，会降低了 insert 及 update 的效率，因为 insert 或 update 时有可能会重建索引，所以怎样建索引需要慎重考虑，视具体情况而定。一个表的索引数最好不要超过6个，若太多则应考虑一些不常使用到的列上建的索引是否有必要。
-
-原文链接：
-
-[提高SQL查询效率方法总结](https://zhuanlan.zhihu.com/p/93319347)
-
-[提高SQL查询效率的23种方法](https://www.cnblogs.com/coder-wf/p/13371122.html)
 
 ## 数据仓库的架构分层
 
@@ -111,9 +35,10 @@ join 和 union 的区别：
 
 (4)DW (Data Warehouse)数据仓库，包括DWD、MID和DM(Data Mart)。DWD是清洗维度补充。MID进行轻度汇总和。DM按照部门或主题（特定用户群、特定主题）生成。
 
-(5)APP（Application），面向用户应用和分析需求，包括前端报表、分析图表、KPI、仪表盘、OLAP、专题等分析，面向最终结果用户。
+(5)APP（Application），面向用户应用和分析需求，包括前端报表、分析图表、KPI、仪表盘、OLAP、专题等分析，面向最终结果用户。【面向业务定制的应用数据】
 
 参考：[数据仓库--通用的数据仓库分层方法](https://www.cnblogs.com/itboys/p/10592871.html)
+
 [干货：解码OneData，阿里的数仓之路](https://developer.aliyun.com/article/67011)
 
 ## 数据集出现数据缺失，怎么办 ##

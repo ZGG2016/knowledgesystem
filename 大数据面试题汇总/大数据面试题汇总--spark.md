@@ -2,6 +2,99 @@
 
 [TOC]
 
+## Spark的容错机制
+
+如果丢失的分区和上游分区是窄依赖的关系，那么重算父RDD的分区即可。父RDD相应分区的所有数据都是子RDD分区的数据，并不存在冗余计算。
+
+如果是宽依赖，丢失一个子RDD分区，需要重算的 每个父RDD的每个分区的所有数据 并不是都给丢失的子RDD分区用的，会有一部分数据相当于对应的是未丢失的子RDD分区中需要的数据，这样就会产生冗余计算开销，这也是宽依赖开销更大的原因。
+
+所以，可以引入checkpoint检查点机制。定期将中间生成的 RDDs 保存到可靠存储，通过多副本机制来实现容错。
+
+```scala
+val data = sc.textFile("/tmp/spark/1.data").cache() // 注意要cache 
+sc.setCheckpointDir("/tmp/spark/checkpoint")
+data.checkpoint 
+data.count
+```
+
+原文链接：[Spark容错机制](https://blog.csdn.net/dengxing1234/article/details/73613484)
+
+## Spark和zookeeper的结合
+
+Spark Standalone集群是Master-Slaves架构的集群模式，存着Master单点故障的问题。如何解决这个问题，Spark提供了两种方案：
+
+（1）基于文件系统的单点恢复。主要用于开发或者测试环境。当 Master 宕掉，如果你只想能重启 Master 服务器，那么就可用使用 FILESYSTEM 模式。当应用程序和 Workers 注册了之后，它们具有写入目录的足够状态，以便在 Master 进程重启后可以恢复它们。
+
+（2）基于zookeeper的Standby Master。用于生产模式，其基本原理就是通过zookeeper来选举一个Master，其他的Master处于Standby状态，将spark集群连接到同一个Zookeeper实例，并启动一个Master，**利用zookeeper提供的选举和状态保存的功能**，可以使一个Master被选举成活着的master，其他Master处于Standby状态。如果现任的Master挂掉了，另外一个就可通过选举产生，并恢复到旧的Master状态，然后恢复调度，整个恢复过程可能需要1至2分钟。
+
+修改配置文件：vim spark-env.sh
+
+
+  # 1.安装Zookeeper
+
+  # 2.修改spark-env.sh文件添加如下配置
+
+  注释掉如下内容：
+
+  # SPARK_MASTER_HOST=hadoop102　　/注释掉master节点的ip，因为高可用部署的master是变化的
+
+  # SPARK_MASTER_PORT=7077
+
+  添加上如下内容：
+
+  　　export SPARK_DAEMON_JAVA_OPTS="
+
+  　　-Dspark.deploy.recoveryMode=ZOOKEEPER
+
+  　　-Dspark.deploy.zookeeper.url=hdp01,hdp02,hdp03　　//这里填写zookeeper集群的ip　zookeeper单机式只需要填一个即可
+
+  　　-Dspark.deploy.zookeeper.dir=/spark"
+
+  　　参数说明;
+
+  　　　　（1）recoveryMode，恢复模式（Master重新启动的模式）
+
+  　　　　　　有三种：Zookeeper、FileSystem、None
+
+  　　　　（2）deploy.zookeeper.url,Zookeeper的服务器地址
+
+  　　　　（3）deploy.zookeeper.dir，保存集群元数据信息的文件、目录。
+
+  　　　　包括worker,Driver,Application.
+
+在设置了 ZooKeeper 集群之后，只需要在具有相同 ZooKeeper 配置（ZooKeeper URL 和 目录）的不同节点上启动多个 Master 进程。
+
+为了调度新的应用程序或者添加新的 Worker 到集群中，他们需要知道当前的 leader 的 IP 地址。这可以通过传递一个 Masters 的列表来完成。例如，您可以启动您的 SparkContext 指向 spark://host1:port1,host2:port2。
+
+这将导致您的 SparkContext 尝试去注册两个 Masters – 如果 host1 宕掉，这个配置仍然是正确地，因为我们将会发现新的 leader host2。
+
+如果发生 failover，新的 leader 将会联系所有已经注册的应用程序和 Workers ，通知他们领导层的变化，所以他们甚至不知道新的 Master 存在。
+
+## Spark Stage的划分
+
+在对RDD操作过程中，会产生依赖关系，包含窄依赖和宽依赖。(可以继续说下区别)
+
+Spark任务会根据RDD之间的依赖关系，形成一个DAG有向无环图，DAG会提交给DAGScheduler；
+
+DAGScheduler从DAG图末端出发，逆向遍历整个依赖关系链，遇到宽依赖就断开，遇到窄依赖就将其加入到当前stage。
+
+每个stage包含一个或多个task任务。然后将这些task以taskSet的形式提交给TaskScheduler运行。stage是由一组并行的task组成。
+
+Stage的task并行度是由stage的最后一个RDD的分区数来决定的 。一般来说，一个partiotion对应一个task,但最后reduce的时候可以手动改变reduce的个数，也就是分区数，即改变了并行度。例如reduceByKey(XXX,3),GroupByKey(4)
+
+![spark02](./image/spark02.png)
+
+## Spark调优参数
+
+spark.sql.shuffle.partitions：
+
+    在 join 或聚合算子执行 shuffle 时，默认的分区数(task 数)， 默认200个
+
+spark.sql.sources.partitionColumnTypeInference.enabled：
+
+    当 true 时，自动推断分区字段的数据类型。默认true。关闭后能提升性能。
+
+
 ## spark Dataframe的优点
 
 (1)相比rdd，DataFrame记录了数据的结构信息，即schema，可以知道每列的名称和类型各是什么。
@@ -560,6 +653,14 @@ Spark不适合的场景，如：
 
 	- 有高实时性要求的流式计算业务，例如实时性要求毫秒级。
 	- 由于RDD设计上的只读特点，所以Spark对于待分析数据频繁变动的情景很难做
+
+或者问：相比hadoop，spark的优势
+
+    1、hadoop中间结果存储在磁盘，而spark存在内存。
+    2、Hadoop shuffle在map端和reduce段都需要排序。而spark在bypass模式下的shufflez中，不会排序【当 shuffle read task 的数量小于等于 `spark.shuffle.sort.bypassMergeThreshold` 参数的值时(默认为200)，就会启用 bypass 机制。】
+    3、spark扩展性好，包含了分布式查询、流计算、机器学习、图计算和对 R 的支持
+    4、mapreduce只有map和reduce两个算子，而Spark的编程模型更加灵活。
+    5、hadoop和spark适用于不同的场景。
 
 ## spark shuffle
 
