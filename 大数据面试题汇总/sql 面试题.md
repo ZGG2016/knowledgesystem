@@ -1,4 +1,4 @@
-# 大数据面试题汇总--sql
+# sql 面试题
 
 ## 判断sql语句的效率
 
@@ -8,19 +8,19 @@
 
 表a的数据复制到表b
 
-两表结构相同：
+两表结构相同： (b已存在)
 
 ```sql
 insert into b select * from a (where...);
 ```
 
-两表结构不相同：
+两表结构不相同：(b已存在)
 
 ```sql
 insert into b(col1,col2) select col1,col2 from a;
 ```
 
-表a的数据和结构复制到表b
+表a的数据和结构复制到表b (b不存在)，不会复制表的默认值
 
 ```sql
 create table b select * from a;
@@ -31,6 +31,83 @@ create table b select * from a;
 ```sql
 create table b like a;
 ```
+
+MySQL 数据库不支持 SELECT ... INTO 语句，但支持 INSERT INTO ... SELECT 。
+
+```sql
+MariaDB [mysql]> select * from apps;
++----+------------+-------------------------+---------+
+| id | app_name   | url                     | country |
++----+------------+-------------------------+---------+
+|  1 | QQ APP     | http://im.qq.com/       | CN      |
+|  2 | 微博 APP   | http://weibo.com/       | CN      |
+|  3 | 淘宝 APP   | https://www.taobao.com/ | CN      |
++----+------------+-------------------------+---------+
+3 rows in set (0.00 sec)
+
+--表结构
+MariaDB [mysql]> desc apps;
++----------+--------------+------+-----+---------+----------------+
+| Field    | Type         | Null | Key | Default | Extra          |
++----------+--------------+------+-----+---------+----------------+
+| id       | int(11)      | NO   | PRI | NULL    | auto_increment |
+| app_name | char(20)     | NO   |     |         |                |
+| url      | varchar(255) | NO   |     |         |                |
+| country  | char(10)     | NO   |     |         |                |
++----------+--------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+--create table ... as select...
+MariaDB [mysql]> create table apps_bkp2 as  select * from apps;
+Query OK, 3 rows affected (0.01 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+--表结构
+MariaDB [mysql]> desc apps_bkp2;
++----------+--------------+------+-----+---------+-------+
+| Field    | Type         | Null | Key | Default | Extra |
++----------+--------------+------+-----+---------+-------+
+| id       | int(11)      | NO   |     | 0       |       |
+| app_name | char(20)     | NO   |     |         |       |
+| url      | varchar(255) | NO   |     |         |       |
+| country  | char(10)     | NO   |     |         |       |
++----------+--------------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+
+--create table ... like ...
+MariaDB [mysql]> create table apps_bkp3 like apps;
+Query OK, 0 rows affected (0.01 sec)
+
+--表结构
+MariaDB [mysql]> desc apps_bkp3;
++----------+--------------+------+-----+---------+----------------+
+| Field    | Type         | Null | Key | Default | Extra          |
++----------+--------------+------+-----+---------+----------------+
+| id       | int(11)      | NO   | PRI | NULL    | auto_increment |
+| app_name | char(20)     | NO   |     |         |                |
+| url      | varchar(255) | NO   |     |         |                |
+| country  | char(10)     | NO   |     |         |                |
++----------+--------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+
+MariaDB [mysql]> insert into apps_bkp select * from apps_bkp2 where id='1';
+Query OK, 1 row affected (0.00 sec)
+Records: 1  Duplicates: 0  Warnings: 0
+
+
+MariaDB [mysql]> select * from apps_bkp;
++----+------------+-------------------------+---------+
+| id | app_name   | url                     | country |
++----+------------+-------------------------+---------+
+|  1 | QQ APP     | http://im.qq.com/       | CN      |
+|  2 | 微博 APP   | http://weibo.com/       | CN      |
+|  3 | 淘宝 APP   | https://www.taobao.com/ | CN      |
+|  1 | QQ APP     | http://im.qq.com/       | CN      |
++----+------------+-------------------------+---------+
+4 rows in set (0.00 sec)
+```
+[Oracle中复制表的方法（create as select、insert into select、select into）](https://blog.csdn.net/weixin_39750084/article/details/81292774)
 
 ## Innodb和MyISAM区别
 

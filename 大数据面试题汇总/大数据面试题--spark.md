@@ -2,6 +2,38 @@
 
 [TOC]
 
+## Spark Steaming连接kafka的两种方式及区别
+
+
+
+## RDD的sortBy和scala的sortBy的区别
+
+
+## Spark的 shuffle和MapReduce的 shuffle的区别 （还需整理）
+
+从执行角度讲：
+
+    MapReduce的shuffle会经历map()，spill，merge， shuffle，sort，reduce()，是按照流程顺次执行的，属于push类型。
+
+    因为Spark的Shuffle过程是算子驱动的，具有懒执行的特点，属于pull类型。正因为是 算子驱动的，Spark的Shuffle主要是两个阶段：Shuffle Write和Shuffle Read。
+
+从数据流角度讲：
+
+    MapReduce 只能从一个 Map Stage shuffle 数据， Spark 可以从多个 Map Stages shuffle 数据（参见 CoGroup(), join() 等操作的数据流图）。 
+
+从map角度讲：
+
+    MapReduce的map阶段的数据存在一个环形缓冲区中， 缓冲区大小默认是100MB，达到80%后会溢写磁盘同时排序。
+
+    Spark的shuffle write阶段是将数据写入了一个AppendOnlyMap或者pairBuffer结构中，可以选择不排序bypass模式。
+
+从reduce角度讲：
+
+    MapReduce shuffle阶段就是边fetch边使用combine() 进行处理，但是combine()处理的是部分数据。MapReduce不能做到边fetch边reduce处 理，因为MapReduce为了让进入reduce()的records有序，必须等到全部数据都shuffle- sort后再开始reduce()。
+
+    Spark不要求shuffle后的数据全局有序，因此没必要等到全 部数据shuffle完成后再处理。为了实现边shuffle边处理，而且流入的records是无序的可以 用aggregate的数据结构，比如HashMap。
+
+
 ## Spark的容错机制
 
 如果丢失的分区和上游分区是窄依赖的关系，那么重算父RDD的分区即可。父RDD相应分区的所有数据都是子RDD分区的数据，并不存在冗余计算。
@@ -526,11 +558,13 @@ unpersist() 取消缓存
 
 ## rdd是什么
 
+【是什么、分区、容错、创建、依赖关系、操作】
+
 rdd 是一个弹性分布式数据集，是容错的、分区的、可以执行并行操作的元素集合。
 
 有两种方法可以创建 rdd：
 
-	- 在驱动程序中 sc.parallelize(["a,b","b,c"])
+	- 在驱动程序中 parallelizing 一个已存在的集合 sc.parallelize(["a,b","b,c"])
 	- 在外部存储系统中引用一个数据集，例如，一个共享文件系统、HDFS、HBase、或者提供 Hadoop InputFormat 的任何数据源。 sc.textFile("/in/data.txt")
 
 支持两种类型的操作： 
@@ -543,7 +577,7 @@ rdd 是一个弹性分布式数据集，是容错的、分区的、可以执行�
 
 	默认情况下，对于一个已转换的 RDD，每次你在这个 RDD 运行一个 action 时，它都会被重新计算。
 
-	但是，可以使用 persist/cache 方法将 RDD 持久化到内存中，也可以到磁盘。
+	但是，可以使用 persist/cache 方法将 RDD 持久化到内存中，也可以到磁盘。(7种持久化级别)
 
 分区的
 
@@ -553,7 +587,7 @@ rdd 是一个弹性分布式数据集，是容错的、分区的、可以执行�
 
 	正常情况下，Spark 会根据集群情况，自动设置分区数量。然而，你也可以给算子传递一个参数来手动设置，或者在配置文件里设置。
 
-容错的
+容错的(依赖关系)
 
 	对 RDD 操作有 transformations（转换）和 actions（动作）。转换操作会返回一个新的 RDD，这样就会建立一种血统关系。
 
