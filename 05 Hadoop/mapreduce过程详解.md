@@ -50,3 +50,5 @@ different from those for grouping keys before reduction]
 参考：[MapReduce中各个阶段的分析](https://blog.csdn.net/wyqwilliam/article/details/84669579)
 	  [hadoop权威指南]
 	  [MapReduce Tutorial](https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html#Reducer)
+	  [环形缓冲区1](https://blog.csdn.net/FullStackDeveloper0/article/details/83104370)
+	  [环形缓冲区2](https://www.baidu.com/link?url=jpDE7w3mSR9fQYYrYnc1UlvBDXY9JTfSSlt2rX0leLuzQKVk8rJvVASlygomKIw-UBeoXbuL4M8P1Df7JPaCZq&wd=&eqid=f84db88600050676000000025f33f2ed)

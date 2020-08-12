@@ -9,13 +9,13 @@
 ## RDD的sortBy和scala的sortBy的区别
 
 
-## Spark的 shuffle和MapReduce的 shuffle的区别 （还需整理）
+## Spark的shuffle和MapReduce的shuffle的区别
 
 从执行角度讲：
 
     MapReduce的shuffle会经历map()，spill，merge， shuffle，sort，reduce()，是按照流程顺次执行的，属于push类型。
 
-    因为Spark的Shuffle过程是算子驱动的，具有懒执行的特点，属于pull类型。正因为是 算子驱动的，Spark的Shuffle主要是两个阶段：Shuffle Write和Shuffle Read。
+    因为Spark的Shuffle过程是算子驱动的，具有懒执行的特点，只有执行类似reduceByKey的算子时才会执行shuffle，属于pull类型。正因为是算子驱动的，Spark的Shuffle主要是两个阶段：Shuffle Write和Shuffle Read。
 
 从数据流角度讲：
 
@@ -23,16 +23,17 @@
 
 从map角度讲：
 
-    MapReduce的map阶段的数据存在一个环形缓冲区中， 缓冲区大小默认是100MB，达到80%后会溢写磁盘同时排序。
+    MapReduce的map阶段的数据存在一个环形缓冲区(字节数组)中， 缓冲区大小默认是100MB，达到80%后会溢写磁盘同时排序。
 
-    Spark的shuffle write阶段是将数据写入了一个AppendOnlyMap或者pairBuffer结构中，可以选择不排序bypass模式。
+    Spark的 shuffle write阶段是将数据写入了一个AppendOnlyMap(集合)或者pairBuffer(数组)结构中，可以选择不排序bypass模式。
 
 从reduce角度讲：
 
-    MapReduce shuffle阶段就是边fetch边使用combine() 进行处理，但是combine()处理的是部分数据。MapReduce不能做到边fetch边reduce处 理，因为MapReduce为了让进入reduce()的records有序，必须等到全部数据都shuffle- sort后再开始reduce()。
+    MapReduce shuffle阶段就是边拉取边使用归并排序，等到全部数据都 shuffle-sort 后再开始 reduce。
 
-    Spark不要求shuffle后的数据全局有序，因此没必要等到全 部数据shuffle完成后再处理。为了实现边shuffle边处理，而且流入的records是无序的可以 用aggregate的数据结构，比如HashMap。
+    Spark不要求shuffle后的数据全局有序，因此没必要等到全 部数据shuffle完成后再处理。
 
+扩展阅读：[对比 Hadoop MapReduce 和 Spark 的 Shuffle 过程](https://www.jianshu.com/p/01d39de0045d)
 
 ## Spark的容错机制
 
@@ -799,6 +800,10 @@ bypass 运行机制的触发条件如下：
 [关于hash shuffle的更多介绍](https://www.2cto.com/net/201712/703242.html)
 
 [腾讯大数据之TDW计算引擎解析——Shuffle](https://data.qq.com/article?id=543)
+
+[Spark Shuffle 内存使用](https://www.jianshu.com/p/4b53992e6b38)
+
+[Spark3.0.0 中shuffle原理](https://blog.csdn.net/newhandnew413/article/details/107730608)
 
 
 

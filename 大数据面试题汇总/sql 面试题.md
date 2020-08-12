@@ -175,8 +175,58 @@ UNION 和 UNION ALL 的区别：
 
 对排序的处理：
 
-    UNION 交换两个SELECT语句的顺序后结果仍然是一样的
-    UNION ALL 在交换了SELECT语句的顺序后结果则不相同
+    UNION 交换两个SELECT语句的顺序后结果仍然是一样的；会对结果排序
+    UNION ALL 在交换了SELECT语句的顺序后结果则不相同；不会对结果排序
+
+```sql
+MariaDB [mysql]> select * from apps union select * from apps_bkp;
++----+------------+-------------------------+---------+
+| id | app_name   | url                     | country |
++----+------------+-------------------------+---------+
+|  1 | QQ APP     | http://im.qq.com/       | CN      |
+|  2 | 微博 APP   | http://weibo.com/       | CN      |
+|  3 | 淘宝 APP   | https://www.taobao.com/ | CN      |
++----+------------+-------------------------+---------+
+3 rows in set (0.00 sec)
+
+MariaDB [mysql]> select * from apps union all select * from apps_bkp;
++----+------------+-------------------------+---------+
+| id | app_name   | url                     | country |
++----+------------+-------------------------+---------+
+|  1 | QQ APP     | http://im.qq.com/       | CN      |
+|  2 | 微博 APP   | http://weibo.com/       | CN      |
+|  3 | 淘宝 APP   | https://www.taobao.com/ | CN      |
+|  1 | QQ APP     | http://im.qq.com/       | CN      |
+|  2 | 微博 APP   | http://weibo.com/       | CN      |
+|  3 | 淘宝 APP   | https://www.taobao.com/ | CN      |
+|  1 | QQ APP     | http://im.qq.com/       | CN      |
++----+------------+-------------------------+---------+
+7 rows in set (0.01 sec)
+
+MariaDB [mysql]> select * from apps_bkp union select * from apps;
++----+------------+-------------------------+---------+
+| id | app_name   | url                     | country |
++----+------------+-------------------------+---------+
+|  1 | QQ APP     | http://im.qq.com/       | CN      |
+|  2 | 微博 APP   | http://weibo.com/       | CN      |
+|  3 | 淘宝 APP   | https://www.taobao.com/ | CN      |
++----+------------+-------------------------+---------+
+3 rows in set (0.00 sec)
+
+MariaDB [mysql]> select * from apps_bkp union all select * from apps;
++----+------------+-------------------------+---------+
+| id | app_name   | url                     | country |
++----+------------+-------------------------+---------+
+|  1 | QQ APP     | http://im.qq.com/       | CN      |
+|  2 | 微博 APP   | http://weibo.com/       | CN      |
+|  3 | 淘宝 APP   | https://www.taobao.com/ | CN      |
+|  1 | QQ APP     | http://im.qq.com/       | CN      |
+|  1 | QQ APP     | http://im.qq.com/       | CN      |
+|  2 | 微博 APP   | http://weibo.com/       | CN      |
+|  3 | 淘宝 APP   | https://www.taobao.com/ | CN      |
++----+------------+-------------------------+---------+
+7 rows in set (0.00 sec)
+```
 
 join 和 union 的区别：
 
@@ -214,3 +264,83 @@ join 和 union 的区别：
 [提高SQL查询效率方法总结](https://zhuanlan.zhihu.com/p/93319347)
 
 [提高SQL查询效率的23种方法](https://www.cnblogs.com/coder-wf/p/13371122.html)
+
+## case when ... then ... else ... end
+
+MySQL 的 case when 的语法有两种：
+
+简单函数 
+
+    CASE [col_name] WHEN [value1] THEN [result1]…ELSE [default] END
+    枚举这个字段所有可能的值
+
+搜索函数 
+
+    CASE WHEN [expr] THEN [result1]…ELSE [default] END
+    搜索函数可以写判断，并且搜索函数只会返回第一个符合条件的值，其他case被忽略
+
+
+```sql
+MariaDB [mysql]> select * from websites;
++----+--------------+---------------------------+-------+---------+
+| id | name         | url                       | alexa | country |
++----+--------------+---------------------------+-------+---------+
+|  1 | Google       | https://www.google.cm/    |     1 | USA     |
+|  2 | 淘宝         | https://www.taobao.com/   |    13 | CN      |
+|  3 | 菜鸟教程     | http://www.runoob.com/    |  4689 | CN      |
+|  4 | 微博         | http://weibo.com/         |    20 | CN      |
+|  5 | Facebook     | https://www.facebook.com/ |     3 | USA     |
++----+--------------+---------------------------+-------+---------+
+5 rows in set (0.00 sec)
+
+
+MariaDB [mysql]> select id,case when alexa<=20 THEN 'a' ELSE 'b' end rlt from websites;
++----+-----+
+| id | rlt |
++----+-----+
+|  1 | a   |
+|  2 | a   |
+|  3 | b   |
+|  4 | a   |
+|  5 | a   |
++----+-----+
+5 rows in set (0.00 sec)
+
+
+MariaDB [mysql]> select id,case country when 'USA' THEN 'a' else 'b' end rlt from websites; 
++----+-----+
+| id | rlt |
++----+-----+
+|  1 | a   |
+|  2 | b   |
+|  3 | b   |
+|  4 | b   |
+|  5 | a   |
++----+-----+
+5 rows in set (0.00 sec)
+
+
+MariaDB [mysql]> select id,case when alexa>0 and alexa<=10 THEN 'a'  when alexa>10 and alexa<=20 then 'b' ELSE 'c' end rlt from websites;
++----+-----+
+| id | rlt |
++----+-----+
+|  1 | a   |
+|  2 | b   |
+|  3 | c   |
+|  4 | b   |
+|  5 | a   |
++----+-----+
+5 rows in set (0.00 sec)
+
+```
+
+## coalesce
+
+mysql的coalesce:
+
+    coalesce()解释：返回参数中的第一个非空表达式（从左向右依次类推）；
+
+```sql
+-- Return 2
+select coalesce(null,2,3); 
+```
