@@ -2,18 +2,73 @@
 
 [TOC]
 
+## RDD弹性的表现:
+
+- 自动的进行内存和磁盘数据存储的切换；(shuffle溢写;cache/persist持久化)
+
+- 基于 Lineage 的高效容错（第n个节点出错，会从第n-1个节点恢复，血统容错，依赖关系）； 
+
+- Task 如果失败会自动进行特定次数的重试（spark.task.maxFailures 默认4次）； 
+
+- [checkpoint](https://www.cnblogs.com/superhedantou/p/9004820.html)
+
+- 数据分片的高度弹性(可自定义分片函数；repartition/coalesce) 
+
+- Stage如果失败会自动进行特定次数的重试（可以只运行计算失败的阶段）；只计算失败的数据分片； 
+ 
+- 数据调度弹性：DAG TASK 和资源管理无关  
+
 ## Spark Steaming连接kafka的两种方式及区别
 
+### 1、createStream
 
+使用一个 Receiver 来接收数据。在该 Receiver 的实现中使用了 Kafka high-level consumer API。
 
-## RDD的sortBy和scala的sortBy的区别
+Receiver 从 kafka 接收的数据将被存储到 Spark executor 中，随后启动的 job 将处理这些数据。
 
+在默认配置下，该方法失败后会丢失数据（保存在 executor 内存里的数据在 application 失败后就没了），若要保证数据不丢失，需要启用 WAL（即预写日志至 HDFS、S3等），这样再失败后可以从日志文件中恢复数据。
+
+需要注意的点：
+
+1）Kafka Topic 的 partitions 与RDD 的 partitions 没有直接关系，不能一一对应。如果增加 topic 的 partition 个数的话仅仅会增加单个 Receiver 接收数据的线程数。事实上，使用这种方法只会在一个 executor 上启用一个 Receiver，该 Receiver 包含一个线程池，线程池的线程个数与所有 topics 的 partitions 个数总和一致，每条线程接收一个 topic 的一个 partition 的数据。而并不会增加处理数据时的并行度。
+
+2）对于一个 topic，可以使用多个 groupid 相同的 input DStream 来使用多个 Receivers 来增加并行度，然后 union 他们；对于多个 topics，除了可以用上个办法增加并行度外，还可以对不同的 topic 使用不同的 input DStream 然后 union 他们来增加并行度
+
+3）如果你启用了 WAL，为能将接收到的数据将以 log 的方式在指定的存储系统备份一份，需要指定输入数据的存储等级为 StorageLevel.MEMORY_AND_DISK_SER 或 StorageLevel.MEMORY_AND_DISK_SER_2
+
+### 2、createDirectStream
+
+自 Spark-1.3.0 起，提供了不需要 Receiver 的方法。
+
+该方法定期查询每个 topic+partition 的 lastest offset，并据此决定每个 batch 要接收的 offsets 范围。
+
+优点：
+
+1）简化并行读取
+
+如果要读取多个partition，不需要创建多个输入Dstream然后对他们进行union操作，spark会创建跟kafka partition一样多的rdd partition，并行的从kafka读取数据。所以在kafka partition跟rdd partition之间，有一个一对一的映射。
+
+2）高性能
+
+如果要保证零数据丢失，在基于receiver的方式中需要开启WAL机制，这种方式效率低下，因为要保存两份数据，kafka本身就有高可靠的机制，会对数据复制一份，而这里又会复制一份到WAL中。而direct方式只要kafka中复制一份，就可以通过kafka的副本进行恢复。
+
+3）Exactly-once 语义保证
+
+基于Receiver方式使用了 Kafka 的 high level API 来在 Zookeeper 中存储已消费的 offsets。这在某些情况下会导致一些数据被消费两次，比如 streaming app 在处理某个 batch 内已接受到的数据的过程中挂掉，但是数据已经处理了一部分，但这种情况下无法将已处理数据的 offsets 更新到 Zookeeper 中，下次重启时，这批数据将再次被消费且处理。基于direct的方式，使用kafka的简单api，Spark Streaming自己就负责追踪消费的offset，并保存在checkpoint中。Spark自己一定是同步的，因此可以保证数据是消费一次且仅消费一次。这种方式中，只要将 output 操作和保存 offsets 操作封装成一个原子操作就能避免失败后的重复消费和处理，从而达到恰好一次的语义（Exactly-once）
+
+## Spark的sortBy和scala的sortBy的区别
+
+Scala 中 sortBy 是方法，由 Array 或 List 集合调用，默认只能升序，除非实现隐式转换或调用 reverse 方法才能实现降序。
+
+Spark 中 sortBy 是算子，由 RDD 调用，默认是升序，可以通过第二个参数来实现降序排序。
+
+【RDD的sortBy是内存+磁盘排序，scala的sortBy是内存排序？？】
 
 ## Spark的shuffle和MapReduce的shuffle的区别
 
 从执行角度讲：
 
-    MapReduce的shuffle会经历map()，spill，merge， shuffle，sort，reduce()，是按照流程顺次执行的，属于push类型。
+    MapReduce的shuffle会经历map，spill，merge， shuffle，sort，reduce，是按照流程顺次执行的，属于push类型。
 
     因为Spark的Shuffle过程是算子驱动的，具有懒执行的特点，只有执行类似reduceByKey的算子时才会执行shuffle，属于pull类型。正因为是算子驱动的，Spark的Shuffle主要是两个阶段：Shuffle Write和Shuffle Read。
 
@@ -31,7 +86,7 @@
 
     MapReduce shuffle阶段就是边拉取边使用归并排序，等到全部数据都 shuffle-sort 后再开始 reduce。
 
-    Spark不要求shuffle后的数据全局有序，因此没必要等到全 部数据shuffle完成后再处理。
+    Spark不要求shuffle后的数据全局有序，因此没必要等到全部数据shuffle完成后再处理。
 
 扩展阅读：[对比 Hadoop MapReduce 和 Spark 的 Shuffle 过程](https://www.jianshu.com/p/01d39de0045d)
 
@@ -699,6 +754,8 @@ Spark不适合的场景，如：
 
 ## spark shuffle
 
+什么是shuffle、shuffle的产生、Sort Shuffle、对比Hash shuffle
+
 ### 1、什么是shuffle
 
 数据从 map task 输出到 reduce task 输入的过程。
@@ -708,7 +765,7 @@ shuffle 的性能高低直接影响了整个程序的性能和吞吐量。
 
 因为在分布式情况下，reduce task需要跨节点(或分区)去拉取其它节点上的map task结果。这一过程将会产生网络资源消耗和内存，磁盘IO的消耗。
 
-### 2、spark shuffle
+### 2、shuffle的产生
 
 ![spark07](./image/spark07.png)
 
@@ -720,31 +777,27 @@ ShuffleManager随着Spark的发展有两种实现的方式，分别为 HashShuff
 
 在 Spark 1.2 以后的版本中，默认的 ShuffleManager 由 HashShuffleManager 改成了 SortShuffleManager。
 
-### 3、Hash shuffle
-
-分成两种，一种是普通运行机制，另一种是合并的运行机制。
-
-合并机制主要是通过复用buffer来优化Shuffle过程中产生的小文件的数量。
-
-### 4、Sort Shuffle
+### 3、Sort Shuffle
 
 主要分成两种，一种是普通运行机制，另一种是bypass运行机制。
 
 当 shuffle read task 的数量小于等于 `spark.shuffle.sort.bypassMergeThreshold` 参数的值时(默认为200)，就会启用 bypass 机制。
 
-#### 4.1、普通运行机制
+#### 3.1、普通运行机制
 
 ![spark08](./image/spark08.png)
+
+**shuffle write阶段**
 
 (1)写入内存数据结构
 
 数据会先写入一个内存数据结构中(默认5M)，接着，**每写一条数据进入内存数据结构之后，就会判断一下，是否达到了某个临界阈值**。如果达到临界阈值的话，那么就会尝试将内存数据结构中的数据**溢写到磁盘，然后清空内存数据结构**。
 
-此时根据不同的 shuffle 算子，可能选用不同的数据结构。如果是 reduceByKey 这种聚合类的 shuffle 算子，那么会选用 Map 数据结构，一边通过 Map 进行聚合，一边写入内存;如果是 join 这种普通的 shuffle 算子，那么会选用 Array 数据结构，直接写入内存。
+此时根据不同的 shuffle 算子，可能选用不同的数据结构。如果是 reduceByKey 这种聚合类的 shuffle 算子，那么会选用 Map 数据结构，一边通过 Map 进行聚合，一边写入内存；如果是 join 这种普通的 shuffle 算子，那么会选用 Array 数据结构，直接写入内存。
 
 注意：
 
-  shuffle 中的定时器：定时器会检查内存数据结构的大小，如果内存数据结构空间不够，那么会申请额外的内存，申请的大小满足如下公式：
+shuffle 中的定时器：定时器会检查内存数据结构的大小，如果内存数据结构空间不够，那么会申请额外的内存，申请的大小满足如下公式：
 
   applyMemory=nowMenory*2-oldMemory
 
@@ -768,11 +821,21 @@ ShuffleManager随着Spark的发展有两种实现的方式，分别为 HashShuff
 
 此时会将之前所有临时磁盘文件中的数据读取出来，然后依次写入最终的磁盘文件之中。
 
-此外，由于一个 task 就只对应一个磁盘文件，也就意味着该 task 为 Reduce 端的 stage 的 task 准备的数据都在这一个文件中，因此还**会单独写一份索引文件，其中标识了下游各个 task 的数据在文件中的 start offset 与 end offset**。
-
 SortShuffleManager 由于有一个磁盘文件 merge 的过程，因此大大减少了文件数量。比如第一个stage有50个task，总共有10个Executor，每个Executor执行5个task，而第二个stage有100个task。由于每个task最终只有一个磁盘文件，因此此时每个Executor上只有5个磁盘文件，所有Executor只有50个磁盘文件。
 
-#### 4.2、bypass运行机制
+**最终每个 Task 会产生数据和索引两个文件。其中，数据文件会按照分区进行存储，即相同分区的数据在文件中是连续的，而索引文件记录了每个分区在文件中的起始和结束位置。**
+
+**shuffle read阶段**
+
+首先可能需要通过网络从各个 Write 任务节点获取给定分区的数据，即数据文件中某一段连续的区域，然后经过排序，归并等过程，最终形成计算结果。具体为：
+
+数据获取分为远程获取和本地获取。本地获取将直接从本地的 BlockManager 取数据， 而对于远程数据，需要走网络。在远程获取过程中，数据会存到内存，达到一个阈值，也会溢写磁盘。
+
+整个插入、溢写 和 Merge 和 Write 阶段差不多。总体上，这块也是比较消耗内存的，但是因为有 Spill 操作，当内存不足时，可以将内存数据刷到磁盘，从而释放内存空间。
+
+在获取到数据以后，默认情况下会对获取的数据进行校验，这个过程也增加了一定的内存消耗。
+
+#### 3.2、bypass运行机制
 
 ![spark09](./image/spark09.png)
 
@@ -782,28 +845,26 @@ bypass 运行机制的触发条件如下：
 
   2)不是聚合类的 shuffle 算子(比如reduceByKey)。
 
-此时 task 会为每个 reduce 端的 task 都创建一个临时磁盘文件，并将数据按 key 进行 hash 然后根据 key 的 hash 值，将 key 写入对应的磁盘文件之中。当然，写入磁盘文件时也是先写入内存缓冲，缓冲写满之后再溢写到磁盘文件的。最后，同样会将所有临时磁盘文件都合并成一个磁盘文件，并创建一个单独的索引文件。
+将每个 task 将数据按 key 进行 hash 分区，进入内存缓冲，缓冲写满之后再溢写到磁盘文件的。最后，同样会将所有临时磁盘文件都合并成一个磁盘文件，并创建一个单独的索引文件。
 
 该过程的磁盘写机制其实跟未经优化的 HashShuffleManager 是一模一样的，因为都要创建数量惊人的磁盘文件，只是在最后会做一个磁盘文件的合并而已。因此少量的最终磁盘文件，也让该机制相对未经优化的 HashShuffleManager 来说，shuffle read 的性能会更好。
 
 而该机制与普通 SortShuffleManager 运行机制的不同在于：
 
-  第一，磁盘写机制不同;
+    第一，磁盘写机制不同;
 
-  第二，不会进行排序。也就是说，启用该机制的最大好处在于，shuffle write过程中，不需要进行数据的排序操作，也就节省掉了这部分的性能开销。
+    第二，不会进行排序。也就是说，启用该机制的最大好处在于，shuffle write过程中，不需要进行数据的排序操作，也就节省掉了这部分的性能开销。
+
+### 4、对比Hash shuffle
+
+在Spark 1.2以前，默认的shuffle计算引擎是 HashShuffleManager。在普通模式下，Shuffle前在磁盘上会产生海量的小文件，即使是在合并的运行机制下，当 Reducer 端的并行任务或者是数据分片过多的话，则 `Core * Reducer Task` 依旧过大，也会产生很多小文件。
+
+而相比于HashShuffle，SortShuffle会在shuffle write前合并小文件成一个大文件。
 
 ### 5、优化方向
 
     - 压缩：对数据进行压缩，减少写读数据量；
     - 内存化：对于具有较大内存的集群来讲，还是尽量地往内存上写吧，内存放不下了再放磁盘。
-
-[关于hash shuffle的更多介绍](https://www.2cto.com/net/201712/703242.html)
-
-[腾讯大数据之TDW计算引擎解析——Shuffle](https://data.qq.com/article?id=543)
-
-[Spark Shuffle 内存使用](https://www.jianshu.com/p/4b53992e6b38)
-
-[Spark3.0.0 中shuffle原理](https://blog.csdn.net/newhandnew413/article/details/107730608)
 
 
 
