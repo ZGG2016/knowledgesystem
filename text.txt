@@ -6,7 +6,7 @@ hadoop fs -cat /.../part-*.lzo | lzop -d  读hdfs中的数据
 
 hadoop fs -text /.../part-*.lzo >localfile
 
-cat pp_00039e307cd308129287aa4681886293 |jq -c '.examination_record_strategy[]'|jq .|vim -
+cat pp_0129287aa4681886293 |jq -c '.examination_record_strategy[]'|jq .|vim -
 
 
-nohup spark-submit trace.py $1 ${ppin}${partno} '/user/yili.wei/ppsample'
+nohup spark-submit trace.py $1 ${ppin}${partno} '/user/yi/ppsample'
