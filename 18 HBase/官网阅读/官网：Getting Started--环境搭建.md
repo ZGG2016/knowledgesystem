@@ -1,5 +1,7 @@
 # 官网：Getting Started
 
+[TOC]
+
 ## 1. Introduction
 
 *Quickstart will get you up and running on a single-node, standalone instance of HBase.*
@@ -398,6 +400,236 @@ $ .bin/local-regionservers.sh stop 3
 ```
 *Stop HBase.*
 
+使用 `bin/stop-hbase.sh` 停止 HBase
+
 *You can stop HBase the same way as in the quickstart procedure, using the bin/stop-hbase.sh command.*
 
 ## 2.4. Advanced - Fully Distributed
+
+*In reality, you need a fully-distributed configuration to fully test HBase and to use it in real-world scenarios. In a distributed configuration, the cluster contains multiple nodes, each of which runs one or more HBase daemon. These include primary and backup Master instances, multiple ZooKeeper nodes, and multiple RegionServer nodes.*
+
+分布式环境中，集群保护多个节点，每个节点运行一个或多个 HBase 守护进程。这些包含主要和备份 Master 实例，多个 ZooKeeper 节点，和多个 RegionServer 节点。
+
+*This advanced quickstart adds two more nodes to your cluster. The architecture will be as follows:*
+
+节点规划如下：
+
+![hbase07](./image/hbase07.png)
+
+*This quickstart assumes that each node is a virtual machine and that they are all on the same network. It builds upon the previous quickstart, Pseudo-Distributed Local Install, assuming that the system you configured in that procedure is now node-a. Stop HBase on node-a before continuing.*
+
+快速开始部分假设每个节点是一台独立的机器，都运行在相同网络下。
+
+*Be sure that all the nodes have full access to communicate, and that no firewall rules are in place which could prevent them from talking to each other. If you see any errors like no route to host, check your firewall.*
+
+注意：所有节点都可以被访问，且能互相访问。如果出现 `no route to host` 错误，检查防火墙。
+
+*Procedure: Configure Passwordless SSH Access*
+
+Procedure:配置 ssh 免密登录
+
+*node-a needs to be able to log into node-b and node-c (and to itself) in order to start the daemons. The easiest way to accomplish this is to use the same username on all hosts, and configure password-less SSH login from node-a to each of the others.*
+
+`node-a` 需要能登录 `node-b and node-c (and to itself)`，以启动守护进程。最简单的方法就是在所有主机上使用相同的用户名，配置从 `node-a` 到其他主机的 ssh 免密登录。
+
+*On node-a, generate a key pair.*
+
+1.`node-a` 上生成 a key pair.
+
+*While logged in as the user who will run HBase, generate a SSH key pair, using the following command:*
+
+```sh
+$ ssh-keygen -t rsa
+```
+
+*If the command succeeds, the location of the key pair is printed to standard output. The default name of the public key is id_rsa.pub.*
+
+执行成功后，key pair 的位置就被打印出标准输出。 public key 的默认名字是 `id_rsa.pub`
+
+*Create the directory that will hold the shared keys on the other nodes.*
+
+2.在其他节点创建一个目录，用来放 shared keys
+
+*On node-b and node-c, log in as the HBase user and create a .ssh/ directory in the user’s home directory, if it does not already exist. If it already exists, be aware that it may already contain other keys.*
+
+在 `node-b and node-c` 上，以 HBase 用户登录，在用户主目录创建 `.ssh/` 目录。如果该目录已存在，它可能包含了其他的 keys.
+
+*Copy the public key to the other nodes.*
+
+3.把 `public key` 复制到其他节点上。
+
+*Securely copy the public key from node-a to each of the nodes, by using the scp or some other secure means. On each of the other nodes, create a new file called .ssh/authorized_keys if it does not already exist, and append the contents of the id_rsa.pub file to the end of it. Note that you also need to do this for node-a itself.*
+
+使用 `scp` 或其他安全命令将 `public key` 复制到其他两个节点上。
+
+在其他的每个节点上，会创建一个 `.ssh/authorized_keys` 文件，将 `id_rsa.pub` 追加到该文件的末尾。在 `node-a` 上也要执行这个操作。
+
+```sh
+$ cat id_rsa.pub >> ~/.ssh/authorized_keys
+```
+
+*Test password-less login.*
+
+4.测试免密登录
+
+*If you performed the procedure correctly, you should not be prompted for a password when you SSH from node-a to either of the other nodes using the same username.*
+
+完成所有步骤后，就不需要输入密码了。
+
+*Since node-b will run a backup Master, repeat the procedure above, substituting node-b everywhere you see node-a. Be sure not to overwrite your existing .ssh/authorized_keys files, but concatenate the new key onto the existing file using the >> operator rather than the > operator.*
+
+因为 `node-b` 将运行一个备份 Master ，所以重复上面的过程，在看到 `node-a` 的地方替换 `node-b` 。请确保不要覆盖现有的 `.ssh/authorized_keys` 文件，使用 >> 操作符(而不是 > 操作符)将新 key 连接到现有文件。
+
+*Procedure: Prepare node-a*
+
+Procedure: 准备 `node-a`
+
+*node-a will run your primary master and ZooKeeper processes, but no RegionServers. Stop the RegionServer from starting on node-a.*
+
+`node-a` 将会运行主 master 和 ZooKeeper 进程，没有 RegionServers 。但停止 RegionServers 需要在 `node-a` 上。 
+
+*Edit conf/regionservers and remove the line which contains localhost. Add lines with the hostnames or IP addresses for node-b and node-c.*
+
+1.编辑 `conf/regionservers` ，删除包含 localhost 的行。添加 node-b and node-c 的主机名或ip地址。
+
+***Even if you did want to run a RegionServer on node-a, you should refer to it by the hostname the other servers would use to communicate with it**. In this case, that would be node-a.example.com. This enables you to distribute the configuration to each node of your cluster any hostname conflicts. Save the file.*
+
+*Configure  HBase to use node-b as a backup master.*
+
+2.配置 HBase ，使用 `node-b` 作为备份 master
+
+*Create a new file in conf/ called backup-masters, and add a new line to it with the hostname for node-b. In this demonstration, the hostname is node-b.example.com.*
+
+在 `conf/` 中，创建一个名为 `backup-masters` 的文件，文件中添加一行 `node-b` 主机名的内容。
+
+*Configure ZooKeeper*
+
+3.配置 ZooKeeper
+
+*In reality, you should carefully consider your ZooKeeper configuration. You can find out more about configuring ZooKeeper in zookeeper section. This configuration will direct HBase to start and manage a ZooKeeper instance on each node of the cluster.*
+
+*On node-a, edit conf/hbase-site.xml and add the following properties.*
+
+编辑`conf/hbase-site.xml` 文件配置。
+
+```xml
+<property>
+  <name>hbase.zookeeper.quorum</name>
+  <value>node-a.example.com,node-b.example.com,node-c.example.com</value>
+</property>
+<property>
+  <name>hbase.zookeeper.property.dataDir</name>
+  <value>/usr/local/zookeeper</value>
+</property>
+```
+
+**4.Everywhere in your configuration that you have referred to node-a as localhost, change the reference to point to the hostname that the other nodes will use to refer to node-a. In these examples, the hostname is node-a.example.com.**
+
+*Procedure: Prepare node-b and node-c*
+
+Procedure: 准备 node-b 和 node-c
+
+*node-b will run a backup master server and a ZooKeeper instance.*
+
+`node-b` 运行备份 master server 和 a ZooKeeper
+
+*Download and unpack HBase.*
+
+1.下载、还原 HBase 到 `node-b`。执行和 单机、伪分布一样的操作。
+
+*Download and unpack HBase to node-b, just as you did for the standalone and pseudo-distributed quickstarts.*
+
+*Copy the configuration files from node-a to node-b.and node-c.*
+
+2.将 `node-a` 复制配置文件到 `node-b.and node-c`
+
+集群中的每个节点都需要有相同的配置信息。
+
+*Each node of your cluster needs to have the same configuration information. Copy the contents of the conf/ directory to the conf/ directory on node-b and node-c.*
+
+*Procedure: Start and Test Your Cluster*
+
+Procedure: 启动测试集群
+
+*Be sure HBase is not running on any node.*
+
+1.确保 HBase 没有运行在任何节点
+
+*If you forgot to stop HBase from previous testing, you will have errors. Check to see whether HBase is running on any of your nodes by using the jps command. Look for the processes HMaster, HRegionServer, and HQuorumPeer. If they exist, kill them.*
+
+*Start the cluster.*
+
+2.启动集群
+
+`node-a` 节点上，执行 `start-hbase.sh`.
+
+*On node-a, issue the start-hbase.sh command. Your output will be similar to that below.*
+
+```sh
+$ bin/start-hbase.sh
+node-c.example.com: starting zookeeper, logging to /home/hbuser/hbase-0.98.3-hadoop2/bin/../logs/hbase-hbuser-zookeeper-node-c.example.com.out
+node-a.example.com: starting zookeeper, logging to /home/hbuser/hbase-0.98.3-hadoop2/bin/../logs/hbase-hbuser-zookeeper-node-a.example.com.out
+node-b.example.com: starting zookeeper, logging to /home/hbuser/hbase-0.98.3-hadoop2/bin/../logs/hbase-hbuser-zookeeper-node-b.example.com.out
+starting master, logging to /home/hbuser/hbase-0.98.3-hadoop2/bin/../logs/hbase-hbuser-master-node-a.example.com.out
+node-c.example.com: starting regionserver, logging to /home/hbuser/hbase-0.98.3-hadoop2/bin/../logs/hbase-hbuser-regionserver-node-c.example.com.out
+node-b.example.com: starting regionserver, logging to /home/hbuser/hbase-0.98.3-hadoop2/bin/../logs/hbase-hbuser-regionserver-node-b.example.com.out
+node-b.example.com: starting master, logging to /home/hbuser/hbase-0.98.3-hadoop2/bin/../logs/hbase-hbuser-master-nodeb.example.com.out
+ZooKeeper starts first, followed by the master, then the RegionServers, and finally the backup masters.
+```
+
+*Verify that the processes are running.*
+
+2.验证进程正在运行
+
+*On each node of the cluster, run the jps command and verify that the correct processes are running on each server. You may see additional Java processes running on your servers as well, if they are used for other purposes.*
+
+*node-a jps Output*
+```sh
+$ jps
+20355 Jps
+20071 HQuorumPeer
+20137 HMaster
+```
+*node-b jps Output*
+```sh
+$ jps
+15930 HRegionServer
+16194 Jps
+15838 HQuorumPeer
+16010 HMaster
+```
+*node-c jps Output*
+```sh
+$ jps
+13901 Jps
+13639 HQuorumPeer
+13737 HRegionServer
+```
+*ZooKeeper Process Name
+The HQuorumPeer process is a ZooKeeper instance which is controlled and started by HBase. If you use ZooKeeper this way, it is limited to one instance per cluster node and is appropriate for testing only. If ZooKeeper is run outside of HBase, the process is called QuorumPeer. For more about ZooKeeper configuration, including using an external ZooKeeper instance with HBase, see zookeeper section.*
+
+注意：`HQuorumPeer`是由 HBase 控制启动的 ZooKeeper 实例。也可以使用外部 ZooKeeper，称作 `QuorumPeer`。
+
+*Browse to the Web UI.*
+
+3.浏览 Web UI
+
+*Web UI Port Changes*
+
+注意：Web UI 端口变化了
+
+*In HBase newer than 0.98.x, the HTTP ports used by the HBase Web UI changed from 60010 for the Master and 60030 for each RegionServer to 16010 for the Master and 16030 for the RegionServer.*
+
+0.98.x 及更新的版本，Master 由 60010 改为 16010 ，RegionServer 由 60030 改为 16030
+
+*If everything is set up correctly, you should be able to connect to the UI for the Master http://node-a.example.com:16010/ or the secondary master at http://node-b.example.com:16010/ using a web browser. If you can connect via localhost but not from another host, check your firewall rules. You can see the web UI for each of the RegionServers at port 16030 of their IP addresses, or by clicking their links in the web UI for the Master.*
+
+*Test what happens when nodes or services disappear.*
+
+4.测试当节点或服务消失后，发生了什么。
+
+*With a three-node cluster you have configured, things will not be very resilient. You can still test the behavior of the primary Master or a RegionServer by killing the associated processes and watching the logs.*
+
+## 2.5. Where to go next
+
+*The next chapter, configuration, gives more information about the different HBase run modes, system requirements for running HBase, and critical configuration areas for setting up a distributed HBase cluster.*
