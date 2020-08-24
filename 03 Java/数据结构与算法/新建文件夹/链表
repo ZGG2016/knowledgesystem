@@ -1,0 +1,43 @@
+链表：
+     1，一种递归的数据结构，该结点含有一个泛型的元素和对下一个节点的引用。
+         
+     2，构造链表：让一个结点的指针域指向下一个结点的数据域
+         Node first = new Node()  //first是一个指向Node对象的变量
+         Node second = new Node()  //使用new Node()来创建一个Node类型的对象
+         Node third = new Node() 
+      
+         first.item="to"
+         second.item="be"
+         thrid.item="or"
+      
+         first.next=second
+         second.next=third
+
+         third.next=null
+      
+     3，在表头插入结点
+          Node<Item> oldfirst = first;//将当前结点保存到下一结点上
+          first = new Node<Item>();  //创建一个新的结点
+          first.item = item;    //设置新节点的item域和next域
+          first.next = oldfirst; 
+        从表头删除结点
+          first=first.next
+        在表尾插入结点
+          Node oldlast=last  //保存指向尾结点的链接
+          last=new Node()    //创建新的尾结点
+          last.item="not"
+          oldlast.next=last   //将尾链接指向新结点
+        在表中插入结点
+          Node p=new Node()   (在p和b中插入s)
+          Node s=new Node()
+          Node b=new Node()
+          
+          s.next=p.next
+          p.next=s
+        在表中删除结点
+           Node p=new Node()    
+           p.next=p.next.next
+     4，链表的遍历：
+          for(Node x=first;x!=null;x=x.next){}
+     5，循环链表：表中的最后一个结点的指针域指向头结点，整个链表形成一个环。
+     6、双向链表：
