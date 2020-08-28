@@ -1,35 +1,39 @@
 # Kafka Stream处理数据
 
-Kafka Stream是kafka的客户端库，用于实时流处理和分析存储在kafka broker的数据，这个快速入门示例将演示如何运行一个流应用程序。一个WordCountDemo的例子。
+Kafka Stream 是 kafka 的客户端库，用于实时流处理和分析存储在 kafka broker 的数据。
 
-	public class MyKafkaStreams {
-	    public static void main(String[] args){
-	        Properties props = new Properties();
+这个快速入门示例将演示如何运行一个流应用程序。一个 WordCountDemo 的例子。
+
+```java
+public class MyKafkaStreams {
+	public static void main(String[] args){
+	    Properties props = new Properties();
 	
-	        props.put(StreamsConfig.APPLICATION_ID_CONFIG,"wordcount-application");
-	        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,"namenode1:9092,datanode1:9092,datanode2:9092");
-	        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG,Serdes.String().getClass());
-	        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,Serdes.String().getClass());
+	    props.put(StreamsConfig.APPLICATION_ID_CONFIG,"wordcount-application");
+	    props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,"namenode1:9092,datanode1:9092,datanode2:9092");
+	    props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG,Serdes.String().getClass());
+	    props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG,Serdes.String().getClass());
 	
-	        StreamsConfig config = new StreamsConfig(props);
+	    StreamsConfig config = new StreamsConfig(props);
 	
-	        KStreamBuilder builder = new KStreamBuilder();
-	        KStream<String,String> textLines = builder.stream("InputTopic");
-	        KTable<String,Long> wordCounts = textLines
-	                //通过空格划分文本行
-	                .flatMapValues(textLine -> Arrays.asList(textLine.toLowerCase().split("\\W+")))
-	                .groupBy((key, word) -> word)
-	                .count("Counts");
+	    KStreamBuilder builder = new KStreamBuilder();
+	    KStream<String,String> textLines = builder.stream("InputTopic");
+	    KTable<String,Long> wordCounts = textLines
+	     //通过空格划分文本行
+	        .flatMapValues(textLine -> Arrays.asList(textLine.toLowerCase().split("\\W+")))
+	        .groupBy((key, word) -> word)
+	        .count("Counts");
 	
-	        wordCounts.to(Serdes.String(),Serdes.Long(),"OutputTopic");
+	    wordCounts.to(Serdes.String(),Serdes.Long(),"OutputTopic");
 	
-	        KafkaStreams streams = new KafkaStreams(builder, config);
-	        streams.start();
+	    KafkaStreams streams = new KafkaStreams(builder, config);
+	    streams.start();
 	
 	    }
 	}
+```
 
-1、创建topic--->InputTopic..OutputTopic
+1、创建topic：InputTopic、OutputTopic
 
 	bin/kafka-topics.sh --create \
     --zookeeper localhost:2181 \
@@ -53,8 +57,6 @@ Kafka Stream是kafka的客户端库，用于实时流处理和分析存储在kaf
 
 	bin/kafka-console-producer.sh --broker-list namenode1:9092,datanode1:9092,datanode2:9092 --topic InputTopic
 
-![](https://i.imgur.com/iAxgfBJ.png)
-
 4、检查WordCountDemo应用，从输出的topic读取。
 
 	bin/kafka-console-consumer --zookeeper namenode1:2181 
@@ -65,7 +67,5 @@ Kafka Stream是kafka的客户端库，用于实时流处理和分析存储在kaf
             --property print.value=true 
             --property key.deserializer=org.apache.kafka.common.serialization.StringDeserializer 
             --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer
-
-![](https://i.imgur.com/EX4sTNP.png)
 
 来一条数据处理一条数据

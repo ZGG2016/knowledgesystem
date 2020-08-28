@@ -142,12 +142,16 @@ class HashPartitioner(partitions: Int) extends Partitioner {
 }
 
 /**
+ * 对有序的记录，通过一定范围来分区，进入大致相同的范围。
+ *  (每个分区的数量大致相同)
  * A [[org.apache.spark.Partitioner]] that partitions sortable records by range into roughly
  * equal ranges. The ranges are determined by sampling the content of the RDD passed in.
- *
+ * 范围是通过对传入的RDD的内容进行采样来确定的。
  * @note The actual number of partitions created by the RangePartitioner might not be the same
  * as the `partitions` parameter, in the case where the number of sampled records is less than
  * the value of `partitions`.
+ *
+ * 在抽样记录的数目小于 partitions 参数值的情况下，RangePartitioner 创建的实际分区数可能和 partitions 参数值不同。
  */
 class RangePartitioner[K : Ordering : ClassTag, V](
     partitions: Int,
@@ -159,11 +163,13 @@ class RangePartitioner[K : Ordering : ClassTag, V](
   // A constructor declared in order to maintain backward compatibility for Java, when we add the
   // 4th constructor parameter samplePointsPerPartitionHint. See SPARK-22160.
   // This is added to make sure from a bytecode point of view, there is still a 3-arg ctor.
+  // 构造参数，为了兼容java
   def this(partitions: Int, rdd: RDD[_ <: Product2[K, V]], ascending: Boolean) = {
     this(partitions, rdd, ascending, samplePointsPerPartitionHint = 20)
   }
 
   // We allow partitions = 0, which happens when sorting an empty RDD under the default settings.
+  // 在默认设置下，当排序一个空 RDD 时，允许partitions = 0
   require(partitions >= 0, s"Number of partitions cannot be negative but found $partitions.")
   require(samplePointsPerPartitionHint > 0,
     s"Sample points per partition must be greater than 0 but found $samplePointsPerPartitionHint")
@@ -185,7 +191,7 @@ class RangePartitioner[K : Ordering : ClassTag, V](
         Array.empty
       } else {
         // If a partition contains much more than the average number of items, we re-sample from it
-        // to ensure that enough items are collected from that partition.
+        // to ensure that enough items are collected from that partition.一个分区样本数不能超过平均值
         val fraction = math.min(sampleSize / math.max(numItems, 1L), 1.0)
         val candidates = ArrayBuffer.empty[(K, Float)]
         val imbalancedPartitions = mutable.Set.empty[Int]
@@ -213,6 +219,7 @@ class RangePartitioner[K : Ordering : ClassTag, V](
     }
   }
 
+  // 分区数：要加1
   def numPartitions: Int = rangeBounds.length + 1
 
   private var binarySearch: ((Array[K], K) => Int) = CollectionsUtils.makeBinarySearch[K]
@@ -225,7 +232,7 @@ class RangePartitioner[K : Ordering : ClassTag, V](
       while (partition < rangeBounds.length && ordering.gt(k, rangeBounds(partition))) {
         partition += 1
       }
-    } else {
+    } else {  // 超过128 ，二分查找
       // Determine which binary search method to use only once.
       partition = binarySearch(rangeBounds, k)
       // binarySearch either returns the match location or -[insertion point]-1
@@ -303,7 +310,7 @@ private[spark] object RangePartitioner {
 
   /**
    * Sketches the input RDD via reservoir sampling on each partition.
-   *
+   * 
    * @param rdd the input RDD to sketch
    * @param sampleSizePerPartition max sample size per partition
    * @return (total number of items, an array of (partitionId, number of items, sample))
@@ -324,9 +331,10 @@ private[spark] object RangePartitioner {
   }
 
   /**
+   * 选择边界
    * Determines the bounds for range partitioning from candidates with weights indicating how many
    * items each represents. Usually this is 1 over the probability used to sample this candidate.
-   *
+   *  
    * @param candidates unordered candidates with weights
    * @param partitions number of partitions
    * @return selected bounds
