@@ -13,7 +13,7 @@ shuffle 的性能高低直接影响了整个程序的性能和吞吐量。
 
 ![sparkshuffle01](./image/sparkshuffle01.png)
 
-宽依赖之间会划分 stage，而 stage 间需要进行 Shuffle，如图中的 stage0，stage1 和 stage3 之间就会产生 Shuffle。
+宽依赖之间会划分 stage，而 stage 间需要进行 Shuffle，如图中的stage1 、 stage3 之间就会产生 Shuffle。
 
 在 Spark 中，负责 shuffle 过程的执行、计算和处理的组件主要就是 ShuffleManager。
 
