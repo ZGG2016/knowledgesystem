@@ -1,8 +1,8 @@
-# Dependency 类
+# Dependency
 
 **spark-2.4.4-bin-hadoop2.7**
 
-```scala
+```java
 
 package org.apache.spark
 

@@ -22,7 +22,7 @@
 	
 结果：数据按照partition为单位聚集在一起，同一partition内的按照key有序。
 
-(5)对中间过程的输出进行本地的聚集，即combine，以降低从 Mapper 到 Reducer 数据传输量。
+(5)对中间过程的输出进行本地的聚集，即combine，以降低从 Mapper 到 Reducer 数据传输量。【可选步骤】
 
 (6)每次环形缓冲区容量达80%时，就会新建一个溢出文件(磁盘上)。
 在将中间输出结果写磁盘的过程中，可以进行压缩，这样的话，写入磁盘的速度会加快。
@@ -47,8 +47,14 @@ different from those for grouping keys before reduction]
 (12)调用outputformat会将内容写入到文件中。
 
 
-参考：[MapReduce中各个阶段的分析](https://blog.csdn.net/wyqwilliam/article/details/84669579)
-	  [hadoop权威指南]
-	  [MapReduce Tutorial](https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html#Reducer)
-	  [环形缓冲区1](https://blog.csdn.net/FullStackDeveloper0/article/details/83104370)
-	  [环形缓冲区2](https://www.baidu.com/link?url=jpDE7w3mSR9fQYYrYnc1UlvBDXY9JTfSSlt2rX0leLuzQKVk8rJvVASlygomKIw-UBeoXbuL4M8P1Df7JPaCZq&wd=&eqid=f84db88600050676000000025f33f2ed)
+参考：
+
+[hadoop权威指南]
+
+[MapReduce中各个阶段的分析](https://blog.csdn.net/wyqwilliam/article/details/84669579)
+
+[MapReduce Tutorial](https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html#Reducer)
+
+[环形缓冲区1](https://blog.csdn.net/FullStackDeveloper0/article/details/83104370)
+
+[环形缓冲区2](https://www.baidu.com/link?url=jpDE7w3mSR9fQYYrYnc1UlvBDXY9JTfSSlt2rX0leLuzQKVk8rJvVASlygomKIw-UBeoXbuL4M8P1Df7JPaCZq&wd=&eqid=f84db88600050676000000025f33f2ed)
