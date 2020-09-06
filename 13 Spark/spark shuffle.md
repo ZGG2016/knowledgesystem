@@ -1,6 +1,6 @@
 # spark shuffle
 
-## 1、什么是shuffle
+## 1、什么是shuffle 
 
 数据从 map task 输出到 reduce task 输入的过程。
 【shuffle read task 从 shuffle write task 复制数据的过程】
