@@ -1,4 +1,4 @@
-# 扩展阅读：Hadoop Map中如何处理跨行Block和InputSplit
+# Hadoop Map中如何处理跨行Block和InputSplit
 
 比如对于那么对于一个记录行形式的文本大于128M时，HDFS将会分成多块存储（block）
 ，同时分片并非到每行行尾。这样就会产生两个问题：
