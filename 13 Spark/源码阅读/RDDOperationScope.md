@@ -181,6 +181,19 @@ private[spark] object RDDOperationScope extends Logging {
       }
     withScope[T](sc, callerMethodName, allowNesting, ignoreParent = false)(body)
   }
+  
+  /**
+    * 去除符合条件的元素，直到不符合条件，返回去除后的集合。找到不符合条件的项就停止，后面的就不再处理。
+    * 
+    * scala> var n = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    * n: List[Int] = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    *
+    * scala> n.dropWhile(_ %2 != 0)
+    * res3: List[Int] = List(2, 3, 4, 5, 6, 7, 8, 9, 10)
+    *
+    * scala> n.dropWhile(_ !=2)
+    * res2: List[Int] = List(2, 3, 4, 5, 6, 7, 8, 9, 10)
+    */
 
   /**
    * Execute the given body such that all RDDs created in this body will have the same scope.
