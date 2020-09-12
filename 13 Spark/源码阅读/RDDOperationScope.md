@@ -169,7 +169,7 @@ private[spark] object RDDOperationScope extends Logging {
 
     // 确定当前scope的名字
     val callerMethodName = Thread.currentThread.getStackTrace()
-      //删除方法名不是withScope的方法
+      //删除方法名不是withScope的方法[注意dropWhile方法的特性]
       .dropWhile(_.getMethodName != ourMethodName)
       //找到方法名不是withScope的方法
       .find(_.getMethodName != ourMethodName)
