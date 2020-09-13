@@ -183,7 +183,9 @@ private[spark] object RDDOperationScope extends Logging {
   }
   
   /**
-    * 去除符合条件的元素，直到不符合条件，返回去除后的集合。找到不符合条件的项就停止，后面的就不再处理。
+    * dropWhile：
+    *   去除符合条件的元素，直到不符合条件，返回去除后的集合。
+    *   找到不符合条件的项就停止，后面的就不再处理。
     * 
     * scala> var n = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     * n: List[Int] = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)

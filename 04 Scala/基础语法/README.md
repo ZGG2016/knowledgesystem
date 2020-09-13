@@ -1,5 +1,5 @@
 
-twitter_scala_school阅读笔记
+twitter_scala_school
 
 [极客学院wiki](https://wiki.jikexueyuan.com/project/scala/basic.html)
 

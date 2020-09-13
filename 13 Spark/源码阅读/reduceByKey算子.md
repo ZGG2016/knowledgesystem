@@ -1,10 +1,5 @@
 # reduceByKey算子
 
-算子|含义
----|:---
-reduceByKey(func, [numPartitions]) | 当一个(K,V)对数据集调用的时候，返回一个(K, V)对数据集，其中每个 K 的 V 是经过 func 聚合后的结果。它必须是 type (V,V) => V 的类型。像 groupByKey 一样，reduce 任务数可以通过第二个可选的参数配置。
-
-
 ```java
   /**
    * Merge the values for each key using an associative and commutative reduce function. This will
@@ -14,24 +9,29 @@ reduceByKey(func, [numPartitions]) | 当一个(K,V)对数据集调用的时候�
    *
    * 使用一个 reduce 函数合并每个 key 的值。
    *
-   * 在发生结果到 reducer 前， 它会在每个 mapper 上执行本地的合并，类型 combiner
+   * 在发生结果到 reducer 前， 它会在每个 mapper 上执行本地的合并，类似 combiner
    *
-   * 输出是根据并行度，哈希分区的。
+   * 输出是根据并行度，进行哈希分区的。
    * 
    * 这里的 V 是 (K,V) 对数据集中的值
    */
   def reduceByKey(func: (V, V) => V): RDD[(K, V)] = self.withScope {
-    reduceByKey(defaultPartitioner(self), func)  //使用了一个分区器
+    reduceByKey(defaultPartitioner(self), func)  //默认
   }
 
-```
+  /**
+   * Merge the values for each key using an associative and commutative reduce function. This will
+   * also perform the merging locally on each mapper before sending results to a reducer, similarly
+   * to a "combiner" in MapReduce. Output will be hash-partitioned with numPartitions partitions.
+   */
+  def reduceByKey(func: (V, V) => V, numPartitions: Int): RDD[(K, V)] = self.withScope {
+    reduceByKey(new HashPartitioner(numPartitions), func)  //指定
+  }
 
-```java
   /**
    * Merge the values for each key using an associative and commutative reduce function. This will
    * also perform the merging locally on each mapper before sending results to a reducer, similarly
    * to a "combiner" in MapReduce.
-   *
    * 这里的 V 是 (K,V) 对数据集中的值
    *
    * 传入了一个分区器
@@ -39,7 +39,9 @@ reduceByKey(func, [numPartitions]) | 当一个(K,V)对数据集调用的时候�
   def reduceByKey(partitioner: Partitioner, func: (V, V) => V): RDD[(K, V)] = self.withScope {
     combineByKeyWithClassTag[V]((v: V) => v, func, func, partitioner)
   }
+
 ```
+
 
 ```java
 /**
@@ -48,7 +50,7 @@ reduceByKey(func, [numPartitions]) | 当一个(K,V)对数据集调用的时候�
    * functions. Turns an RDD[(K, V)] into a result of type RDD[(K, C)], for a "combined type" C
    *
    * 使用自定义的聚合函数合并每个 key 的元素。
-   * RDD[(K, V)] ---> RDD[(K, C)]  类型V转成了C
+   * RDD[(K, V)] ---> RDD[(K, C)]  C是一个聚合类型
    *
    *
    * Users provide three functions:
@@ -85,24 +87,46 @@ reduceByKey(func, [numPartitions]) | 当一个(K,V)对数据集调用的时候�
       mapSideCombine: Boolean = true,  // 在 map 端是否执行聚合操作
       serializer: Serializer = null)(implicit ct: ClassTag[C]): RDD[(K, C)] = self.withScope {
     require(mergeCombiners != null, "mergeCombiners must be defined") // required as of Spark 0.9.0
+
+    // 是不是数组类型
+    // private[spark] def keyClass: Class[_] = kt.runtimeClass 
     if (keyClass.isArray) {
-      if (mapSideCombine) {
+      if (mapSideCombine) {  // 默认true，数组类型的key不能本地聚合
         throw new SparkException("Cannot use map-side combining with array keys.")
       }
+      // HashPartitioner 不能分区数组类型的key
       if (partitioner.isInstanceOf[HashPartitioner]) {
         throw new SparkException("HashPartitioner cannot partition array keys.")
       }
     }
+
+    // Aggregator：聚合数据的函数集合
+    // @param createCombiner function to create the initial value of the aggregation.
+    // @param mergeValue function to merge a new value into the aggregation   
+    // @param mergeCombiners function to merge outputs from multiple mergeValue function.
     val aggregator = new Aggregator[K, V, C](
+      // Clean a closure to make it ready to be serialized and sent to tasks。
+      // 具体见ClosureCleaner
       self.context.clean(createCombiner),
       self.context.clean(mergeValue),
       self.context.clean(mergeCombiners))
-    if (self.partitioner == Some(partitioner)) {
+
+
+    //Some(partitioner)：参数传入的分区器
+    // 当前rdd的分区是不是和传入的分区相同
+    if (self.partitioner == Some(partitioner)) { 
+      //相同的话，终止任务（不做shuffle了）
       self.mapPartitions(iter => {
+
+        //Spark 的一个任务操作一个分区，mapPartitions操作的对象是一个分区
+        // 取的是一个分区的任务信息
         val context = TaskContext.get()
+
+        //任务终止的迭代器
         new InterruptibleIterator(context, aggregator.combineValuesByKey(iter, context))
-      }, preservesPartitioning = true)
+      }, preservesPartitioning = true) // 保留父RDD的分区信息
     } else {
+      // 不相同的话，创建ShuffledRDD对象，但没有执行具体的操作。(transformation懒加载)
       new ShuffledRDD[K, V, C](self, partitioner)
         .setSerializer(serializer)
         .setAggregator(aggregator)
@@ -110,51 +134,4 @@ reduceByKey(func, [numPartitions]) | 当一个(K,V)对数据集调用的时候�
     }
   }
 
-```
-
-```java
- /**
-   * Choose a partitioner to use for a cogroup-like operation between a number of RDDs.
-   *
-   * If spark.default.parallelism is set, we'll use the value of SparkContext defaultParallelism
-   * as the default partitions number, otherwise we'll use the max number of upstream partitions.
-   *
-   * When available, we choose the partitioner from rdds with maximum number of partitions. If this
-   * partitioner is eligible (number of partitions within an order of maximum number of partitions
-   * in rdds), or has partition number higher than default partitions number - we use this
-   * partitioner.
-   *
-   * Otherwise, we'll use a new HashPartitioner with the default partitions number.
-   *
-   * Unless spark.default.parallelism is set, the number of partitions will be the same as the
-   * number of partitions in the largest upstream RDD, as this should be least likely to cause
-   * out-of-memory errors.
-   *
-   * We use two method parameters (rdd, others) to enforce callers passing at least 1 RDD.
-   */
-  def defaultPartitioner(rdd: RDD[_], others: RDD[_]*): Partitioner = {
-    val rdds = (Seq(rdd) ++ others)
-    val hasPartitioner = rdds.filter(_.partitioner.exists(_.numPartitions > 0))
-
-    val hasMaxPartitioner: Option[RDD[_]] = if (hasPartitioner.nonEmpty) {
-      Some(hasPartitioner.maxBy(_.partitions.length))
-    } else {
-      None
-    }
-
-    val defaultNumPartitions = if (rdd.context.conf.contains("spark.default.parallelism")) {
-      rdd.context.defaultParallelism
-    } else {
-      rdds.map(_.partitions.length).max
-    }
-
-    // If the existing max partitioner is an eligible one, or its partitions number is larger
-    // than the default number of partitions, use the existing partitioner.
-    if (hasMaxPartitioner.nonEmpty && (isEligiblePartitioner(hasMaxPartitioner.get, rdds) ||
-        defaultNumPartitions < hasMaxPartitioner.get.getNumPartitions)) {
-      hasMaxPartitioner.get.partitioner.get
-    } else {
-      new HashPartitioner(defaultNumPartitions)
-    }
-  }
 ```
