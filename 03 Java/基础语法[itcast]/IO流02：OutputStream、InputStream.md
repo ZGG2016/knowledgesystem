@@ -183,6 +183,7 @@ public class FileOutputStreamDemo2 {
  *
  * 追加：
  * 		利用带追加参数的构造方法
+ *              【追加指的是，第二次执行程序产生的结果会在第一次执行程序产生结果的后面】
  */
 public class FileOutputStreamDemo3 {
 	public static void main(String[] args) throws IOException {
