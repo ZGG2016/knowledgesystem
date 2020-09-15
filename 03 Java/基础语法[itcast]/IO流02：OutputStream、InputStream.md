@@ -346,7 +346,7 @@ public class FileInputStreamDemo2 {
 		// 数组的长度一般是1024或者1024的整数倍
 		byte[] bys = new byte[1024];
 		int len = 0;
-		while ((len = fis.read(bys)) != -1) {
+		while ((len = fis.read(bys)) != -1) {   // 一次读取1024个字节
 			System.out.print(new String(bys, 0, len));
 		}
 
@@ -400,9 +400,9 @@ class test {
 输入为:
 	
 	fis2.txt
-		hello
-		world
-		java
+	hello
+	world
+	java
 
 输出为：
 
