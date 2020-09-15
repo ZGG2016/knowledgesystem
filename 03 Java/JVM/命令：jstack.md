@@ -1,6 +1,8 @@
 # jstack命令
 
-作用：Prints Java thread stack traces for a Java process, core file, or remote debug server. This command is experimental and unsupported.
+### 作用：
+
+Prints Java thread stack traces for a Java process, core file, or remote debug server. This command is experimental and unsupported.
 
 打印Java process, core file, or remote debug server的**线程的堆栈跟踪信息**。
 
@@ -12,8 +14,7 @@
 
 - jstack [ options ] [ server-id@ ] remote-hostname-or-IP
 
-
-### 选项：
+其中：
 
 - options
 
@@ -83,6 +84,8 @@
 ### 命令描述
 
 对于每个java frame，会打印类名、方法名、字节码索引和行号。
+
+如果进程运行在 64-bit JVM 中，需要指定参数 -J-d64，即`jstack -J-d64 -m pid`
 
 *The jstack command prints Java stack traces of Java threads for a specified Java process, core file, or remote debug server. For each Java frame, the full class name, method name, byte code index (BCI), and line number, when available, are printed.*
 *With the -m option, the jstack command prints both Java and native frames of all threads with the program counter (PC). For each native frame, the closest native symbol to PC, when available, is printed. C++ mangled names are not demangled. To demangle C++ names, the output of this command can be piped to c++filt. When the specified process is running on a 64-bit Java Virtual Machine, you might need to specify the -J-d64 option, for example:`jstack -J-d64 -m pid.`*
