@@ -1,5 +1,7 @@
 # mapPartitions算子
 
+## 1、源码
+
 ```java
   /**
    * Return a new RDD by applying a function to each partition of this RDD.
@@ -89,7 +91,7 @@
 
 ```
 
-mapPartitions 和 mapPartitionsWithIndex 区别：
+## 2、mapPartitions 和 mapPartitionsWithIndex 区别
 
 	mapPartitionsWithIndex的输入函数多了一个 分区的index 参数，
 	所以可以取出分区编号。

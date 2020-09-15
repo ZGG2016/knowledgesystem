@@ -1,7 +1,7 @@
 # sortByKey、sortBy算子
 
 
-## 示例
+## 1、示例
 
 ```sh
 scala> val rdd = sc.parallelize(List(1,2,3,4))
@@ -46,7 +46,7 @@ scala> prdd.sortByKey().collect()
 res15: Array[(String, Int)] = Array((a,3), (b,2), (c,1))
 ```
 
-## sortByKey、sortBy区别与联系
+## 2、sortByKey、sortBy区别与联系
 
 sortByKey 
 
@@ -64,9 +64,9 @@ sortBy
 
 sortBy 实际调用了 sortByKey 排序的。
 
-## 源码
+## 3、源码
 
-```scala
+```java
 /**
    * Return this RDD sorted by the given key function.
    */
@@ -88,7 +88,7 @@ sortBy 实际调用了 sortByKey 排序的。
 
 - numPartitions，决定排序后的RDD的分区个数，默认排序后的分区个数和排序之前的个数相等，即为this.partitions.size。
 
-```scala
+```java
 /**
    * Sort the RDD by key, so that each partition contains a sorted range of the elements. Calling
    * `collect` or `save` on the resulting RDD will return or output an ordered list of records
@@ -118,7 +118,7 @@ sortBy 实际调用了 sortByKey 排序的。
 
 - numPartitions，决定排序后的RDD的分区个数，默认排序后的分区个数和排序之前的个数相等，即为self.partitions.length。
 
-```scala
+```java
   /**
    * Return an RDD with the values of each tuple.
    */
@@ -127,7 +127,7 @@ sortBy 实际调用了 sortByKey 排序的。
 ```
 作用：取PairRDD的值
 
-```scala
+```java
 /**
    * Creates tuples of the elements in this RDD by applying `f`.
    * 
@@ -140,7 +140,7 @@ sortBy 实际调用了 sortByKey 排序的。
 
 作用：将传进来的每个元素作用于f(x)中，并返回tuples类型的元素，也就变成了Key-Value类型的RDD
 
-```scala
+```java
   /** Set key ordering for RDD's shuffle. */
   def setKeyOrdering(keyOrdering: Ordering[K]): ShuffledRDD[K, V, C] = {
     this.keyOrdering = Option(keyOrdering)
