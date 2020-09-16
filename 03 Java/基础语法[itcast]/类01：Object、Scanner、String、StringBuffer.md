@@ -866,7 +866,7 @@ public class StringTest4 {
 
 ### 1、构造方法
 
-```
+```java
 /*
  * 线程安全(多线程讲解)
  * 安全 -- 同步 -- 一次只做一件事 --数据是安全的
@@ -918,7 +918,7 @@ public class StringBufferDemo {
 ```
 ### 2、添加功能
 
-```
+```java
 /*
  * public StringBuffer append(String str):
  *   可以把任意类型数据追加到字符串缓冲区里面,并返回字符串缓冲区本身
@@ -956,7 +956,7 @@ public class StringBufferDemo {
 
 ```
 ### 3、删除功能
-```
+```java
 /*
  * public StringBuffer deleteCharAt(int index):
  *		删除指定位置的字符，并返回本身
@@ -991,7 +991,7 @@ public class StringBufferDemo {
 }
 ```
 ### 4、替换功能
-```
+```java
 /*
  * StringBuffer的替换功能：
  * public StringBuffer replace(int start,int end,String str):
@@ -1018,7 +1018,7 @@ public class StringBufferDemo {
 
 ```
 ### 5、反转功能
-```
+```java
 /*
  * public StringBuffer reverse()
  */
@@ -1038,7 +1038,7 @@ public class StringBufferDemo {
 }
 ```
 ### 6、截取功能
-```
+```java
 /*
  * 注意返回值类型不再是StringBuffer本身了
  * public String substring(int start)
@@ -1080,7 +1080,7 @@ StringBuffer --> String
 	方式1:通过构造方法
 	方式2：通过toString()方法
 
-```
+```java
 public class StringBufferTest {
 	public static void main(String[] args) {
 		// String -- StringBuffer
@@ -1112,7 +1112,7 @@ public class StringBufferTest {
 ```
 
 ### 8、案例：把数组拼接成一个字符串
-```
+```java
 public class StringBufferTest2 {
 	public static void main(String[] args) {
 		// 定义一个数组
@@ -1166,7 +1166,7 @@ public class StringBufferTest2 {
 
 ```
 ### 9、案例：把字符串反转
-```
+```java
 import java.util.Scanner;
 
 public class StringBufferTest3 {
@@ -1205,7 +1205,7 @@ public class StringBufferTest3 {
 
 ```
 ### 10、案例：判断一个字符串是否是对称字符串
-```
+```java
 import java.util.Scanner;
 
 /*
@@ -1257,7 +1257,8 @@ public class StringBufferTest4 {
 
 ```
 ### 11、面试题
-```
+
+```java
 /*
  * 面试题：
  * 1：String,StringBuffer,StringBuilder的区别?
