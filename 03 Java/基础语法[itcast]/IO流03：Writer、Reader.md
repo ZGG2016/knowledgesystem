@@ -89,7 +89,7 @@ implements Appendable, Closeable, Flushable
 ### 2、OutputStreamWriter 字符输出流
 
 	public class OutputStreamWriter 
-	extends WriterOutputStreamWriter 
+	extends Writer 
 
 是 **字符流通向字节流** 的桥梁：可使用指定的 charset 将要写入流中的字符编码成字节。
 它使用的 **字符集可以由名称指定或显式给定，否则将接受平台默认的字符集**。 
@@ -299,7 +299,7 @@ private static void write() throws IOException {
 ### 2、InputStreamReader 字符输入流
 
 	public class InputStreamReader
-	extends ReaderInputStreamReader 
+	extends Reader
 
 是 **字节流通向字符流** 的桥梁：它使用指定的 charset 读取字节并将其解码为字符。
 它使用的字符集 **可以由名称指定或显式给定，或者可以接受平台默认的字符集**。 
