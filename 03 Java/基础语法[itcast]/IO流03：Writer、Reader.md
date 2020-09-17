@@ -70,6 +70,41 @@ public class StringDemo {
 
 ## 二、Writer
 
+**总体预览：**
+
+Writer --> OutputStreamWriter 字符输出流 -->  FileWriter
+       --> BufferedWriter
+
+Writer:
+
+	public void write(char[] cbuf) throws IOException
+
+	public abstract void write(char[] cbuf,int off,int len) throws IOException
+
+	public void write(String str) throws IOException
+
+	public void write(String str,int off,int len) throws IOException
+
+BufferedWriter:
+
+	public void write(char[] cbuf,int off,int len) throws IOException
+
+	public void write(String s,int off,int len) throws IOException
+
+	public void write(int c) throws IOException
+
+OutputStreamWriter:
+
+	public void write(char[] cbuf,int off,int len) throws IOException
+
+	public void write(String str,int off,int len) throws IOException
+
+	public void write(int c) throws IOException
+
+FileWriter:
+
+	全部是父类方法
+
 ### 1、Writer
 
 public abstract class Writer
@@ -139,7 +174,6 @@ public class OutputStreamWriterDemo {
 	public void write(char[] cbuf):写一个字符数组
 	public void write(String str):写一个字符串
 	
-
 
 ```java
 public class OutputStreamWriterDemo {
@@ -279,6 +313,45 @@ private static void write() throws IOException {
 ```
 
 ## 三、Reader
+
+**总体预览：**
+
+Reader --> InputStreamReader 字符输入流 -->  FileReader
+       --> BufferedReader --> LineNumberReader
+
+Reader：
+
+	public int read(CharBuffer target) throws IOException
+
+	public int read() throws IOException  一次读取一个字符
+
+	public int read(char[] cbuf) throws IOException
+
+	public abstract int read(char[] cbuf,int off,int len) throws IOException
+
+InputStreamReader：
+
+	public int read() throws IOException
+
+	public int read(char[] cbuf,int offset,int length) throws IOException
+
+FileReader：
+
+BufferedReader ：
+
+	public int read() throws IOException
+
+	public int read(char[] cbuf, int off, int len) throws IOException
+
+	public String readLine() throws IOException
+
+LineNumberReader:
+
+	public int read() throws IOException
+
+	public int read(char[] cbuf,int off,int len) throws IOException
+
+	public String readLine() throws IOException
 
 ### 1、Reader
 
