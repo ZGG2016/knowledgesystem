@@ -78,7 +78,7 @@ implements Appendable, Closeable, Flushable
 
 写入字符流的抽象类。子类必须实现的方法仅有 write(char[], int, int)、flush() 和 close()。
 
-#### （1）构造方法
+#### (1)构造方法
 
 	protected Writer()
 		创建一个新的字符流 writer，其关键部分将同步 writer 自身。 
@@ -99,7 +99,7 @@ implements Appendable, Closeable, Flushable
 的大小，不过，默认的缓冲区对多数用途来说已足够大。注意，传递给 write() 
 方法的字符没有缓冲。 
 
-####（1）构造方法
+#### (1)构造方法
 
 	public OutputStreamWriter(OutputStream out)
 		创建使用默认字符编码的 OutputStreamWriter
@@ -127,7 +127,7 @@ public class OutputStreamWriterDemo {
 }
 ```
 
-####（2）成员方法
+#### (2)成员方法
 
 	public void write(int c):写一个字符
 	public void write(char[] cbuf,int off,int len):写一个字符数组的一部分
@@ -199,7 +199,7 @@ OutputStreamWriter。
 
 FileWriter 用于写入字符流。要写入原始字节流，请考虑使用 FileOutputStream。
 
-#### （1）构造方法
+#### (1)构造方法
 
 	public FileWriter(File file)throws IOException
 		根据给定的 File 对象构造一个 FileWriter 对象。 
@@ -213,7 +213,7 @@ FileWriter 用于写入字符流。要写入原始字节流，请考虑使用 Fi
 	public FileWriter(String fileName,boolean append)throws IOException
 		根据给定的文件名以及指示是否附加写入数据的 boolean 值来构造 FileWriter 对象。 
 
-#### （2）成员方法
+#### (2)成员方法
 
 全部继承至父类OutputStreamWriter。
 
@@ -226,7 +226,7 @@ FileWriter 用于写入字符流。要写入原始字节流，请考虑使用 Fi
 
 可以指定缓冲区的大小，或者接受默认的大小。在大多数情况下，默认值就足够大了。
 
-####（1）构造方法
+#### (1)构造方法
 
 	public BufferedWriter(Writer out)
 
@@ -235,7 +235,7 @@ FileWriter 用于写入字符流。要写入原始字节流，请考虑使用 Fi
 	public BufferedWriter(Writer out,int sz)
 		创建一个使用给定大小输出缓冲区的新缓冲字符输出流。 
 
-####（2）成员方法
+#### (2)成员方法
 
 	public void write(int c) throws IOException
 		写入单个字符。 
@@ -288,7 +288,7 @@ private static void write() throws IOException {
 
 用于读取字符流的抽象类。子类必须实现的方法只有 read(char[], int, int) 和 close()。
 
-#### （1）构造方法
+#### (1)构造方法
 
 	protected Reader()
 		创建一个新的字符流 reader，其重要部分将同步其自身的 reader。 
@@ -308,7 +308,7 @@ private static void write() throws IOException {
 一个或多个字节。要启用从字节到字符的有效转换，可以提前从底层流读取更多的
 字节，使其超过满足当前读取操作所需的字节。 
 
-####（1）构造方法
+#### (1)构造方法
 
 	public InputStreamReader(InputStream in)
 		创建一个使用默认字符集的 InputStreamReader。
@@ -343,7 +343,7 @@ public class InputStreamReaderDemo {
 }
 
 ```
-####（2）成员方法
+#### (2)成员方法
 
 	public int read():一次读取一个字符
 	public int read(char[] chs):一次读取一个字符数组
@@ -410,7 +410,7 @@ private static void read() throws IOException {
 
 FileReader 用于读取字符流。要读取原始字节流，请考虑使用 FileInputStream。 
 
-#### （1）构造方法
+#### (1)构造方法
 
 	public FileReader(File file)throws FileNotFoundException
 		在给定从中读取数据的 File 的情况下创建一个新 FileReader。 
@@ -418,7 +418,7 @@ FileReader 用于读取字符流。要读取原始字节流，请考虑使用 Fi
 	public FileReader(String fileName)throws FileNotFoundException
 		在给定从中读取数据的文件名的情况下创建一个新 FileReader。 		   
 
-#### （2）成员方法
+#### (2)成员方法
 
 全部继承至父类InputStreamReader。
 
@@ -431,7 +431,7 @@ FileReader 用于读取字符流。要读取原始字节流，请考虑使用 Fi
 
 可以指定缓冲区的大小，或者可使用默认的大小。大多数情况下，默认值就足够大了
 
-#### （1）构造方法
+#### (1)构造方法
 
 	public BufferedReader(Reader in)
 		创建一个使用默认大小输入缓冲区的缓冲字符输入流。
@@ -439,7 +439,7 @@ FileReader 用于读取字符流。要读取原始字节流，请考虑使用 Fi
 	public BufferedReader(Reader in,int sz)
 		创建一个使用指定大小输入缓冲区的缓冲字符输入流。
 
-#### （2）成员方法
+#### (2)成员方法
 
 	public int read()throws IOException
 		读取单个字符。 
