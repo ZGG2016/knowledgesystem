@@ -72,8 +72,8 @@ public class StringDemo {
 
 **总体预览：**
 
-Writer --> OutputStreamWriter 字符输出流 -->  FileWriter
-       --> BufferedWriter
+	Writer --> OutputStreamWriter 字符输出流 -->  FileWriter
+	       --> BufferedWriter
 
 Writer:
 
@@ -316,8 +316,8 @@ private static void write() throws IOException {
 
 **总体预览：**
 
-Reader --> InputStreamReader 字符输入流 -->  FileReader
-       --> BufferedReader --> LineNumberReader
+	Reader --> InputStreamReader 字符输入流 -->  FileReader
+	       --> BufferedReader --> LineNumberReader
 
 Reader：
 
