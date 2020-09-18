@@ -86,7 +86,7 @@
       mergeValue: (C, V) => C,
       mergeCombiners: (C, C) => C,
       partitioner: Partitioner,  // 控制 输出 RDD 的分区
-      mapSideCombine: Boolean = true,  // 在 map 端是否执行聚合操作
+      mapSideCombine: Boolean = true,  // 在 map 端是否执行本地合并操作
       serializer: Serializer = null)(implicit ct: ClassTag[C]): RDD[(K, C)] = self.withScope {
     require(mergeCombiners != null, "mergeCombiners must be defined") // required as of Spark 0.9.0
 
