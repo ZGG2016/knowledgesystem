@@ -45,7 +45,7 @@
 
 ## 2、示例
 
-二者区别通map、flatMap
+二者区别同map、flatMap
 
 ```java
 object mapValues {
