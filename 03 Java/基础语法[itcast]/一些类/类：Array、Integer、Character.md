@@ -1,4 +1,4 @@
-# 类02：Array、Integer、Character
+# 类：Array、Integer、Character
 
 ## 一、Array类
 

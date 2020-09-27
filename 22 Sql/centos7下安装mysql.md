@@ -52,7 +52,9 @@ mysql-community-common-8.0.21-1.el7.x86_64
 /usr/lib64/mysql
 /usr/share/mysql
 [root@zgg opt]# rm -rf /usr/bin/mysql /usr/lib64/mysql /usr/share/mysql
-[root@zgg opt]# find / -name mysql  
+[root@zgg opt]# find / -name mysql
+[root@zgg script]# rm -rf /var/log/mysqld.log
+[root@zgg etc]# rm -f my.cnf  
 ```
 
 ## 2、配置Mysql8.0安装源
@@ -157,6 +159,17 @@ Query OK, 0 rows affected (0.01 sec)
 
 mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
 Query OK, 0 rows affected (0.01 sec)
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+4 rows in set (0.00 sec)
 ```
 
 ## 7、配置 /etc/my.cnf 文件
