@@ -1,6 +1,6 @@
-# 类：Array、Integer、Character
+# 类：Arrays、Integer、Character
 
-## 一、Array类
+## 一、Arrays类
 
 针对数组进行操作的工具类。提供了排序，查找等功能。
 
@@ -37,6 +37,7 @@ public class ArraysDemo {
 ```
 
    public static String toString(int[] a)源码解析    
+   
 ```
 int[] arr = { 24, 69, 80, 57, 13 };
 System.out.println("排序前：" + Arrays.toString(arr));

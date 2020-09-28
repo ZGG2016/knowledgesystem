@@ -141,7 +141,7 @@ public static void main(String[] args) {
 ### 1.3、成员方法
 
 ```java
-*
+/*
  * String类的判断功能：
  * boolean equals(Object obj):比较字符串的内容是否相同,区分大小写
  * boolean equalsIgnoreCase(String str):比较字符串的内容是否相同,忽略大小写
@@ -949,7 +949,7 @@ public class StringBufferTest4 {
  * 但是呢,StringBuffer的数据最终是一个字符串数据。
  * 而数组可以放置多种数据，但必须是同一种数据类型的。
  * 
- * 3:形式参数问题
+ * 3:形式参数问题  ？？？
  * String作为参数传递
  * StringBuffer作为参数传递 
  * 

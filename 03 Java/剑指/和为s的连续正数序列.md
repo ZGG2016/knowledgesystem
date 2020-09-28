@@ -23,10 +23,67 @@
 
 ## 2、思路
 
+方法1：滑动窗口。定义窗口的左右两个边界left、right，实时更新窗口内值的和sum。当sum小于target，右边界右移，当大于时，左边界右移。
 
+方法2：滑动窗口。直接利用等差数列求和公式计算。
 
 ## 3、解法
 
 ```java
+class Solution {
+    public int[][] findContinuousSequence(int target) {
 
+        int left = 1,right = 1,sum = 0;
+        ArrayList<int[]> rlt = new ArrayList<int[]>();
+        while(left<=target/2){//当left超过一半时，不会存在两个数的和等于target
+
+            if(sum<target){ //先判断再加和
+                sum+=right;
+                right++;
+            }else if(sum>target){
+                sum-=left;
+                left++;
+            }else{
+                int[] arr = new int[right-left];  
+                for(int i=left;i<right;i++){
+                    arr[i-left]=i;
+                }
+                rlt.add(arr);
+                
+                sum-=left;
+                left++; 
+            }
+        }
+        return rlt.toArray(new int[rlt.size()][]);
+    }
+}
+//执行用时：5 ms
+//内存消耗：36.9 MB
+
+class Solution {
+    public int[][] findContinuousSequence(int target) {
+
+        ArrayList<int[]> rlt = new ArrayList<int[]>();
+
+        for(int l=1,r=2;l<r;){
+            int sum = (l + r) * (r - l + 1) / 2;
+            if (sum == target){
+                int[] arr = new int[r-l+1];
+                for (int i = l; i <= r; i++){
+                    arr[i-l]=i;
+                }
+                rlt.add(arr);
+                l++;
+            }else if (sum < target){
+                r++;
+            } else{
+                l++;
+            }
+        }
+
+        return rlt.toArray(new int[rlt.size()][]);
+    }
+}
+//执行用时：5 ms
+//内存消耗：37.1 MB
 ```
