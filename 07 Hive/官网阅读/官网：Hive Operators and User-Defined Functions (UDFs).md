@@ -105,7 +105,7 @@ Time taken: 0.038 seconds, Fetched: 1 row(s)
 
 ### 2.8、Misc. Functions
 
-#### 2.8。1、xpath
+#### 2.8.1、xpath
 
 #### 2.8.2、get_json_object
 
