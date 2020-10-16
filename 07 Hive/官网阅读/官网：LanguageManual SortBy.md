@@ -2,6 +2,8 @@
 
 [TOC]
 
+[Hive SQL Language Manual:Sort/Distribute/Cluster/Order By](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+SortBy)
+
 ## 1、Order, Sort, Cluster, and Distribute By
 
 *This describes the syntax of SELECT clauses ORDER BY, SORT BY, CLUSTER BY, and DISTRIBUTE BY.  See [Select Syntax](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+Select#LanguageManualSelect-SelectSyntax) for general information.*

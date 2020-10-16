@@ -2,6 +2,8 @@
 
 [TOC]
 
+[Operators and UDFs](https://cwiki.apache.org/confluence/display/Hive/LanguageManual+UDF)
+
 ## 1、Built-in Operators
 
 ### 1.1、Operators Precedences
