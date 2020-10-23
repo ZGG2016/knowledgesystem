@@ -2,11 +2,13 @@
 
 ## 1、源码
 
+RDD.scala
+
 ```java
   /**
    * 使用一个聚合函数和一个中性的"0值"，聚合每个分区的元素，再聚合这些分区的结果。
    *
-   * 这个函数会返回结果的类型U和rdd的T类型不同。
+   * 这个函数会返回的结果的类型U和rdd的T类型不同。【zeroValue的类型就是返回值的类型】
    *
    * 因此，需要一个操作将T合并到U，再使用另一个操作合并两个U。 
    *
@@ -25,7 +27,7 @@
    *
    * seqOp：在一个分区内累积结果的操作
    *
-   * combOp:一个合并两个不同分区的结果的联合操作
+   * combOp:一个合并不同分区结果的联合操作
    *
    * @param zeroValue the initial value for the accumulated result of each partition for the
    *                  `seqOp` operator, and also the initial value for the combine results from
@@ -41,10 +43,13 @@
     var jobResult = Utils.clone(zeroValue, sc.env.serializer.newInstance())
     val cleanSeqOp = sc.clean(seqOp)
     val cleanCombOp = sc.clean(combOp)
+    
     // 执行seqOp，实际调用了foldLeft方法：对每一个元素x，使用op操作x和0值
     val aggregatePartition = (it: Iterator[T]) => it.aggregate(zeroValue)(cleanSeqOp, cleanCombOp)
+    
     // 执行combOp：使用combOp操作0值和每个分区的计算结果
     val mergeResult = (index: Int, taskResult: U) => jobResult = combOp(jobResult, taskResult)
+    
     //runJob：Run a job on all partitions in an RDD and pass the results to a handler function.
     sc.runJob(this, aggregatePartition, mergeResult)
     jobResult
@@ -52,11 +57,10 @@
 
   /**
     * it.aggregate(zeroValue)(cleanSeqOp, cleanCombOp):
-    *
-    *   def aggregate[B](z: =>B)(seqop: (B, A) => B, combop: (B, B) => B): B = foldLeft(z)(seqop)
+    *   def aggregate[B](z: =>B)(seqop: (B, A) => B, combop: (B, B) => B): B = foldLeft(z)(seqop)  【TraversableOnce.scala】
     *   
-    *   // 对每一个元素x，使用op操作x和0值
-    *   def foldLeft[B](z: B)(op: (B, A) => B): B = {
+    *   // 对每一个元素x，使用op操作x和0值，0值即为这里的z
+    *   def foldLeft[B](z: B)(op: (B, A) => B): B = {    【TraversableOnce.scala】
     *         var result = z
     *         this foreach (x => result = op(result, x)) 
     *         result
