@@ -2,6 +2,8 @@
 
 **spark-2.4.4-bin-hadoop2.7**
 
+Partitioner.scala
+
 ```java
 
 package org.apache.spark
@@ -22,7 +24,7 @@ import org.apache.spark.util.random.SamplingUtils
 /**
  * An object that defines how the elements in a key-value pair RDD are partitioned by key.
  *
- * 定义了一个键值对 RDD 中的元素是如何根据 key 分区的对象。
+ * 一个定义了键值对 RDD 中的元素是如何根据 key 分区的对象。
  *
  * Maps each key to a partition ID, from 0 to `numPartitions - 1`.
  * 
@@ -31,11 +33,11 @@ import org.apache.spark.util.random.SamplingUtils
  * Note that, partitioner must be deterministic, i.e. it must return the same partition id given
  * the same partition key.
  *
- * partitioner 必须是确定的，如，如果给定相同的分区编号，必须返回相同的分区。
+ * partitioner 必须是确定的，例如，如果给定相同的分区编号，必须返回相同的分区。
  */
 abstract class Partitioner extends Serializable {
-  def numPartitions: Int
-  def getPartition(key: Any): Int
+  def numPartitions: Int  //RDD的分区数
+  def getPartition(key: Any): Int  //根据key获取分区编号，从 0 到 `numPartitions - 1`
 }
 
 object Partitioner {
@@ -46,7 +48,7 @@ object Partitioner {
    * as the default partitions number, otherwise we'll use the max number of upstream partitions.
    *
    * 给定了 spark.default.parallelism ，
-   * 就使用它作为默认分区数，否则，使用上游分区的最大数量
+   * 就使用它作为默认分区数，否则，使用上游分区的最大数量。
    *
    * When available, we choose the partitioner from rdds with maximum number of partitions. If this
    * partitioner is eligible (number of partitions within an order of maximum number of partitions
@@ -70,14 +72,37 @@ object Partitioner {
    * We use two method parameters (rdd, others) to enforce callers passing at least 1 RDD.
    */
   def defaultPartitioner(rdd: RDD[_], others: RDD[_]*): Partitioner = {
+    //++ 用于连接集合
     val rdds = (Seq(rdd) ++ others)
+
+    //过滤掉未分区的RDD  ？？？
+    //partitioner要存在，且分区数大于0，才返回true
     val hasPartitioner = rdds.filter(_.partitioner.exists(_.numPartitions > 0))
 
+    /**
+     * // Returns true if this option is nonempty '''and''' the predicate
+     * // $p returns true when applied to this $option's value.
+     * //Otherwise, returns false.
+     *
+     *  @param  p   the predicate to test
+     *
+     * @inline final def exists(p: A => Boolean): Boolean =
+     *    !isEmpty && p(this.get)
+     *
+     */
+
+    //取出具有最大分区数的RDD ？？？
     val hasMaxPartitioner: Option[RDD[_]] = if (hasPartitioner.nonEmpty) {
       Some(hasPartitioner.maxBy(_.partitions.length))
     } else {
       None
     }
+
+    /**
+     * 
+     * final def partitions: Array[Partition] 获得这个RDD的分区的数组
+     *
+     */
 
     // 若配置了 spark.default.parallelism，那么就取这个。
     // 否则，选择具有最大分区数的rdds 的并行度，
@@ -89,7 +114,7 @@ object Partitioner {
 
     // If the existing max partitioner is an eligible one, or its partitions number is larger
     // than the default number of partitions, use the existing partitioner.
-    // 首先不空，然后 具有最大分区数，或者分区数大于默认分区数 的分区器
+    // 如果已存在的最大分区器是合法的，或者它的分区数大于默认分区数，就使用已存在的分区器。
     if (hasMaxPartitioner.nonEmpty && (isEligiblePartitioner(hasMaxPartitioner.get, rdds) ||
         defaultNumPartitions < hasMaxPartitioner.get.getNumPartitions)) {
       hasMaxPartitioner.get.partitioner.get
@@ -108,6 +133,7 @@ object Partitioner {
   private def isEligiblePartitioner(
      hasMaxPartitioner: RDD[_],
      rdds: Seq[RDD[_]]): Boolean = {
+    //取具有最大分区数的RDD的分区数
     val maxPartitions = rdds.map(_.partitions.length).max
     log10(maxPartitions) - log10(hasMaxPartitioner.getNumPartitions) < 1
   }
@@ -117,9 +143,12 @@ object Partitioner {
  * A [[org.apache.spark.Partitioner]] that implements hash-based partitioning using
  * Java's `Object.hashCode`.  使用 hashCode 分区
  *
- * Java arrays have hashCodes that are based on the arrays' identities rather than their contents, java 数组的 hashCodes 不是基于它的内容计算的，而是identities
- * so attempting to partition an RDD[Array[_]] or RDD[(Array[_], _)] using a HashPartitioner will 所以使用 HashPartitioner 分区 数组RDD会有错误结果
+ * Java arrays have hashCodes that are based on the arrays' identities rather than their contents, 
+ * so attempting to partition an RDD[Array[_]] or RDD[(Array[_], _)] using a HashPartitioner will 
  * produce an unexpected or incorrect result.
+ *
+ * java 数组的 hashCodes 不是基于它的内容计算的，而是identities，
+ * 所以使用 HashPartitioner 分区 数组RDD会有错误结果。
  */
 class HashPartitioner(partitions: Int) extends Partitioner {
   require(partitions >= 0, s"Number of partitions ($partitions) cannot be negative.")
@@ -128,9 +157,24 @@ class HashPartitioner(partitions: Int) extends Partitioner {
 
   def getPartition(key: Any): Int = key match {
     case null => 0
+    //分区编号的计算方法：
+    //先使用key的哈希码值对传入的分区数取余。
+    //然后如果余数小于0，那么分区编号就是这个余数和分区数的加和。否则就是这个余数。
     case _ => Utils.nonNegativeMod(key.hashCode, numPartitions)
   }
 
+ /**
+  * //Calculates 'x' modulo 'mod', takes to consideration sign of x,
+  * //i.e. if 'x' is negative, than 'x' % 'mod' is negative too
+  * //so function return (x % mod) + mod in that case.
+  *
+  * def nonNegativeMod(x: Int, mod: Int): Int = {
+  *    val rawMod = x % mod
+  *    rawMod + (if (rawMod < 0) mod else 0)
+  *}
+  */
+
+ //首先传入的也是HashPartitioner，再比较分区数相不相同
   override def equals(other: Any): Boolean = other match {
     case h: HashPartitioner =>
       h.numPartitions == numPartitions
@@ -138,15 +182,23 @@ class HashPartitioner(partitions: Int) extends Partitioner {
       false
   }
 
-  override def hashCode: Int = numPartitions
+  override def hashCode: Int = numPartitions  //？？？
 }
 
 /**
- * 对有序的记录，通过一定范围来分区，进入大致相同的范围。
+ * 根据范围，将有序记录划分到大致相等的范围中。
  *  (每个分区的数量大致相同)
+ * 范围是通过对传入的RDD的内容进行采样来确定的。 
+ *
+ * 【在range分区中，会存储一个边界的数组，比如[1,100,200,300,400]，然后对比传进来的key，返回对应的分区id】
+ *
+ * Range分区最核心的算法了，大概描述下，
+ * 就是遍历每个paritiion，对里面的数据进行抽样，
+ * 把抽样的数据进行排序，并按照对应的权重确定边界。
+ *
  * A [[org.apache.spark.Partitioner]] that partitions sortable records by range into roughly
  * equal ranges. The ranges are determined by sampling the content of the RDD passed in.
- * 范围是通过对传入的RDD的内容进行采样来确定的。
+ * 
  * @note The actual number of partitions created by the RangePartitioner might not be the same
  * as the `partitions` parameter, in the case where the number of sampled records is less than
  * the value of `partitions`.
@@ -183,15 +235,24 @@ class RangePartitioner[K : Ordering : ClassTag, V](
     } else {
       // This is the sample size we need to have roughly balanced output partitions, capped at 1M.
       // Cast to double to avoid overflowing ints or longs
+      // 这是我们需要大致平衡的输出到分区的样本大小，上限为1M。
       val sampleSize = math.min(samplePointsPerPartitionHint.toDouble * partitions, 1e6)
       // Assume the input partitions are roughly balanced and over-sample a little bit.
+      //每个分区的样本大小
+      // 每个分区的采样数为平均值的三倍
       val sampleSizePerPartition = math.ceil(3.0 * sampleSize / rdd.partitions.length).toInt
+      //通过在每个分区上的水塘采样绘制输入RDD。
+      //返回一个元组： (总的样本数，Array(分区id,分区样本数,样本内容))
+      //rdd.map(_._1) 取到的是原RDD的key组成的rdd
       val (numItems, sketched) = RangePartitioner.sketch(rdd.map(_._1), sampleSizePerPartition)
+
       if (numItems == 0L) {
         Array.empty
       } else {
         // If a partition contains much more than the average number of items, we re-sample from it
-        // to ensure that enough items are collected from that partition.一个分区样本数不能超过平均值
+        // to ensure that enough items are collected from that partition.
+        //如果一个分区包含的样本数超过了平均样本数，需要再次重新抽样。
+        // ？？？
         val fraction = math.min(sampleSize / math.max(numItems, 1L), 1.0)
         val candidates = ArrayBuffer.empty[(K, Float)]
         val imbalancedPartitions = mutable.Set.empty[Int]
@@ -202,18 +263,21 @@ class RangePartitioner[K : Ordering : ClassTag, V](
             // The weight is 1 over the sampling probability.
             val weight = (n.toDouble / sample.length).toFloat
             for (key <- sample) {
-              candidates += ((key, weight))
+              candidates += ((key, weight))  //？？？
             }
           }
         }
         if (imbalancedPartitions.nonEmpty) {
           // Re-sample imbalanced partitions with the desired sampling probability.
+          //PartitionPruningRDD：An RDD used to prune RDD partitions/partitions
           val imbalanced = new PartitionPruningRDD(rdd.map(_._1), imbalancedPartitions.contains)
           val seed = byteswap32(-rdd.id - 1)
+          //重新抽样
           val reSampled = imbalanced.sample(withReplacement = false, fraction, seed).collect()
           val weight = (1.0 / fraction).toFloat
           candidates ++= reSampled.map(x => (x, weight))
         }
+        //确定边界
         RangePartitioner.determineBounds(candidates, math.min(partitions, candidates.size))
       }
     }
@@ -224,18 +288,22 @@ class RangePartitioner[K : Ordering : ClassTag, V](
 
   private var binarySearch: ((Array[K], K) => Int) = CollectionsUtils.makeBinarySearch[K]
 
+  //由key取分区编号
   def getPartition(key: Any): Int = {
     val k = key.asInstanceOf[K]
     var partition = 0
     if (rangeBounds.length <= 128) {
       // If we have less than 128 partitions naive search
+      //没有超过128，
+      //如果编号没有超过边界数组的长度，同时key大于对应的分区边界，那么编号加1
       while (partition < rangeBounds.length && ordering.gt(k, rangeBounds(partition))) {
         partition += 1
       }
-    } else {  // 超过128 ，二分查找
+    } else {  // 超过128 ，从边界数组里二分查找
       // Determine which binary search method to use only once.
       partition = binarySearch(rangeBounds, k)
       // binarySearch either returns the match location or -[insertion point]-1
+      //二分查找的返回值要么是匹配到的位置，要么是-[insertion point]-1
       if (partition < 0) {
         partition = -partition-1
       }
@@ -250,6 +318,7 @@ class RangePartitioner[K : Ordering : ClassTag, V](
     }
   }
 
+//首先需要同是RangePartitioner，然后边界数组里的原始相同，且排序相似相同。
   override def equals(other: Any): Boolean = other match {
     case r: RangePartitioner[_, _] =>
       r.rangeBounds.sameElements(rangeBounds) && r.ascending == ascending
@@ -309,43 +378,63 @@ class RangePartitioner[K : Ordering : ClassTag, V](
 private[spark] object RangePartitioner {
 
   /**
+   * 通过在每个分区上的水塘采样绘制输入RDD。
    * Sketches the input RDD via reservoir sampling on each partition.
    * 
    * @param rdd the input RDD to sketch
    * @param sampleSizePerPartition max sample size per partition
-   * @return (total number of items, an array of (partitionId, number of items, sample))
+   * @return (total number of items, an array of (partitionId, number of items, sample))  总的样本数，(分区id,分区样本数,样本)
    */
   def sketch[K : ClassTag](
       rdd: RDD[K],
       sampleSizePerPartition: Int): (Long, Array[(Int, Long, Array[K])]) = {
+    //  /** A unique ID for this RDD (within its SparkContext). */
+    //  val id: Int = sc.newRddId()
     val shift = rdd.id
     // val classTagK = classTag[K] // to avoid serializing the entire partitioner object
     val sketched = rdd.mapPartitionsWithIndex { (idx, iter) =>
       val seed = byteswap32(idx ^ (shift << 16))
+      //采样后的结果 ：样本和样本数量
       val (sample, n) = SamplingUtils.reservoirSampleAndCount(
         iter, sampleSizePerPartition, seed)
       Iterator((idx, n, sample))
     }.collect()
-    val numItems = sketched.map(_._2).sum
-    (numItems, sketched)
+    //把每个分区中的样本数加和。
+    val numItems = sketched.map(_._2).sum  //_._2 
+    (numItems, sketched)  // sketched:  (idx, n, sample)
   }
+  /**
+   * 返回输入大小的水塘采样实现
+   * def reservoirSampleAndCount[T: ClassTag](
+   *   input: Iterator[T],k: Int, seed: Long = Random.nextLong()): (Array[T], Long) =
+   * 参数：
+   *    input:input size
+   *    k:reservoir size
+   *    seed：random seed
+   * 返回值：(samples, input size)  
+   *
+   */
 
   /**
-   * 选择边界
+   * 确定从候选对象进行范围划分的界限，并使用权重表示每个候选对象所代表的项数
    * Determines the bounds for range partitioning from candidates with weights indicating how many
    * items each represents. Usually this is 1 over the probability used to sample this candidate.
    *  
-   * @param candidates unordered candidates with weights
+   * @param candidates unordered candidates with weights 带有权重的未排序的候选集
    * @param partitions number of partitions
    * @return selected bounds
    */
   def determineBounds[K : Ordering : ClassTag](
-      candidates: ArrayBuffer[(K, Float)],
+      candidates: ArrayBuffer[(K, Float)], // Float代表候选对象对应的权重
       partitions: Int): Array[K] = {
     val ordering = implicitly[Ordering[K]]
+    //根据第一个值排序，返回排序后的candidates
     val ordered = candidates.sortBy(_._1)
+    //候选集大小
     val numCandidates = ordered.size
+    //权重总和，权重表示每个候选对象所代表的项数
     val sumWeights = ordered.map(_._2.toDouble).sum
+    //每个分区理论的大小
     val step = sumWeights / partitions
     var cumWeight = 0.0
     var target = step
@@ -354,15 +443,18 @@ private[spark] object RangePartitioner {
     var j = 0
     var previousBound = Option.empty[K]
     while ((i < numCandidates) && (j < partitions - 1)) {
+      //取出第i个候选对象及其权重
       val (key, weight) = ordered(i)
       cumWeight += weight
+      //累积的项数大于等于理论大小，更新边界。否则，继续取下个候选对象。
       if (cumWeight >= target) {
         // Skip duplicate values.
+        // 比较当前候选对象和当前边界
         if (previousBound.isEmpty || ordering.gt(key, previousBound.get)) {
-          bounds += key
-          target += step
+          bounds += key  //当前候选对象添加进去最终的ArrayBuffer
+          target += step //进入下个分区，下个分区的理论大小
           j += 1
-          previousBound = Some(key)
+          previousBound = Some(key) //更新当前边界
         }
       }
       i += 1
@@ -371,3 +463,5 @@ private[spark] object RangePartitioner {
   }
 }
 ```
+
+[参考1](https://www.jianshu.com/p/56579d1793fa)、[参考2](https://blog.csdn.net/wayne_2015/article/details/70242618)、[参考3](https://www.jianshu.com/p/b74b9663a36c)

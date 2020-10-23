@@ -80,6 +80,7 @@ SELECT IFNULL("Hello", "RUNOOB"); #Hello
 	limit y : 读 y 条数据
 
 	limit x, y : 跳过 x 条数据，读 y 条数据
+	【limit 0,1读第一条，limit 1,1跳过第一条读第二条】
 
 	limit y offset x : 跳过 x 条数据，读 y 条数据
 

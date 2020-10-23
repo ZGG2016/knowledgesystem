@@ -17,22 +17,40 @@
       zeroValue: V,
       partitioner: Partitioner)(func: (V, V) => V): RDD[(K, V)] = self.withScope {
     // Serialize the zero value to a byte array so that we can get a new clone of it on each key
-    //把0值序列化成一个字节数组，每个key就可以获得一个0值的克隆
+    //把0值序列化成一个字节数组，这样，在每个分区上就可以获得一个0值的副本
     val zeroBuffer = SparkEnv.get.serializer.newInstance().serialize(zeroValue)
-    val zeroArray = new Array[Byte](zeroBuffer.limit) //0值的字节数组
+    //创建字节数组，大小为zeroBuffer的大小
+    val zeroArray = new Array[Byte](zeroBuffer.limit) 
     zeroBuffer.get(zeroArray)
 
-    //SparkEnv.get：Returns the SparkEnv.
-    //newInstance()：Creates a new [[SerializerInstance]]. 
-    //def serialize[T: ClassTag](t: T): ByteBuffer
+    /**
+     * SparkEnv.get：Returns the SparkEnv.
+     *
+     * newInstance()：Creates a new [[SerializerInstance]]. 
+     *
+     * def serialize[T: ClassTag](t: T): ByteBuffer
+     */
+
+    /**
+     * 将此缓冲区中的字节传输到给定的目标数组中。
+     * public ByteBuffer get(byte[] dst) {
+     *      return get(dst, 0, dst.length);
+     * }
+     */    
+        
 
     // When deserializing, use a lazy val to create just one instance of the serializer per task
-    //当反序列化时，用 lazy val 为每一个task近创建一个序列化器实例
+    //当反序列化时，用 lazy val 为每一个task创建一个序列化器实例
     lazy val cachedSerializer = SparkEnv.get.serializer.newInstance()
+    //def deserialize[T: ClassTag](bytes: ByteBuffer): T
     val createZero = () => cachedSerializer.deserialize[V](ByteBuffer.wrap(zeroArray))
 
-    // wrap：Wraps a byte array into a buffer.
-    // def deserialize[T: ClassTag](bytes: ByteBuffer): T
+    /**
+     * Wraps a byte array into a buffer.
+     * public static ByteBuffer wrap(byte[] array) {
+     *      return wrap(array, 0, array.length);
+     * }
+     */       
 
     val cleanedFunc = self.context.clean(func)
     // 调用combineByKeyWithClassTag实现聚合

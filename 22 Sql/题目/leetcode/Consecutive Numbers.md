@@ -73,3 +73,14 @@ MariaDB [mysql]> select * from Logs a inner join Logs b on b.Id=a.Id+1 and b.Num
 
 方法2：利用窗口函数
 
+```sql
+SELECT distinct num as "ConsecutiveNums"
+FROM(
+SELECT id,num,
+	lag (num,1) over(order by id ASC) lag1,
+  	lag (num,2) over(order by id ASC) lag2
+FROM logs
+order BY 1
+  ) a
+  where num=lag1 and lag1=lag2
+```

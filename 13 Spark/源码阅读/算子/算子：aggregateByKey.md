@@ -2,11 +2,13 @@
 
 ## 1、源码
 
+PairRDDFunctions.scala
+
 ```java
   /**
    * 使用聚合函数和一个中性的"0值"聚合每个key对应的values。
    *
-   * 这个函数会返回结果的类型U和rdd的value类型V不同。
+   * 这个函数会返回的结果类型U和rdd的value类型V不同。
    *
    * 因此，需要一个操作将V合并到U，再使用另一个操作合并两个U。
    *
@@ -26,15 +28,43 @@
   def aggregateByKey[U: ClassTag](zeroValue: U, partitioner: Partitioner)(seqOp: (U, V) => U,
       combOp: (U, U) => U): RDD[(K, U)] = self.withScope {
     // Serialize the zero value to a byte array so that we can get a new clone of it on each key
+    //把0值序列化成一个字节数组，这样，在每个分区上就可以获得一个0值的副本
     val zeroBuffer = SparkEnv.get.serializer.newInstance().serialize(zeroValue)
+    //创建字节数组，大小为zeroBuffer的大小
     val zeroArray = new Array[Byte](zeroBuffer.limit)
     zeroBuffer.get(zeroArray)
 
+    /**
+     * SparkEnv.get：Returns the SparkEnv.
+     *
+     * newInstance()：Creates a new [[SerializerInstance]]. 
+     *
+     * def serialize[T: ClassTag](t: T): ByteBuffer
+     */
+
+    /**
+     * 将此缓冲区中的字节传输到给定的目标数组中。
+     * public ByteBuffer get(byte[] dst) {
+     *      return get(dst, 0, dst.length);
+     * }
+     */ 
+
+    // When deserializing, use a lazy val to create just one instance of the serializer per task
+    //当反序列化时，用 lazy val 为每一个task创建一个序列化器实例
     lazy val cachedSerializer = SparkEnv.get.serializer.newInstance()
+    //def deserialize[T: ClassTag](bytes: ByteBuffer): T
     val createZero = () => cachedSerializer.deserialize[U](ByteBuffer.wrap(zeroArray))
+
+    /**
+     * Wraps a byte array into a buffer.
+     * public static ByteBuffer wrap(byte[] array) {
+     *      return wrap(array, 0, array.length);
+     * }
+     */
 
     // We will clean the combiner closure later in `combineByKey`
     val cleanedSeqOp = self.context.clean(seqOp)
+    // 调用combineByKeyWithClassTag实现聚合
     combineByKeyWithClassTag[U]((v: V) => cleanedSeqOp(createZero(), v),
       cleanedSeqOp, combOp, partitioner)
   }
@@ -107,5 +137,9 @@ object aggregateByKey {
  *          (3,8)  【第二个参数函数，追加】、【第三个参数函数，合并】
  *
  * 如果"0值"是5，结果为 (1,5)(2,5)(3,8)
+ *
+ *
+ *  combineByKeyWithClassTag[U]((v: V) => cleanedSeqOp(createZero(), v),
+      cleanedSeqOp, combOp, partitioner)
  */
 ```
