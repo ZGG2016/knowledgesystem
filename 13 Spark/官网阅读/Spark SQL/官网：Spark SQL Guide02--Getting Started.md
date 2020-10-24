@@ -19,10 +19,9 @@ spark = SparkSession \
     .appName("Python Spark SQL basic example") \
     .config("spark.some.config.option", "some-value") \
     .getOrCreate()
-
 ```
 
-完整的例子在 "examples/src/main/python/sql/basic.py" 中。 Spark 2.0 的 SparkSession 提供了 HiveQL 、 UDFs 、从 Hive 表中读数据的功能。 使用这些特性的话，需要先安装 Hive.
+完整的例子在 "examples/src/main/python/sql/basic.py" 中。 **Spark 2.0 的 SparkSession 提供对 Hive 特性的内建支持，包括使用 HiveQL 的写查询、访问 Hive UDFs 、从 Hive 表中读数据的能力。 使用这些特性的话，需要先安装 Hive。**
 
 *Find full example code at "examples/src/main/python/sql/basic.py" in the Spark repo.
 SparkSession in Spark 2.0 provides builtin support for Hive features including the ability to write queries using HiveQL, access to Hive UDFs, and the ability to read data from Hive tables. To use these features, you do not need to have an existing Hive setup.*
@@ -720,6 +719,14 @@ teenagerNamesByFieldDF.show();
 
 *The Scala interface for Spark SQL supports automatically converting an RDD containing case classes to a DataFrame. The case class defines the schema of the table. The names of the arguments to the case class are read using reflection and become the names of the columns. Case classes can also be nested or contain complex types such as Seqs or Arrays. This RDD can be implicitly converted to a DataFrame and then be registered as a table. Tables can be used in subsequent SQL statements.*
 
+Spark SQL 支持包含样例类的 RDD 自动转换为一个 DataFrame 。
+
+样例类定义了表的 schema 。使用反射来读取样例类的参数名称，成为列的名称。
+
+样例类也可以嵌套，或包含复杂的类型，如 Seqs or Arrays。
+
+这个 RDD 能隐式转换成一个 DataFrame ，然后注册成一个表。表可以用来 SQL 语句中。
+
 ```scala
 // For implicit conversions from RDDs to DataFrames
 import spark.implicits._
@@ -822,14 +829,15 @@ results.show()
 
 **B：对于java**
 
-*When JavaBean classes cannot be defined ahead of time (for example, the structure of records is encoded in a string, or a text dataset will be parsed and fields will be projected differently for different users), a Dataset<Row> can be created programmatically with three steps.*
+When JavaBean classes cannot be defined ahead of time (for example, the structure of records is encoded in a string, or a text dataset will be parsed and fields will be projected differently for different users), a Dataset<Row> can be created programmatically with three steps.
 
-*Create an RDD of Rows from the original RDD;
+**Create an RDD of Rows from the original RDD;**
+
 Create the schema represented by a StructType matching the structure of Rows in the RDD created in Step 1.
+
 Apply the schema to the RDD of Rows via createDataFrame method provided by SparkSession.
-For example:*
 
-
+For example:
 
 ```java
 import java.util.ArrayList;
@@ -895,12 +903,15 @@ namesDS.show();
 
 **C：对于scala**
 
-*When case classes cannot be defined ahead of time (for example, the structure of records is encoded in a string, or a text dataset will be parsed and fields will be projected differently for different users), a DataFrame can be created programmatically with three steps.*
+When case classes cannot be defined ahead of time (for example, the structure of records is encoded in a string, or a text dataset will be parsed and fields will be projected differently for different users), a DataFrame can be created programmatically with three steps.
 
-*Create an RDD of Rows from the original RDD;
+**Create an RDD of Rows from the original RDD;**
+
 Create the schema represented by a StructType matching the structure of Rows in the RDD created in Step 1.
+
 Apply the schema to the RDD of Rows via createDataFrame method provided by SparkSession.
-For example:*
+
+For example:
 
 ```java
 import org.apache.spark.sql.Row
@@ -956,4 +967,4 @@ Scalar functions 是一个 row 返回一个值。
 
 Aggregate functions are functions that return a single value on a group of rows. The [Built-in Aggregation Functions](http://spark.apache.org/docs/latest/sql-ref-functions-builtin.html#aggregate-functions) provide common aggregations such as count(), countDistinct(), avg(), max(), min(), etc. Users are not limited to the predefined aggregate functions and can create their own. For more details about user defined aggregate functions, please refer to the documentation of [User Defined Aggregate Functions](http://spark.apache.org/docs/latest/sql-ref-functions-udf-aggregate.html).
 
-Aggregate functions 是一组 row 返回一个值。
+Aggregate functions 在一组 rows 上返回一个值。
