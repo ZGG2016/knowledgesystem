@@ -1,5 +1,7 @@
 # 算子：collectAsMap
 
+PairRDDFunctions.scala
+
 ## 1、源码
 
 ```java
@@ -21,8 +23,29 @@
   def collectAsMap(): Map[K, V] = self.withScope {
     val data = self.collect()
     val map = new mutable.HashMap[K, V]
+    //设置map的大小
     map.sizeHint(data.length)
+    //遍历数据，放入map
     data.foreach { pair => map.put(pair._1, pair._2) }
     map
   }
+```
+
+## 2、示例
+
+```java
+object collectAsMap {
+  def main(Args:Array[String]): Unit = {
+    val sparkConf = new SparkConf().setAppName("collect").setMaster("local")
+    val sc = new SparkContext(sparkConf)
+
+    val rdd1 = sc.parallelize(List(1,2,3))
+    val rdd2 = sc.parallelize(List("a","b","c"))
+    //(2,b)
+    //(1,a)
+    //(3,c)
+    rdd1.zip(rdd2).collectAsMap.foreach(println)
+
+  }
+}
 ```

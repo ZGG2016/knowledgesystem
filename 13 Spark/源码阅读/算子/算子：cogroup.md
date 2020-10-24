@@ -31,7 +31,7 @@
       */
     val cg = new CoGroupedRDD[K](Seq(self, other1, other2, other3), partitioner)
     
-    //对每个value,即Seq(self, other1, other2, other3)，判断其类型
+    //对每个value,即Seq(self, other1, other2, other3)，转换其类型
     cg.mapValues { case Array(vs, w1s, w2s, w3s) =>
        (vs.asInstanceOf[Iterable[V]],
          w1s.asInstanceOf[Iterable[W1]],

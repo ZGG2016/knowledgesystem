@@ -1,5 +1,7 @@
 # 算子：coalesce
 
+RDD.scala
+
 ## 1、源码
 
 coalesce的作用是减少rdd的分区到 `numPartitions` 个数。
@@ -19,7 +21,7 @@ coalesce的作用是减少rdd的分区到 `numPartitions` 个数。
    * 这会导致一个窄依赖。例如，如果从1000减少到100个分区，不会shuffle。
    *     相反，这100个新分区中的每个分区将占用当前分区中的10个。
    * 
-   *  如果设置了一个比当前分区数更大的一个值，将会保持不变。
+   * 如果设置了一个比当前分区数更大的一个值，将会保持不变。
    *
    * This results in a narrow dependency, e.g. if you go from 1000 partitions
    * to 100 partitions, there will not be a shuffle, instead each of the 100
@@ -44,6 +46,7 @@ coalesce的作用是减少rdd的分区到 `numPartitions` 个数。
    * 调用coalesce(1000, shuffle = true)将产生1000个分区，使用散列分区器分发数据。
    *
    * 传入的partitionCoalescer参数必须是可序列化的
+   * partitionCoalescer：定义了如何合并给定RDD的分区
    * partitionCoalescer：how to coalesce the partitions of a given RDD
    *
    * @note With shuffle = true, you can actually coalesce to a larger number
@@ -68,9 +71,10 @@ coalesce的作用是减少rdd的分区到 `numPartitions` 个数。
  * hashing.byteswap32(index)：初始种子
  */
 
+      //针对分区操作  (index: Int, items: Iterator[T]) index为分区索引，item为分区内存
       //随机取一个分区，对分区里的每个元素加一个key，以(元素位置，元素内容)的形式
       val distributePartition = (index: Int, items: Iterator[T]) => {
-        //一个分区的开始位置
+        //随机选一个分区。一个分区的开始位置
         var position = new Random(hashing.byteswap32(index)).nextInt(numPartitions)
         //迭代分区内元素
         items.map { t =>
@@ -79,10 +83,10 @@ coalesce的作用是减少rdd的分区到 `numPartitions` 个数。
           position = position + 1
           (position, t)
         }
-      } : Iterator[(Int, T)]  
+      } : Iterator[(Int, T)]   //每个分区中的元素格式：(元素位置，元素内容)
 
 
-	  //因为需要shuffle，所以上游任务仍需要被分发
+	  //因为需要shuffle，所以上游任务仍需要被分发new ShuffledRDD
       // include a shuffle step so that our upstream tasks are still distributed
       new CoalescedRDD(
       	//将distributePartition作用在rdd的每个分区，返回一个ShuffledRDD
@@ -136,10 +140,12 @@ object coalesce {
 
     val rlt1 = data.coalesce(4)
     val rlt2 = data.coalesce(100,shuffle = true)
+    val rlt3 = data.coalesce(100)
 
     println(data.partitions.length) //10
     println(rlt1.partitions.length) //4
     println(rlt2.partitions.length) //100
+    println(rlt3.partitions.length) //10
   }
 }
 ```
