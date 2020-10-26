@@ -1,5 +1,7 @@
 # 算子：groupBy
 
+RDD.scala
+
 ## 1、源码
 
 ```java
@@ -7,6 +9,8 @@
    * 返回一个分了组的RDD。每组由一个key及其映射的元素组成。
    *
    * 不保证每组内元素的顺序，甚至可能每次分组后的结果的顺序都不同。
+   *
+   * 参数f理解成分组规则
    *
    * Return an RDD of grouped items. Each group consists of a key and a sequence of elements
    * mapping to that key. The ordering of elements within each group is not guaranteed, and

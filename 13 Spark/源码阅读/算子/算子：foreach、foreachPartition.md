@@ -1,5 +1,7 @@
 # 算子：foreach、foreachPartition
 
+RDD.scala
+
 ## 1、源码
 
 ```java
@@ -30,6 +32,8 @@
    *
    *  @usecase def foreach(f: A => Unit): Unit
    *    @inheritdoc
+   * 
+   * scala中的函数
    *
    * def foreach[U](f: A => U) { while (hasNext) f(next()) }
    */

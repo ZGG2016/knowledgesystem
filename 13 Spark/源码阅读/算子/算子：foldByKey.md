@@ -1,5 +1,7 @@
 # 算子：foldByKey
 
+PairRDDFunctions.scala
+
 ## 1、源码
 
 ```java
@@ -94,7 +96,7 @@ object foldByKey {
 
     //rdd.mapPartitionsWithIndex(func2).foreach(println)
 
-    val rlt = rdd.foldByKey(2)(_ + _) //先对每个V都加2，再对相同Key的value值相加
+    val rlt = rdd.foldByKey(2)(_ + _) 
 
     println(rlt.collect().toList) //List((b,10), (a,18))
   }
@@ -113,7 +115,7 @@ object foldByKey {
  *         7+3=10 ("b",10)【第二个参数函数，追加】
  *         2+7=9  ("a",9)
  *
- *  rlt:("a",9+9=18)，即  【第二个参数函数，合并】
+ *  rlt:("a",9+9=18)，即  【第三个参数函数，合并】
  *      ("b",10)
  *
  * 

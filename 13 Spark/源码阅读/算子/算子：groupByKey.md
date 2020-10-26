@@ -1,5 +1,7 @@
 # groupByKey算子
 
+PairRDDFunctions.scala
+
 ## 1、源码
 
 ```java
@@ -63,6 +65,20 @@
    */
   def groupByKey(numPartitions: Int): RDD[(K, Iterable[V])] = self.withScope {
     groupByKey(new HashPartitioner(numPartitions))
+  }
+
+    /**
+   * Group the values for each key in the RDD into a single sequence. Hash-partitions the
+   * resulting RDD with the existing partitioner/parallelism level. The ordering of elements
+   * within each group is not guaranteed, and may even differ each time the resulting RDD is
+   * evaluated.
+   *
+   * @note This operation may be very expensive. If you are grouping in order to perform an
+   * aggregation (such as a sum or average) over each key, using `PairRDDFunctions.aggregateByKey`
+   * or `PairRDDFunctions.reduceByKey` will provide much better performance.
+   */
+  def groupByKey(): RDD[(K, Iterable[V])] = self.withScope {
+    groupByKey(defaultPartitioner(self))
   }
 ```
 ## 2、示例

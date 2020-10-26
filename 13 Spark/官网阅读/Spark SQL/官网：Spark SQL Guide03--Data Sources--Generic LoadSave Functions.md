@@ -25,7 +25,7 @@ Find full example code at "examples/src/main/java/org/apache/spark/examples/sql/
 
 **C：对于scala**
 
-```scala
+```java
 val usersDF = spark.read.load("examples/src/main/resources/users.parquet")
 usersDF.select("name", "favorite_color").write.save("namesAndFavColors.parquet")
 ```
@@ -37,9 +37,9 @@ Find full example code at "examples/src/main/scala/org/apache/spark/examples/sql
 
 *Please refer the API documentation for available options of built-in sources, for example, org.apache.spark.sql.DataFrameReader and org.apache.spark.sql.DataFrameWriter. The options documented there should be applicable through non-Scala Spark APIs (e.g. PySpark) as well. For other formats, refer to the API documentation of the particular format.*
 
-你可以指定数据源类型，需要名字要完整合格，如 `org.apache.spark.sql.parquet`。对于内置源，可以使用简单的名字，如json, parquet, jdbc, orc, libsvm, csv, text。
+你**可以指定数据源类型，需要名字要完整合格，如 `org.apache.spark.sql.parquet`。对于内置源，可以使用简单的名字，如json, parquet, jdbc, orc, libsvm, csv, text。**
 
-内置源的可选项请见API。可选项应当也能用在非 Scala 的 Spark APIs (e.g. PySpark)
+内置源的可选项请见API。例如，`org.apache.spark.sql.DataFrameReader` 和 `org.apache.spark.sql.DataFrameWriter` 。可选项应当也能用在非 Scala 的 Spark APIs (e.g. PySpark)
 
 To load a JSON file you can use:
 
@@ -53,7 +53,7 @@ Find full example code at "examples/src/main/python/sql/datasource.py" in the Sp
 
 **B：对于java**
 
-```python
+```java
 Dataset<Row> peopleDF =
   spark.read().format("json").load("examples/src/main/resources/people.json");
 peopleDF.select("name", "age").write().format("parquet").save("namesAndAges.parquet");
@@ -62,7 +62,7 @@ Find full example code at "examples/src/main/java/org/apache/spark/examples/sql/
 
 **C：对于scala**
 
-```scala
+```java
 val peopleDF = spark.read.format("json").load("examples/src/main/resources/people.json")
 peopleDF.select("name", "age").write.format("parquet").save("namesAndAges.parquet")
 ```
@@ -91,7 +91,7 @@ Find full example code at "examples/src/main/java/org/apache/spark/examples/sql/
 
 **C：对于scala**
 
-```scala
+```java
 val peopleDFCsv = spark.read.format("csv")
   .option("sep", ";")
   .option("inferSchema", "true")
@@ -102,7 +102,7 @@ Find full example code at "examples/src/main/scala/org/apache/spark/examples/sql
 
 *The extra options are also used during write operation. For example, you can control bloom filters and dictionary encodings for ORC data sources. The following ORC example will create bloom filter and use dictionary encoding only for favorite_color. For Parquet, there exists parquet.enable.dictionary, too. To find more detailed information about the extra ORC/Parquet options, visit the official Apache ORC/Parquet websites.*
 
-写操作也有一些可选项，如，对 ORC 的  bloom filters 和 dictionary encodings。
+写操作也有一些可选项，如，对 ORC 的 bloom filters 和 dictionary encodings。
 
 对于 Parquet ，也有 parquet.enable.dictionary
 
@@ -119,6 +119,7 @@ df = spark.read.orc("examples/src/main/resources/users.orc")
 Find full example code at "examples/src/main/python/sql/datasource.py" in the Spark repo.
 
 **B：对于java**
+
 ```java
 usersDF.write().format("orc")
   .option("orc.bloom.filter.columns", "favorite_color")
@@ -130,7 +131,7 @@ Find full example code at "examples/src/main/java/org/apache/spark/examples/sql/
 
 **C：对于scala**
 
-```scala
+```java
 usersDF.write.format("orc")
   .option("orc.bloom.filter.columns", "favorite_color")
   .option("orc.dictionary.key.threshold", "1.0")
@@ -143,7 +144,7 @@ Find full example code at "examples/src/main/scala/org/apache/spark/examples/sql
 
 *Instead of using read API to load a file into DataFrame and query it, you can also query that file directly with SQL.*
 
-除了使用 read 来读取文件到 DataFrame ，并从中插叙。也可以直接在文件上运行 SQL
+除了使用 read 来读取文件到 DataFrame ，并查询。也可以直接在文件上运行 SQL
 
 **A：对于python**
 
@@ -162,7 +163,7 @@ Find full example code at "examples/src/main/java/org/apache/spark/examples/sql/
 
 **C：对于scala**
 
-```scala
+```java
 val sqlDF = spark.sql("SELECT * FROM parquet.`examples/src/main/resources/users.parquet`")
 ```
 Find full example code at "examples/src/main/scala/org/apache/spark/examples/sql/SQLDataSourceExample.scala" in the Spark repo.

@@ -124,13 +124,14 @@ jdbcDF2.write()
 jdbcDF.write()
   .option("createTableColumnTypes", "name CHAR(64), comments VARCHAR(1024)")
   .jdbc("jdbc:postgresql:dbserver", "schema.tablename", connectionProperties);
-*
+```
+
 Find full example code at "examples/src/main/java/org/apache/spark/examples/sql/JavaSQLDataSourceExample.java" in the Spark repo.
 
 
 **C：对于scala**
 
-```scala
+```java
 // Note: JDBC loading and saving can be achieved via either the load/save or jdbc methods
 // Loading data from a JDBC source
 val jdbcDF = spark.read
@@ -168,4 +169,5 @@ jdbcDF.write
   .option("createTableColumnTypes", "name CHAR(64), comments VARCHAR(1024)")
   .jdbc("jdbc:postgresql:dbserver", "schema.tablename", connectionProperties)
 ```
+
 *Find full example code at "examples/src/main/scala/org/apache/spark/examples/sql/SQLDataSourceExample.scala" in the Spark repo.*

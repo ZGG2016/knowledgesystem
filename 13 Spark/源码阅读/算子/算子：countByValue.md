@@ -1,10 +1,12 @@
 # 算子：countByValue
 
+PairRDDFunctions.scala
+
 ## 1、源码
 
 ```java
   /**
-   *  这个rdd中，统计唯一值的个数(不是<k,v>里的v)，并以(value, count)本地map的形式返回。
+   *  这个rdd中，统计唯一值(key和value作为一个整体)的个数(不是<k,v>里的v)，并以(value, count)本地map的形式返回。
    *
    *  只有当结果map是少量的时候，才使用这个方法。因为所有的数据会加载到driver的内存中。
    *

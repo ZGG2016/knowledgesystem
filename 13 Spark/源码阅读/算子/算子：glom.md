@@ -1,5 +1,7 @@
 # 算子：glom
 
+RDD.scala
+
 ## 1、源码
 
 ```java
@@ -38,8 +40,8 @@ object glom {
      * 8
      * ------------------
      */
-    rlt.collect().foreach({
-      x => x.foreach(println)
+    rlt.collect().foreach(x =>{
+        x.foreach(println)
         println("------------------")
     })
 

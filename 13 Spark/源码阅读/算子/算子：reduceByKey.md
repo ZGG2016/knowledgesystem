@@ -53,7 +53,7 @@ PairRDDFunctions.scala
    * Generic function to combine the elements for each key using a custom set of aggregation
    * functions. Turns an RDD[(K, V)] into a result of type RDD[(K, C)], for a "combined type" C
    *
-   * 使用自定义的聚合函数合并每个 key 的元素。
+   * 使用一系列自定义的聚合函数合并每个 key 的元素。
    * RDD[(K, V)] ---> RDD[(K, C)]  C是一个聚合类型
    *
    *
@@ -92,7 +92,7 @@ PairRDDFunctions.scala
       serializer: Serializer = null)(implicit ct: ClassTag[C]): RDD[(K, C)] = self.withScope {
     require(mergeCombiners != null, "mergeCombiners must be defined") // required as of Spark 0.9.0
 
-    // 是不是数组类型
+    // key是不是数组类型
     // private[spark] def keyClass: Class[_] = kt.runtimeClass 
     if (keyClass.isArray) {
       if (mapSideCombine) {  // 默认true，数组类型的key不能本地聚合
@@ -116,15 +116,21 @@ PairRDDFunctions.scala
       self.context.clean(mergeCombiners))
 
 
-    //Some(partitioner)：参数传入的分区器
+    // Some(partitioner)：参数传入的分区器
     // 当前rdd的分区是不是和传入的分区相同
     if (self.partitioner == Some(partitioner)) { 
       //相同的话，终止任务（不做shuffle了）
       self.mapPartitions(iter => {
 
         //Spark 的一个任务操作一个分区，mapPartitions操作的对象是一个分区
-        // 取的是一个分区的任务信息
+        // 取的是一个任务操作的一个分区的上下文
         val context = TaskContext.get()
+
+        //Return the currently active TaskContext. 
+        //def get(): TaskContext = taskContext.get
+
+//An iterator that wraps around an existing iterator to provide task killing functionality
+//class InterruptibleIterator[+T](val context: TaskContext, val delegate: Iterator[T]) extends Iterator[T] 
 
         //任务终止的迭代器
         new InterruptibleIterator(context, aggregator.combineValuesByKey(iter, context))
@@ -136,6 +142,7 @@ PairRDDFunctions.scala
         .setAggregator(aggregator)
         .setMapSideCombine(mapSideCombine)
     }
+
   }
 
 ```

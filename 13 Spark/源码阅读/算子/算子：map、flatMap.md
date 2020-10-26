@@ -1,5 +1,7 @@
 # 算子：map、flatMap
 
+RDD.scala
+
 ## 1、源码
 
 ```java
@@ -28,7 +30,7 @@
     new MapPartitionsRDD[U, T](this, (context, pid, iter) => iter.flatMap(cleanF))
   }
 
-//scala包下： 【还需要再看下】
+//scala包下
 
     /** 
      *

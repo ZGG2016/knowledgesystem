@@ -1,4 +1,4 @@
-# groupByKey、reduceByKey、foldByKey、combineBykey和aggregateByKey的比较和区别
+# groupByKey、reduceByKey、foldByKey、combineBykey、aggregateByKey和countByKey的比较和区别
 
 ## 1、groupByKey：
 
@@ -87,3 +87,13 @@
       mergeValue: (C, V) => C,
       mergeCombiners: (C, C) => C,
       numPartitions: Int): RDD[(K, C)]
+
+## 6、countByKey
+
+	统计相同的key的元素有多少个，并将结果收集到本地map，即返回一个map.
+   
+	只有当结果map是少量的时候，才使用这个方法。因为所有的数据会加载到driver的内存中。
+
+	底层会调用collect，所以不再需要action操作。
+
+	def countByKey(): Map[K, Long]

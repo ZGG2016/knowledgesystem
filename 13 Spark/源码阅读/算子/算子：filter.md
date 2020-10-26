@@ -1,10 +1,14 @@
 # 算子：filter
 
+RDD.scala
+
 ## 1、源码
 
 ```java
   /**
    * 返回满足条件的元素，组成的新的RDD
+   *
+   * 针对分区操作 
    *
    * Return a new RDD containing only the elements that satisfy a predicate.
    */

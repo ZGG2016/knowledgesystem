@@ -1,5 +1,7 @@
 # 算子：join
 
+PairRDDFunctions.scala
+
 ## 1、源码
 
 ```java
@@ -14,10 +16,10 @@
    * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in `this` and
    * (k, v2) is in `other`. Uses the given Partitioner to partition the output RDD.
    */
-  def join[W](other: RDD[(K, W)], partitioner: Partitioner): RDD[(K, (V, W))] = self.withScope {  //flatMapValues ？？？
+  def join[W](other: RDD[(K, W)], partitioner: Partitioner): RDD[(K, (V, W))] = self.withScope {  
     this.cogroup(other, partitioner).flatMapValues( pair =>
       for (v <- pair._1.iterator; w <- pair._2.iterator) yield (v, w)
-      // for循环这行：每次循环都返回两个迭代器v\w，yield以元组的形式保存下来
+        //同时遍历两个迭代器
     )
   }
 

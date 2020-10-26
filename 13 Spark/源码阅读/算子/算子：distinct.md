@@ -1,5 +1,7 @@
 # 算子：distinct
 
+RDD.scala
+
 ## 1、源码
 
 ```java
@@ -10,7 +12,7 @@
    * Return a new RDD containing the distinct elements in this RDD.
    */
   def distinct(numPartitions: Int)(implicit ord: Ordering[T] = null): RDD[T] = withScope {
-  	//reduceByKey((x, y) => x, numPartitions):key相同的分到一个分区，只取其中的key
+  	//reduceByKey((x, y) => x, numPartitions):相同的key分到一个分区，只取其中的key
     map(x => (x, null)).reduceByKey((x, y) => x, numPartitions).map(_._1)
   }
 

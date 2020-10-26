@@ -1,5 +1,7 @@
 # combineByKey算子
 
+PairRDDFunctions.scala
+
 ## 1、源码
 
 ```java
@@ -110,11 +112,37 @@
     combineByKeyWithClassTag(createCombiner, mergeValue, mergeCombiners,
       new HashPartitioner(numPartitions))
   }
+
+    /**
+   * Simplified version of combineByKeyWithClassTag that hash-partitions the resulting RDD using the
+   * existing partitioner/parallelism level. This method is here for backward compatibility. It
+   * does not provide combiner classtag information to the shuffle.
+   *
+   * @see `combineByKeyWithClassTag`
+   */
+  def combineByKey[C](
+      createCombiner: V => C,
+      mergeValue: (C, V) => C,
+      mergeCombiners: (C, C) => C): RDD[(K, C)] = self.withScope {
+    combineByKeyWithClassTag(createCombiner, mergeValue, mergeCombiners)(null)
+  }
+
+  /**
+   * :: Experimental ::
+   * Simplified version of combineByKeyWithClassTag that hash-partitions the resulting RDD using the
+   * existing partitioner/parallelism level.
+   */
+  @Experimental
+  def combineByKeyWithClassTag[C](
+      createCombiner: V => C,
+      mergeValue: (C, V) => C,
+      mergeCombiners: (C, C) => C)(implicit ct: ClassTag[C]): RDD[(K, C)] = self.withScope {
+    combineByKeyWithClassTag(createCombiner, mergeValue, mergeCombiners, defaultPartitioner(self))
+  }
+
 ```
 
 ## 2、示例
-
-
 
 ```java
 object combineByKey {

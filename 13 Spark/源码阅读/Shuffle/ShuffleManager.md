@@ -45,7 +45,7 @@ private[spark] trait ShuffleManager {
 
   /** Get a writer for a given partition. Called on executors by map tasks. */
 
-  // 在 map 端的 executors 上的任务调用该方法。
+  // 由 map tasks 在 executors 上调用该方法。
   // 为一个给定分区创建一个 writer，返回一个 ShuffleWriter
   def getWriter[K, V](handle: ShuffleHandle, mapId: Int, context: TaskContext): ShuffleWriter[K, V]
 
@@ -76,7 +76,7 @@ private[spark] trait ShuffleManager {
    * Called on executors by reduce tasks.
    *
    * 创建一个 reader，用来读取一定范围内的分区[startPartition,endPartition-1]
-   * 在 executors 上，由 reduce 端的任务调用
+   * 由 reduce tasks 在 executors 上调用
    */
   def getReader[K, C](
       handle: ShuffleHandle,
@@ -137,8 +137,9 @@ trait ShuffleBlockResolver {
   type ShuffleId = Int
 
   /**
-   * Retrieve the data for the specified block. If the data for that block is not available, 获取指定块的数据，返回一个 ManagedBuffer
-   * throws an unspecified exception.
+   * 根据blockid，获取指定块的数据，返回一个 ManagedBuffer
+   *
+   * Retrieve the data for the specified block. If the data for that block is not available, throws an unspecified exception.
    */
 
   //ManagedBuffer这个接口为字节形式的数据提供了一个不可变的视图。
