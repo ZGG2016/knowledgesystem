@@ -1,10 +1,12 @@
 # 算子：takeSample
 
+RDD.scala
+
 ## 1、源码
 
 ```java
   /**
-   * 已数组形式，返回一个固定大小的RDD的子集 
+   * 以数组形式，返回一个固定大小的RDD的子集 
    *
    * Return a fixed-size sampled subset of this RDD in an array
    *
@@ -14,7 +16,7 @@
    * @return sample of specified size in an array  数组
    *
    *
-   * 此方法只有再结果数组很小时使用，因为所有的数据都会载入到driver的内存
+   * 此方法只有在结果数组很小时使用，因为所有的数据都会载入到driver的内存
    *
    * @note this method should only be used if the resulting array is expected to be small, as
    * all the data is loaded into the driver's memory.
@@ -44,9 +46,11 @@
         //只有不放回，且要返回的样本大于等于RDD中的样本数，才shuffle数据
         if (!withReplacement && num >= initialCount) {
         //Shuffle the elements of an array into a random order, modifying the original array. Returns the original array.
+        //shuffle数组元素到无序状态，更改原始数组，返回这个原始数组。
           Utils.randomizeInPlace(this.collect(), rand)
         } else {
      //Returns a sampling rate that guarantees a sample of size greater than or equal to sampleSizeLowerBound 99.99% of the time.
+  //返回一个抽样比例，保证，在99.99%的情况下，一个样本的大小大于或等于sampleSizeLowerBound。
           val fraction = SamplingUtils.computeFractionForSampleSize(num, initialCount,
             withReplacement)
           var samples = this.sample(withReplacement, fraction, rand.nextInt()).collect()  //有collect()
@@ -54,7 +58,7 @@
           // If the first sample didn't turn out large enough, keep trying to take samples;
           // this shouldn't happen often because we use a big multiplier for the initial size
           var numIters = 0
-          //抽样的样本数量白哦与目标值，再次抽样
+          //抽样的样本数量小于目标值，再次抽样
           while (samples.length < num) {
             logWarning(s"Needed to re-sample due to insufficient sample size. Repeat #$numIters")
             samples = this.sample(withReplacement, fraction, rand.nextInt()).collect()

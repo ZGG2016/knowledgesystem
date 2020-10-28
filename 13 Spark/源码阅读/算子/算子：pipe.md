@@ -1,5 +1,7 @@
 # 算子：pipe
 
+RDD.scala
+
 ## 1、源码
 
 ```java
@@ -20,12 +22,12 @@
 /**
  * // Split a string into words using a standard StringTokenizer
  * def tokenize(command: String): Seq[String] = {
- * val buf = new ArrayBuffer[String]
- * val tok = new StringTokenizer(command)
- * while(tok.hasMoreElements) {
- * buf += tok.nextToken()
- * }
- * buf
+ *    val buf = new ArrayBuffer[String]
+ *    val tok = new StringTokenizer(command)
+ *    while(tok.hasMoreElements) {
+ *        buf += tok.nextToken()
+ *    }
+ *    buf
  * }
  */
 

@@ -97,3 +97,22 @@ Spark SQL CLI 可以在本地模式下运行 Hive metastore service，执行命�
 *Configuration of Hive is done by placing your hive-site.xml, core-site.xml and hdfs-site.xml files in conf/. You may run ./bin/spark-sql --help for a complete list of all available options.*
 
 可以运行 `./bin/spark-sql --help` 查看完成的参数列表。
+
+```sh
+spark-sql> show tables;
+20/10/28 23:00:35 INFO metastore.HiveMetaStore: 0: get_database: global_temp
+20/10/28 23:00:35 INFO HiveMetaStore.audit: ugi=root    ip=unknown-ip-addr      cmd=get_database: global_temp
+20/10/28 23:00:35 WARN metastore.ObjectStore: Failed to get database global_temp, returning NoSuchObjectException
+20/10/28 23:00:35 INFO metastore.HiveMetaStore: 0: get_database: default
+20/10/28 23:00:35 INFO HiveMetaStore.audit: ugi=root    ip=unknown-ip-addr      cmd=get_database: default
+20/10/28 23:00:35 INFO metastore.HiveMetaStore: 0: get_database: default
+20/10/28 23:00:35 INFO HiveMetaStore.audit: ugi=root    ip=unknown-ip-addr      cmd=get_database: default
+20/10/28 23:00:35 INFO metastore.HiveMetaStore: 0: get_tables: db=default pat=*
+20/10/28 23:00:35 INFO HiveMetaStore.audit: ugi=root    ip=unknown-ip-addr      cmd=get_tables: db=default pat=*
+20/10/28 23:00:35 INFO codegen.CodeGenerator: Code generated in 182.247876 ms
+default src     false
+default srcc    false
+default test    false
+Time taken: 1.916 seconds, Fetched 3 row(s)
+20/10/28 23:00:35 INFO thriftserver.SparkSQLCLIDriver: Time taken: 1.916 seconds, Fetched 3 row(s)
+```

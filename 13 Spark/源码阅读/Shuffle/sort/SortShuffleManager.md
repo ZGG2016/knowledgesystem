@@ -20,7 +20,7 @@ import org.apache.spark.shuffle._
  *
  * 
  * 在基于排序的 shuffle 中，传入的记录根据它们的目标分区id进行排序，
- *     然后写入到一个 map 输出文件中。  (这样进入相同分区的数据相邻)
+ *     然后写入到一个 map 输出文件中。  (这样相邻的数据进入相同分区)
  * 为了能读取 map 输出的部分数据，Reducers 获取这个文件的相邻的数据区域。
  * 当装入内存中的 map 输出数据太大，排序了的输出数据可以溢写到磁盘，
        这些在磁盘上的文件被合并到最终的输出文件中。
@@ -50,8 +50,7 @@ import org.apache.spark.shuffle._
  *     然后在排序期间，以序列化的形式被缓存。
  * 
  * 这个写路径实现有几种优化方式：
- *     - 排序操作是基于序列化后的二进制数据，而不是 Java 对象。这可以减少内存消耗和 GC 负载。
- * 这种方式要求序列化器能允许序列化后的记录不需要反序列化就可以排序。
+ *     - 排序操作是基于序列化后的二进制数据，而不是 Java 对象。这可以减少内存消耗和 GC 负载。这种方式要求序列化器能允许序列化后的记录不需要反序列化就可以排序。
  *
  *     - 使用一种高效缓存排序器[ShuffleExternalSorter]，
  * 能够排序压缩后的记录指针和分区id组成的数组。在排序数组中，每个记录占用8字节的空间。
@@ -99,7 +98,7 @@ private[spark] class SortShuffleManager(conf: SparkConf) extends ShuffleManager 
   /**
    * key:shuffle id
    * value:在这个 shuffle 中，产生输出的所有 mappers 的数量。
-   *
+   * 一个 shuffle 对应的 mapper 任务的数量。
    * A mapping from shuffle ids to the number of mappers producing output for those shuffles.
    */
   private[this] val numMapsForShuffle = new ConcurrentHashMap[Int, Int]()
@@ -139,11 +138,11 @@ private[spark] class SortShuffleManager(conf: SparkConf) extends ShuffleManager 
     } else {
       // Otherwise, buffer map outputs in a deserialized form:
       //如果既不能启用bypass模式，也不能以序列化的形式缓存 map 输出，
-      //那么，就以以序列化的形式缓存 map 输出
+      //那么，就以反序列化的形式缓存 map 输出
       new BaseShuffleHandle(shuffleId, numMaps, dependency)
     }
   }
-
+---------------------------------------------------------------看到这
   /**
    * Get a reader for a range of reduce partitions (startPartition to endPartition-1, inclusive).
    * Called on executors by reduce tasks.

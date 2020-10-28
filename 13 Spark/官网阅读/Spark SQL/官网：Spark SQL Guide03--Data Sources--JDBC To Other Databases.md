@@ -12,7 +12,7 @@ JDBC 数据源也可以在 Java 、 Python 里使用，不需要用户提供 Cla
 
 *To get started you will need to include the JDBC driver for your particular database on the spark classpath. For example, to connect to postgres from the Spark Shell you would run the following command:*
 
-首先需要将你的数据的 JDBC driver 添加到你的 spark classpath。例如，从 Spark shell 连接 postgres，需要执行如下命令：
+首先需要**将你的数据的 JDBC driver 添加到你的 spark classpath**。例如，从 Spark shell 连接 postgres，需要执行如下命令：
 
 ```sh
 ./bin/spark-shell --driver-class-path postgresql-9.4.1207.jar --jars postgresql-9.4.1207.jar
@@ -20,7 +20,9 @@ JDBC 数据源也可以在 Java 、 Python 里使用，不需要用户提供 Cla
 
 *Tables from the remote database can be loaded as a DataFrame or Spark SQL temporary view using the Data Sources API. Users can specify the JDBC connection properties in the data source options. user and password are normally provided as connection properties for logging into the data sources. In addition to the connection properties, Spark also supports the following case-insensitive options:*
 
-远程数据库的表使用 Data Sources API 以 DataFrame 或 Spark SQL 临时视图的形式载入。用户可以在数据源选项中，指定 JDBC connection 属性。用户账号和密码放在 connection 属性中。Spark 还支持以下不区分大小写的选项:
+**远程数据库的表使用 Data Sources API 以 DataFrame 或 Spark SQL 临时视图的形式载入**。
+
+**用户可以在数据源选项中，指定 JDBC connection 属性**。用户账号和密码放在 connection 属性中。Spark 还支持以下不区分大小写的选项:
 
 [不区分大小写的选项](http://spark.apache.org/docs/latest/sql-data-sources-jdbc.html)
 

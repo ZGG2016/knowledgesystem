@@ -46,8 +46,12 @@ abstract class NarrowDependency[T](_rdd: RDD[T]) extends Dependency[T] {
 
 
 /**
+ *  一个 shuffle stage 输出的依赖
+ *
+ * 在 shuffle 中，因为在 executor 端不需要这个rdd，所以这个rdd是不可序列化的
+ *
  * :: DeveloperApi ::
- * Represents a dependency on the output of a shuffle stage. Note that in the case of shuffle,  一个 shuffle stage 输出的依赖
+ * Represents a dependency on the output of a shuffle stage. Note that in the case of shuffle, 
  * the RDD is transient since we don't need it on the executor side.
  *
  * @param _rdd the parent RDD
@@ -61,14 +65,15 @@ abstract class NarrowDependency[T](_rdd: RDD[T]) extends Dependency[T] {
  */
 @DeveloperApi
 class ShuffleDependency[K: ClassTag, V: ClassTag, C: ClassTag](
-    @transient private val _rdd: RDD[_ <: Product2[K, V]],
-    val partitioner: Partitioner,
+    @transient private val _rdd: RDD[_ <: Product2[K, V]],  //父RDD
+    val partitioner: Partitioner, //用来划分 shuffle 输出的分区器
     val serializer: Serializer = SparkEnv.get.serializer,
-    val keyOrdering: Option[Ordering[K]] = None,
+    val keyOrdering: Option[Ordering[K]] = None, // RDD's shuffles中，key 的排序方式
     val aggregator: Option[Aggregator[K, V, C]] = None,
-    val mapSideCombine: Boolean = false)
+    val mapSideCombine: Boolean = false)  //是否执行map端聚合
   extends Dependency[Product2[K, V]] {
 
+  //如果要执行map端聚合，需要定义aggregator
   if (mapSideCombine) {
     require(aggregator.isDefined, "Map-side combine without Aggregator specified!")
   }

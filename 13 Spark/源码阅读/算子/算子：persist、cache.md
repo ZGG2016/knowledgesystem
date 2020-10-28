@@ -1,5 +1,7 @@
 # 算子：persist、cache
 
+RDD.scala
+
 ## 1、源码
 
 ```java
@@ -14,6 +16,7 @@
   private def persist(newLevel: StorageLevel, allowOverride: Boolean): this.type = {
     // TODO: Handle changes of StorageLevel
     
+    //当前存储级别不是NONE，且不等于newLevel，且不允许覆盖时，抛出异常。
     if (storageLevel != StorageLevel.NONE && newLevel != storageLevel && !allowOverride) {
       throw new UnsupportedOperationException(
         "Cannot change storage level of an RDD after it was already assigned a level")
@@ -22,7 +25,7 @@
     // If this is the first time this RDD is marked for persisting, register it
     // with the SparkContext for cleanups and accounting. Do this only once.
     if (storageLevel == StorageLevel.NONE) {
-      // 注册一个RDD以便在垃圾收集时进行清理:registerRDDForCleanup
+      // registerRDDForCleanup：注册一个RDD以便在垃圾收集时进行清理
       sc.cleaner.foreach(_.registerRDDForCleanup(this))
       sc.persistRDD(this)
     }
@@ -68,7 +71,7 @@
       // one that is explicitly requested by the user (after adapting it to use disk).
 
       // 在调用localCheckpoint方法时，已经标记了这个RDD进行持久化。这里只需覆盖旧的存储级别
-      //transformStorageLevel 把指定的一个存储级别转换成 使用磁盘的一种存储级别。
+      //transformStorageLevel：把指定的一个存储级别转换成 使用磁盘的一种存储级别。
       persist(LocalRDDCheckpointData.transformStorageLevel(newLevel), allowOverride = true)
     } else {
       persist(newLevel, allowOverride = false)

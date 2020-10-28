@@ -1,5 +1,7 @@
 # 算子：randomSplit
 
+RDD.scala
+
 ## 1、源码
 
 ```java
@@ -28,6 +30,7 @@
     withScope {
       val sum = weights.sum
       
+      //标准化权重
       val normalizedCumWeights = weights.map(_ / sum).scanLeft(0.0d)(_ + _)
       
       normalizedCumWeights.sliding(2).map { x =>
@@ -39,7 +42,7 @@
 
 /**
  * def scanLeft[B, That](z: B)(op: (B, A) => B)(implicit bf: CanBuildFrom[Repr, B, That]): That = {
- * 		val b = bf(repr)   //类似数组的结构
+ * 		  val b = bf(repr)   //类似数组的结构
  *      b.sizeHint(this, 1)
  *      var acc = z
  *      b += acc
@@ -61,6 +64,7 @@
    * @return A random sub-sample of the RDD without replacement.  不放回抽样
    */
   private[spark] def randomSampleWithRange(lb: Double, ub: Double, seed: Long): RDD[T] = {
+    //在每个分区中，定义一个抽样器，分别抽样
     this.mapPartitionsWithIndex( { (index, partition) =>
       val sampler = new BernoulliCellSampler[T](lb, ub)
       sampler.setSeed(seed + index)
@@ -80,9 +84,9 @@ object randomSplit {
 
     val rdd = sc.parallelize(List(1, 2, 2, 2, 5, 6, 8, 8, 8, 8))
 
-    val rlt = rdd.randomSplit(Array(1.0,2.0,3.0,4.0),10)
+    val rlt = rdd.randomSplit(Array(1.0,2.0,3.0,4.0),10) //返回值类型：Array[RDD[T]]
 
-    println(rlt.length)  //3  ，返回值类型：Array[RDD[T]]
+    println(rlt.length)  //4  ，划分出了4个RDD，组成一个数组
 
     for(x <- rlt){
       x.collect().foreach(print) //2  |8  | 1568  | 2288  |

@@ -97,7 +97,7 @@
    */
   def runJob[T, U: ClassTag](
       rdd: RDD[T],
-      processPartition: Iterator[T] => U,
+      processPartition: Iterator[T] => U, //运行在每个分区上的函数
       resultHandler: (Int, U) => Unit)
   {
   	//函数作用在每个分区上
