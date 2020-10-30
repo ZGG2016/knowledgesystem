@@ -1,4 +1,4 @@
-# 官网：Hive Tutorial
+# Hive Tutorial
 
 [TOC]
 

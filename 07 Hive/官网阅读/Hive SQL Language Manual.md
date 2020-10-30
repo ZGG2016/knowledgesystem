@@ -53,9 +53,9 @@ This is the Hive Language Manual.  For other Hive documentation, see the Hive wi
 
 ## 5、Data Manipulation Statements
 
-## 5.1、DML: Load, Insert, Update, Delete
+### 5.1、DML: Load, Insert, Update, Delete
 
-## 5.2、Import/Export
+### 5.2、Import/Export
 
 
 
@@ -65,11 +65,11 @@ This is the Hive Language Manual.  For other Hive documentation, see the Hive wi
 
 #### 6.1.1、Group By
 
-#### 6.1.2、Sort/Distribute/Cluster/Order By
+#### 6.1.2、[Sort/Distribute/Cluster/Order By](https://github.com/ZGG2016/knowledgesystem/blob/master/07%20Hive/%E5%AE%98%E7%BD%91%E9%98%85%E8%AF%BB/Sort%20Distribute%20Cluster%20Order%20By.md)
 
 #### 6.1.3、Transform and Map-Reduce Scripts
 
-#### 6.1.4、Operators and User-Defined Functions (UDFs)
+#### 6.1.4、[Operators and User-Defined Functions (UDFs)](https://github.com/ZGG2016/knowledgesystem/blob/master/07%20Hive/%E5%AE%98%E7%BD%91%E9%98%85%E8%AF%BB/Operators%20and%20UDFs.md)
 
 #### 6.1.5、XPath-specific Functions
 
@@ -93,8 +93,7 @@ This is the Hive Language Manual.  For other Hive documentation, see the Hive wi
 
 ### 6.7、Procedural Language:  Hive HPL/SQL
 
-### 6.8、[Explain Execution Plan](https://github.com/ZGG2016/knowledgesystem/blob/master/07%20Hive/%E5%AE%98%E7%BD%91%E9%98%85%E8%AF%BB/%E5%AE%98%E7%BD%91%EF%BC%9ALanguageManual%20Explain.md)
-
+### 6.8、[Explain Execution Plan](https://github.com/ZGG2016/knowledgesystem/blob/master/07%20Hive/%E5%AE%98%E7%BD%91%E9%98%85%E8%AF%BB/explain%20plan.md)
 
 
 ## 7、Locks
