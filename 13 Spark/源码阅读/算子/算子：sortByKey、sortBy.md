@@ -90,6 +90,19 @@ sortBy 实际调用了 sortByKey 排序的。
 
 ```java
 /**
+   * Creates tuples of the elements in this RDD by applying `f`.
+   * 
+   */
+  def keyBy[K](f: T => K): RDD[(K, T)] = withScope {
+    val cleanedF = sc.clean(f)
+    map(x => (cleanedF(x), x))
+  }
+```
+
+作用：将传进来的每个元素作用于f(x)中，并返回tuples类型的元素，也就变成了Key-Value类型的RDD
+
+```java
+/**
    * Sort the RDD by key, so that each partition contains a sorted range of the elements. Calling
    * `collect` or `save` on the resulting RDD will return or output an ordered list of records
    * (in the `save` case, they will be written to multiple `part-X` files in the filesystem, in
@@ -119,28 +132,6 @@ sortBy 实际调用了 sortByKey 排序的。
 - numPartitions，决定排序后的RDD的分区个数，默认排序后的分区个数和排序之前的个数相等，即为self.partitions.length。
 
 ```java
-  /**
-   * Return an RDD with the values of each tuple.
-   */
-  def values: RDD[V] = self.map(_._2)
-
-```
-作用：取PairRDD的值
-
-```java
-/**
-   * Creates tuples of the elements in this RDD by applying `f`.
-   * 
-   */
-  def keyBy[K](f: T => K): RDD[(K, T)] = withScope {
-    val cleanedF = sc.clean(f)
-    map(x => (cleanedF(x), x))
-  }
-```
-
-作用：将传进来的每个元素作用于f(x)中，并返回tuples类型的元素，也就变成了Key-Value类型的RDD
-
-```java
   /** Set key ordering for RDD's shuffle. */
   def setKeyOrdering(keyOrdering: Ordering[K]): ShuffledRDD[K, V, C] = {
     this.keyOrdering = Option(keyOrdering)
@@ -148,4 +139,13 @@ sortBy 实际调用了 sortByKey 排序的。
   }
 ```
 作用：决定 ShuffledRDD 是升序还是降序
+
+```java
+  /**
+   * Return an RDD with the values of each tuple.
+   */
+  def values: RDD[V] = self.map(_._2)
+
+```
+作用：取PairRDD的值
 

@@ -1,4 +1,4 @@
-# 官网：Hive Operators and User-Defined Functions (UDFs)
+# LanguageManual UDF
 
 [TOC]
 

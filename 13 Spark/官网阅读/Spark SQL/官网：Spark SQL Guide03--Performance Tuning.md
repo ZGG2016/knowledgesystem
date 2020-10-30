@@ -12,9 +12,7 @@
 
 *Configuration of in-memory caching can be done using the setConf method on SparkSession or by running SET key=value commands using SQL.*
 
-`spark.catalog.cacheTable("tableName")` 或 `dataFrame.cache()` 可以缓存表。
-
-然后 Spark SQL 就扫描某些列，自动压缩，以最小化内存使用和 gc 压力
+`spark.catalog.cacheTable("tableName")` 或 `dataFrame.cache()` 可以缓存表。然后 Spark SQL 就扫描某些列，自动压缩，以最小化内存使用和 gc 压力。
 
 `spark.catalog.uncacheTable("tableName")` 移除内存中的表。
 
@@ -34,20 +32,30 @@ spark.sql.inMemoryColumnarStorage.batchSize | 10000 | Controls the size of batch
 
 Property Name | Default | Meaning | Since Version
 ---|:---|:---|:---
-spark.sql.files.maxPartitionBytes | 134217728 (128 MB) | The maximum number of bytes to pack into a single partition when reading files. This configuration is effective only when using file-based sources such as Parquet, JSON and ORC. 读取文件时，打包进分区的数据的最大字节数。基于文件的源| 2.0.0
-spark.sql.files.openCostInBytes | 4194304 (4 MB) | The estimated cost to open a file, measured by the number of bytes could be scanned in the same time. This is used when putting multiple files into a partition. It is better to over-estimated, then the partitions with small files will be faster than partitions with bigger files (which is scheduled first). This configuration is effective only when using file-based sources such as Parquet, JSON and ORC. 打开文件的估计费用(字节)| 2.0.0
+spark.sql.files.maxPartitionBytes | 134217728 (128 MB) | The maximum number of bytes to pack into a single partition when reading files. This configuration is effective only when using file-based sources such as Parquet, JSON and ORC. 读取文件时，打包进分区的数据的最大字节数。这个配置仅对基于文件的源有效，如Parquet, JSON and ORC【一个分区的最大大小】| 2.0.0
+spark.sql.files.openCostInBytes | 4194304 (4 MB) | The estimated cost to open a file, measured by the number of bytes could be scanned in the same time. This is used when putting multiple files into a partition. It is better to over-estimated, then the partitions with small files will be faster than partitions with bigger files (which is scheduled first). This configuration is effective only when using file-based sources such as Parquet, JSON and ORC. 打开文件的估计费用(字节)。在把多个文件放入分区时是有用的。最好是往高了估算，这样具有小文件的分区会比具有大文件的分区快(大文件是首先调度的)。这个配置仅对基于文件的源有效，如Parquet, JSON and ORC| 2.0.0
 spark.sql.broadcastTimeout | 300 | Timeout in seconds for the broadcast wait time in broadcast joins 广播连接中的广播等待时间超时（秒）| 1.3.0
-spark.sql.autoBroadcastJoinThreshold | 10485760 (10 MB) | Configures the maximum size in bytes for a table that will be broadcast to all worker nodes when performing a join. By setting this value to -1 broadcasting can be disabled. Note that currently statistics are only supported for Hive Metastore tables where the command ANALYZE TABLE <tableName> COMPUTE STATISTICS noscan has been run. 将广播给所有工作节点的表的最大字节数| 1.1.0
+spark.sql.autoBroadcastJoinThreshold | 10485760 (10 MB) | Configures the maximum size in bytes for a table that will be broadcast to all worker nodes when performing a join. By setting this value to -1 broadcasting can be disabled. Note that currently statistics are only supported for Hive Metastore tables where the command ANALYZE TABLE <tableName> COMPUTE STATISTICS noscan has been run. 当执行join时，广播给所有工作节点的表的最大字节数| 1.1.0
 spark.sql.shuffle.partitions | 200 | Configures the number of partitions to use when shuffling data for joins or aggregations. shuffle 时，使用的分区数| 1.1.0
 
 
-## 3、Join Strategy Hints for SQL Queries  SQL查询的连接策略提示
+## 3、Join Strategy Hints for SQL Queries  SQL查询的Join策略提示
 
 *The join strategy hints, namely BROADCAST, MERGE, SHUFFLE_HASH and SHUFFLE_REPLICATE_NL, instruct Spark to use the hinted strategy on each specified relation when joining them with another relation. For example, when the BROADCAST hint is used on table ‘t1’, broadcast join (either broadcast hash join or broadcast nested loop join depending on whether there is any equi-join key) with ‘t1’ as the build side will be prioritized by Spark even if the size of table ‘t1’ suggested by the statistics is above the configuration spark.sql.autoBroadcastJoinThreshold.*
 
+**join 策略提示，即 BROADCAST、MERGE、SHUFFLE_HASH 和 SHUFFLE_REPLICATE_NL，指示 Spark 在将每个指定的关系与另一个关系 join 时，对它们使用提示的策略。**
+
+例如，当 BROADCAST 提示是用于表 t1 时，即使表 t1 的大小大于配置 `spark.sql.autoBroadcastJoinThreshold`的值时，broadcast join t1 作为build side 也会是 Spark 的优先选择(broadcast hash join 或 broadcast nested loop join 取决于是否有等值连接键)。
+
 *When different join strategy hints are specified on both sides of a join, Spark prioritizes the BROADCAST hint over the MERGE hint over the SHUFFLE_HASH hint over the SHUFFLE_REPLICATE_NL hint. When both sides are specified with the BROADCAST hint or the SHUFFLE_HASH hint, Spark will pick the build side based on the join type and the sizes of the relations.*
 
+**当 join 的两端指定不同的 join 策略提示时，Spark 的 join 策略提示的优先级是：`BROADCAST > MERGE > SHUFFLE_HASH > SHUFFLE_REPLICATE_NL`**
+
+当两端均指定为 BROADCAST 或 SHUFFLE_HASH 时，Spark 将基于连接类型和关系的大小选择 build side 。
+
 *Note that there is no guarantee that Spark will choose the join strategy specified in the hint since a specific strategy may not support all join types.*
+
+注意，不能保证 Spark 会选择提示中指定的 join 策略，因为特定的策略可能不支持所有的 join 类型。
 
 **A：对于python**
 
@@ -61,11 +69,37 @@ spark.table("src").join(spark.table("records").hint("broadcast"), "key").show();
 ```
 **C：对于scala**
 
-```scala
+```java
 spark.table("src").join(spark.table("records").hint("broadcast"), "key").show()
 ```
 
 *For more details please refer to the documentation of [Join Hints](http://spark.apache.org/docs/latest/sql-ref-syntax-qry-select-hints.html#join-hints).*
+
+例如：
+
+```sh
+>>> spark.sql("select * from test").show()
++----+------+----+
+|dept|userid| sal|
++----+------+----+
+|  d1| user1|1000|
+|  d1| user2|2000|
+|  d1| user3|3000|
+|  d2| user4|4000|
+|  d2| user5|5000|
++----+------+----+
+
+>>> spark.table("test").join(spark.table("test").hint("broadcast"), "userid").show()
++------+----+----+----+----+                                                    
+|userid|dept| sal|dept| sal|
++------+----+----+----+----+
+| user1|  d1|1000|  d1|1000|
+| user2|  d1|2000|  d1|2000|
+| user3|  d1|3000|  d1|3000|
+| user4|  d2|4000|  d2|4000|
+| user5|  d2|5000|  d2|5000|
++------+----+----+----+----+
+```
 
 ## 4、Coalesce Hints for SQL Queries
 
@@ -77,12 +111,14 @@ Coalesce hints 可以控制输出文件的数量，就像 coalesce, repartition 
 - REPARTITION 接收 分区数、列、或同时都有这两项 作为参数。
 - REPARTITION_BY_RANGE 必须有 列名作为参数。分区数参数可选。
 
+```
 	SELECT /*+ COALESCE(3) */ * FROM t
 	SELECT /*+ REPARTITION(3) */ * FROM t
 	SELECT /*+ REPARTITION(c) */ * FROM t
 	SELECT /*+ REPARTITION(3, c) */ * FROM t
 	SELECT /*+ REPARTITION_BY_RANGE(c) */ * FROM t
 	SELECT /*+ REPARTITION_BY_RANGE(3, c) */ * FROM t
+```
 
 *For more details please refer to the documentation of [Partitioning Hints](http://spark.apache.org/docs/latest/sql-ref-syntax-qry-select-hints.html#partitioning-hints).*
 
@@ -127,7 +163,7 @@ spark.sql.adaptive.advisoryPartitionSizeInBytes | 64 MB | The advisory size in b
 
 *Data skew can severely downgrade the performance of join queries. This feature dynamically handles skew in sort-merge join by splitting (and replicating if needed) skewed tasks into roughly evenly sized tasks. It takes effect when both spark.sql.adaptive.enabled and spark.sql.adaptive.skewJoin.enabled configurations are enabled.*
 
-数据倾斜会严重降低连接查询的性能。该特性通过将倾斜任务拆分(并在需要时复制)为大小大致相同的任务来动态处理排序合并连接中的倾斜。当sql.adaptive。和spark.sql.adaptive.skewJoin启用时生效。
+数据倾斜会严重降低连接查询的性能。该特性通过将倾斜任务拆分(并在需要时复制)为大小大致相同的任务来动态处理排序合并连接中的倾斜。当 sql.adaptive.enabled 和 spark.sql.adaptive.skewJoin 启用时生效。
 
 Property Name | Default | Meaning | Since Version
 ---|:---|:---|:---

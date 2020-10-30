@@ -6,23 +6,25 @@ Since Spark 2.4 release, Spark SQL provides built-in support for reading and wri
 
 ## 1、Deploying
 
-**The spark-avro module is external and not included in spark-submit or spark-shell by default.**
+*The spark-avro module is external and not included in spark-submit or spark-shell by default.*
 
 **默认情况下，spark-avro 模块是外部的、不包含在 spark-submit 或 spark-shell 中的。**
 
-**As with any Spark applications, spark-submit is used to launch your application. spark-avro_2.12 and its dependencies can be directly added to spark-submit using --packages, such as,**
+*As with any Spark applications, spark-submit is used to launch your application. spark-avro_2.12 and its dependencies can be directly added to spark-submit using --packages, such as,*
 
 spark-avro_2.12 和它的依赖可以直接使用 `--packages` 添加到 spark-submit
 
 	./bin/spark-submit --packages org.apache.spark:spark-avro_2.12:3.0.0 ...
 
-**For experimenting on spark-shell, you can also use --packages to add org.apache.spark:spark-avro_2.12 and its dependencies directly,**
+*For experimenting on spark-shell, you can also use --packages to add org.apache.spark:spark-avro_2.12 and its dependencies directly,*
 
 也可以使用 `--packages` ，将 `org.apache.spark:spark-avro_2.12` 它的依赖添加到 spark-shell
 
 	./bin/spark-shell --packages org.apache.spark:spark-avro_2.12:3.0.0 ...
 
-**See [Application Submission Guide](https://spark.apache.org/docs/3.0.0/submitting-applications.html) for more details about submitting applications with external dependencies.**
+*See [Application Submission Guide](https://spark.apache.org/docs/3.0.0/submitting-applications.html) for more details about submitting applications with external dependencies.*
+
+**具体操作见文末**
 
 ## 2、Load and Save Functions
 
@@ -70,7 +72,7 @@ Avro 包提供了 `to_avro` 函数将一列数据编码成 Avro 格式的二进�
 
 *Using Avro record as columns is useful when reading from or writing to a streaming source like Kafka. Each Kafka key-value record will be augmented with some metadata, such as the ingestion timestamp into Kafka, the offset in Kafka, etc.*
 
-当从 Kafka 这样的流数据源读取或写入数据时，使用 Avro 记录作为列是非常有用的。**每个 Kafka 键值记录都将添加一些元数据**，比如进入 Kafka 的时间戳、在 Kafka 中的偏移量等等。
+**当从 Kafka 这样的流数据源读取或写入数据时，使用 Avro 记录作为列是非常有用的。每个 Kafka 键值记录都将添加一些元数据**，比如进入 Kafka 的时间戳、在 Kafka 中的偏移量等等。
 
 *If the “value” field that contains your data is in Avro, you could use from_avro() to extract your data, enrich it, clean it, and then push it downstream to Kafka again or write it out to a file.
 to_avro() can be used to turn structs into Avro records. This method is particularly useful when you would like to re-encode multiple columns into a single one when writing data out to Kafka.
@@ -201,7 +203,7 @@ spark.sql.avro.deflate.level | -1 | Compression level for the deflate codec used
 
 *This Avro data source module is originally from and compatible with Databricks’s open source repository [spark-avro](https://github.com/databricks/spark-avro).*
 
-此 Avro 数据源模块来源于、且兼容 Databricks’s spark-avr
+此 Avro 数据源模块来源于、且兼容 Databricks’s spark-avro
 
 *By default with the SQL configuration spark.sql.legacy.replaceDatabricksSparkAvro.enabled enabled, the data source provider com.databricks.spark.avro is mapped to this built-in Avro module. For the Spark tables created with Provider property as com.databricks.spark.avro in catalog meta store, the mapping is essential to load these tables if you are using this built-in Avro module.*
 
@@ -274,3 +276,90 @@ BinaryType | fixed |
 StringType | enum | 	
 TimestampType | long | timestamp-millis
 DecimalType | bytes | decimal
+
+## 9、Avro 部署实践
+
+注意点：
+
+(1) `org.apache.spark:spark-avro_2.11:2.4.4`，这里的 2.11 是 scala 的版本，2.4.4 是 spark 的版本，要对应一致，否则执行语句时，会出现如下错误：`java.util.ServiceConfigurationError: org.apache.spark.sql.sources.DataSourceRegister: Provider org.apache.spark.sql.avro.AvroFileFormat could not be instantiated`
+
+**下面的实现是基于 scala2.11 和 spark2.4.4 ，不同于本文档的 scala2.12 和 spark3.0.0**
+
+### 9.1、【方式1】使用 `--packages` ，将 org.apache.spark:spark-avro_2.12 它的依赖添加到 spark-shell
+
+```sh
+[root@zgg spark-2.4.4-bin-hadoop2.7]# bin/pyspark --packages org.apache.spark:spark-avro_2.11:2.4.4
+Python 2.7.5 (default, Apr  2 2020, 13:16:51) 
+[GCC 4.8.5 20150623 (Red Hat 4.8.5-39)] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+Ivy Default Cache set to: /root/.ivy2/cache
+The jars for the packages stored in: /root/.ivy2/jars
+:: loading settings :: url = jar:file:/opt/spark-2.4.4-bin-hadoop2.7/jars/ivy-2.4.0.jar!/org/apache/ivy/core/settings/ivysettings.xml
+org.apache.spark#spark-avro_2.11 added as a dependency
+:: resolving dependencies :: org.apache.spark#spark-submit-parent-36366a70-2d08-415b-b5e5-138633451e6d;1.0
+        confs: [default]
+        found org.apache.spark#spark-avro_2.11;2.4.4 in central
+        found org.spark-project.spark#unused;1.0.0 in central
+downloading https://repo1.maven.org/maven2/org/apache/spark/spark-avro_2.11/2.4.4/spark-avro_2.11-2.4.4.jar ...
+        [SUCCESSFUL ] org.apache.spark#spark-avro_2.11;2.4.4!spark-avro_2.11.jar (8743ms)
+:: resolution report :: resolve 6348ms :: artifacts dl 8748ms
+        :: modules in use:
+        org.apache.spark#spark-avro_2.11;2.4.4 from central in [default]
+        org.spark-project.spark#unused;1.0.0 from central in [default]
+        ---------------------------------------------------------------------
+        |                  |            modules            ||   artifacts   |
+        |       conf       | number| search|dwnlded|evicted|| number|dwnlded|
+        ---------------------------------------------------------------------
+        |      default     |   2   |   1   |   1   |   0   ||   2   |   1   |
+        ---------------------------------------------------------------------
+:: retrieving :: org.apache.spark#spark-submit-parent-36366a70-2d08-415b-b5e5-138633451e6d
+        confs: [default]
+        1 artifacts copied, 1 already retrieved (182kB/7ms)
+20/10/30 10:29:03 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel). For SparkR, use setLogLevel(newLevel).
+20/10/30 10:29:03 WARN conf.HiveConf: HiveConf of name hive.conf.hidden.list does not exist
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /__ / .__/\_,_/_/ /_/\_\   version 2.4.4
+      /_/
+
+Using Python version 2.7.5 (default, Apr  2 2020 13:16:51)
+SparkSession available as 'spark'.
+>>> dfa = spark.read.format("avro").load("file:///root/data/users.avro")
+>>> dfa.select("name", "favorite_color").write.format("avro").save("file:///root/data/namesAndFavColors.avro")
+>>> 
+```
+
+### 9.2、【方式2】spark-avro_2.12 和它的依赖可以直接使用 --packages 添加到 spark-submit
+
+从 [spark-avro_2.11/2.4.4](https://mvnrepository.com/artifact/org.apache.spark/spark-avro_2.11/2.4.4) 下载对应版本的 JAR 包，放到 Spark 的 `jars` 目录下。再执行如下命名:
+`spark-submit avro_read_sparksql.py  --master spark://zgg:7077 --jars /opt/spark-2.4.4-bin-hadoop2.7/jars/spark-avro_2.11-2.4.4.jar`
+
+```sh
+[root@zgg python_script]# spark-submit avro_read_sparksql.py  --master spark://zgg:7077 --jars /opt/spark-2.4.4-bin-hadoop2.7/jars/spark-avro_2.11-2.4.4.jar
+20/10/30 10:51:10 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+20/10/30 10:51:10 INFO spark.SparkContext: Running Spark version 2.4.4
+20/10/30 10:51:10 INFO spark.SparkContext: Submitted application: datasource_avro
+...
+20/10/30 10:51:16 INFO executor.Executor: Running task 0.0 in stage 0.0 (TID 0)
+20/10/30 10:51:16 INFO output.FileOutputCommitter: File Output Committer Algorithm version is 1
+20/10/30 10:51:16 INFO datasources.SQLHadoopMapReduceCommitProtocol: Using output committer class org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter
+20/10/30 10:51:16 INFO datasources.FileScanRDD: Reading File path: file:///root/data/users.avro, range: 0-334, partition values: [empty row]
+20/10/30 10:51:16 INFO codegen.CodeGenerator: Code generated in 21.997514 ms
+20/10/30 10:51:16 INFO output.FileOutputCommitter: Saved output of task 'attempt_20201030105115_0000_m_000000_0' to file:/root/data/namesAndFavColors.avro/_temporary/0/task_20201030105115_0000_m_000000
+20/10/30 10:51:16 INFO mapred.SparkHadoopMapRedUtil: attempt_20201030105115_0000_m_000000_0: Committed
+20/10/30 10:51:16 INFO executor.Executor: Finished task 0.0 in stage 0.0 (TID 0). 2245 bytes result sent to driver
+20/10/30 10:51:16 INFO scheduler.TaskSetManager: Finished task 0.0 in stage 0.0 (TID 0) in 476 ms on localhost (executor driver) (1/1)
+20/10/30 10:51:16 INFO scheduler.TaskSchedulerImpl: Removed TaskSet 0.0, whose tasks have all completed, from pool 
+20/10/30 10:51:16 INFO scheduler.DAGScheduler: ResultStage 0 (save at NativeMethodAccessorImpl.java:0) finished in 0.640 s
+20/10/30 10:51:16 INFO scheduler.DAGScheduler: Job 0 finished: save at NativeMethodAccessorImpl.java:0, took 0.728402 s
+20/10/30 10:51:16 INFO datasources.FileFormatWriter: Write Job fcbd7163-6076-4f72-8de4-720aac844654 committed.
+20/10/30 10:51:16 INFO datasources.FileFormatWriter: Finished processing stats for write job fcbd7163-6076-4f72-8de4-720aac844654.
+...
+
+```
+
+执行 `spark-submit avro_read_sparksql.py  --master spark://zgg:7077 --packages org.apache.spark:spark-avro_2.11:2.4.4`，出现错误：`pyspark.sql.utils.AnalysisException: u'Failed to find data source: avro. Avro is built-in but external data source module since Spark 2.4. Please deploy the application as per the deployment section of "Apache Avro Data Source Guide".;'`【？？？】

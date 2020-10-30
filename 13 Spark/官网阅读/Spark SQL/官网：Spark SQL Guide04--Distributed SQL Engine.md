@@ -90,6 +90,7 @@ beeline> !connect jdbc:hive2://<host>:<port>/<database>?hive.server2.transport.m
 Spark SQL CLI 可以在本地模式下运行 Hive metastore service，执行命令行输入的查询。但不会和 Thrift JDBC server 通信。
 
 *To start the Spark SQL CLI, run the following in the Spark directory:*
+
 ```sh
 ./bin/spark-sql
 ```

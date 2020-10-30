@@ -1,4 +1,4 @@
-# 官网：LanguageManual Explain
+# LanguageManual Explain
 
 [TOC]
 
