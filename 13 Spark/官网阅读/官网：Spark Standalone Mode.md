@@ -4,7 +4,7 @@
 
 *In addition to running on the Mesos or YARN cluster managers, Spark also provides a simple standalone deploy mode. You can launch a standalone cluster either manually, by starting a master and workers by hand, or use our provided [launch scripts](http://spark.apache.org/docs/latest/spark-standalone.html#cluster-launch-scripts). It is also possible to run these daemons on a single machine for testing.*
 
-既可以手动启动集群，也可以使用 启动脚本 启动。
+既可以通过手动启动 master 和 workers 来手动启动独立集群，也可以使用 启动脚本 启动。
 
 也可以在一台机器上运行这些进程。
 
