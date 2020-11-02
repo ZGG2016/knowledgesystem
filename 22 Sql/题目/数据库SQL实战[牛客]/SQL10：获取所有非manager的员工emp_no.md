@@ -2,6 +2,7 @@
 
 ## 1、题目
 
+
 获取所有非manager的员工emp_no
 
 ```sql
