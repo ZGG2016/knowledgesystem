@@ -20,6 +20,8 @@ For example, given the above Employee table, the query should return 200 as the 
 	| 200                 |
 	+---------------------+
 
+题目和`数据库SQL实现[牛客]`的`SQL17`相同。
+
 ## 2、题解
 
 ```sql
