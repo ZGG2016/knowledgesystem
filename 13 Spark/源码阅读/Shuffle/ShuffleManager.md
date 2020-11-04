@@ -1,7 +1,5 @@
 # ShuffleManager
 
-**spark-2.4.4-bin-hadoop2.7**
-
 ```java
 package org.apache.spark.shuffle
 

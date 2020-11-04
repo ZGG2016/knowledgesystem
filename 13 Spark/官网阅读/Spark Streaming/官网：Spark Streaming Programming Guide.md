@@ -25,7 +25,7 @@ Spark Streaming 是 Spark core API 的扩展，具有可扩展性、高吞吐、
 
 *Spark Streaming provides a high-level abstraction called discretized stream or DStream, which represents a continuous stream of data. DStreams can be created either from input data streams from sources such as Kafka, and Kinesis, or by applying high-level operations on other DStreams. Internally, a DStream is represented as a sequence of RDDs.*
 
-DStream 表示一个持续的数据流。可以从 Kafka或Kinesis等数据源创建，也可以从其他 DStream 创建。 
+DStream 表示一个持续的数据流。可以从 Kafka或Kinesis等数据源创建，也可以通过在其他 DStream 上应用高级操作创建。 
 
 在内部，一个 DStream 就是一个 [RDD](http://spark.apache.org/docs/latest/api/scala/org/apache/spark/rdd/RDD.html) 序列。
 
@@ -94,7 +94,7 @@ wordCounts.pprint()
 
 - 然后 reduceByKey 得到数据的每个批次中单词的数量。
 
-- 最后，wordCounts.print()将打印每秒生成的一些计数。
+- 最后，wordCounts.pprint()将打印每秒生成的一些计数。
 
 *Note that when these lines are executed, Spark Streaming only sets up the computation it will perform when it is started, and no real processing has started yet. To start the processing after all the transformations have been setup, we finally call*
 

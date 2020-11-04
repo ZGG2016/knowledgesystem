@@ -6,6 +6,7 @@ package org.apache.spark.shuffle
 import org.apache.spark.ShuffleDependency
 
 /**
+ * 获取注册的 shuffle 的参数
  * A basic ShuffleHandle implementation that just captures registerShuffle's parameters.
  */
 private[spark] class BaseShuffleHandle[K, V, C](

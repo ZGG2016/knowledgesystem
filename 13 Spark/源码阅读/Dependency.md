@@ -69,7 +69,7 @@ class ShuffleDependency[K: ClassTag, V: ClassTag, C: ClassTag](
     val partitioner: Partitioner, //用来划分 shuffle 输出的分区器
     val serializer: Serializer = SparkEnv.get.serializer,
     val keyOrdering: Option[Ordering[K]] = None, // RDD's shuffles中，key 的排序方式
-    val aggregator: Option[Aggregator[K, V, C]] = None,
+    val aggregator: Option[Aggregator[K, V, C]] = None,  //map/reduce-side 的聚合器
     val mapSideCombine: Boolean = false)  //是否执行map端聚合
   extends Dependency[Product2[K, V]] {
 
