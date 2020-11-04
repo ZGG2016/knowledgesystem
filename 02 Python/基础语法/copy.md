@@ -1,5 +1,7 @@
 # copy
 
+[TOC]
+
 ## 1、copy — Shallow and deep copy operations
 
 Source code: [Lib/copy.py](https://github.com/python/cpython/blob/3.8/Lib/copy.py)
