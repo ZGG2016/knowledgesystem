@@ -4,7 +4,7 @@
 
 ## 1、Overview
 
-*Spark Streaming is an extension of the core Spark API that enables scalable, high-throughput, fault-tolerant stream processing of live data streams. Data can be ingested from many sources like Kafka, Kinesis, or TCP sockets, and can be processed using complex algorithms expressed with high-level functions like map, reduce, join and window. Finally, processed data can be pushed out to filesystems, databases, and live dashboards. In fact, you can apply Spark’s [machine learning](http://spark.apache.org/docs/latest/ml-guide.html) and [graph processing algorithms](http://spark.apache.org/docs/latest/graphx-programming-guide.html) on data streams.*
+*Spark Streaming is an extension of the core Spark API that enables scalable, high-throughput, fault-tolerant stream processing of live data streams. Data can be ingested from many sources like Kafka, Kinesis, or TCP sockets, and can be processed using complex algorithms expressed with high-level functions like map, reduce, join and window. Finally, processed data can be pushed out to filesystems, databases, and live dashboards. In fact, you can apply Spark’s [machine learning](https://spark.apache.org/docs/3.0.0/ml-guide.html) and [graph processing algorithms](https://spark.apache.org/docs/3.0.0/graphx-programming-guide.html) on data streams.*
 
 
 Spark Streaming 是 Spark core API 的扩展，具有可扩展性、高吞吐、容错。
@@ -27,7 +27,7 @@ Spark Streaming 是 Spark core API 的扩展，具有可扩展性、高吞吐、
 
 DStream 表示一个持续的数据流。可以从 Kafka或Kinesis等数据源创建，也可以通过在其他 DStream 上应用高级操作创建。 
 
-在内部，一个 DStream 就是一个 [RDD](http://spark.apache.org/docs/latest/api/scala/org/apache/spark/rdd/RDD.html) 序列。
+在内部，一个 DStream 就是一个 [RDD](https://spark.apache.org/docs/3.0.0/api/scala/org/apache/spark/rdd/RDD.html) 序列。
 
 *This guide shows you how to start writing Spark Streaming programs with DStreams. You can write Spark Streaming programs in Scala, Java or Python (introduced in Spark 1.2), all of which are presented in this guide. You will find tabs throughout this guide that let you choose between code snippets of different languages.*
 
@@ -41,7 +41,7 @@ DStream 表示一个持续的数据流。可以从 Kafka或Kinesis等数据源�
 
 **A：对于python**
 
-*First, we import StreamingContext, which is the main entry point for all streaming functionality. We create a local StreamingContext with two execution threads, and batch interval of 1 second.*
+*First, we import StreamingContext, which is the main entry point for all streaming functionality. We create a local [StreamingContext](https://spark.apache.org/docs/3.0.0/api/scala/org/apache/spark/streaming/StreamingContext.html) with two execution threads, and batch interval of 1 second.*
 
 先导入程序主入口 StreamingContext，并创建，两个执行线程，批次为间隔1秒。
 
@@ -283,7 +283,7 @@ wordCounts.print()
 ssc.start()             // Start the computation
 ssc.awaitTermination()  // Wait for the computation to terminate
 ```
-*The complete code can be found in the Spark Streaming example NetworkWordCount. *
+*The complete code can be found in the Spark Streaming example NetworkWordCount.*
 
 *If you have already downloaded and built Spark, you can run this example as follows. You will first need to run Netcat (a small utility found in most Unix-like systems) as a data server by using*
 
@@ -571,7 +571,7 @@ Spark Streaming有两种内置的流的源：
 
 *For reading data from files on any file system compatible with the HDFS API (that is, HDFS, S3, NFS, etc.), a DStream can be created as via StreamingContext.fileStream[KeyClass, ValueClass, InputFormatClass].*
 
-从核 HDFS API 兼容的文件系统读取文件中的数据，如：HDFS、 S3、 NFS等。
+从和 HDFS API 兼容的文件系统读取文件中的数据，如：HDFS、 S3、 NFS等。
 
 `StreamingContext.fileStream[KeyClass, ValueClass, InputFormatClass]`：创建DStream
 
@@ -586,6 +586,8 @@ File streams 不需要运行 receiver ，所以就不需要分配为其分配核
 **A：对于python**
 
 *fileStream is not available in the Python API; only textFileStream is available.*
+
+fileStream 方法在 Python API 中是不可用的，仅可以使用 textFileStream。
 
 ```python
 streamingContext.textFileStream(dataDirectory)
@@ -667,7 +669,7 @@ Spark Streaming 会监控数据所在目录，并处理其中的文件：
 
 ##### 3.4.1.2、Streams based on Custom Receivers  自定义Receivers
 
-*DStreams can be created with data streams received through custom receivers. See the [Custom Receiver Guide](http://spark.apache.org/docs/latest/streaming-custom-receivers.html) for more details.*
+*DStreams can be created with data streams received through custom receivers. See the [Custom Receiver Guide](https://spark.apache.org/docs/3.0.0/streaming-custom-receivers.html) for more details.*
 
 ##### 3.4.1.3、Queue of RDDs as a Stream
 
@@ -731,7 +733,7 @@ python 不支持此特性。
 *This can be used for sources that do not support acknowledgment, or even for reliable sources when one does not want or need to go into the complexity of acknowledgment.
 The details of how to write a reliable receiver are discussed in the Custom Receiver Guide.*
 
-如何编写一个靠接收器，见 [Custom Receiver Guide](http://spark.apache.org/docs/latest/streaming-custom-receivers.html)
+如何编写一个可靠接收器，见 [Custom Receiver Guide](https://spark.apache.org/docs/3.0.0/streaming-custom-receivers.html)
 
 
 ### 3.5、Transformations on DStreams
@@ -1050,13 +1052,10 @@ val joinedStream = windowedStream.transform { rdd => rdd.join(dataset) }
 
 Output Operation | Meaning
 ---|:---
-print()	| Prints the first ten elements of every batch of data in a DStream on the driver node running the streaming application. This is useful for development and debugging. 
-Python API This is called pprint() in the Python API. 打印每个批次的前十个元素。
+print()	| Prints the first ten elements of every batch of data in a DStream on the driver node running the streaming application. This is useful for development and debugging. Python API This is called pprint() in the Python API. 打印每个批次的前十个元素。
 saveAsTextFiles(prefix, [suffix])	| Save this DStream's contents as text files. The file name at each batch interval is generated based on prefix and suffix: "prefix-TIME_IN_MS[.suffix]".存入文本文件。
-saveAsObjectFiles(prefix, [suffix])	| Save this DStream's contents as SequenceFiles of serialized Java objects. The file name at each batch interval is generated based on prefix and suffix: "prefix-TIME_IN_MS[.suffix]". 
-Python API This is not available in the Python API.
-saveAsHadoopFiles(prefix, [suffix])	| Save this DStream's contents as Hadoop files. The file name at each batch interval is generated based on prefix and suffix: "prefix-TIME_IN_MS[.suffix]". hadoop文件
-Python API This is not available in the Python API.
+saveAsObjectFiles(prefix, [suffix])	| Save this DStream's contents as SequenceFiles of serialized Java objects. The file name at each batch interval is generated based on prefix and suffix: "prefix-TIME_IN_MS[.suffix]". Python API This is not available in the Python API.
+saveAsHadoopFiles(prefix, [suffix])	| Save this DStream's contents as Hadoop files. The file name at each batch interval is generated based on prefix and suffix: "prefix-TIME_IN_MS[.suffix]". hadoop文件 Python API This is not available in the Python API.
 foreachRDD(func) | The most generic output operator that applies a function, func, to each RDD generated from the stream. This function should push the data in each RDD to an external system, such as saving the RDD to files, or writing it over the network to a database. Note that the function func is executed in the driver process running the streaming application, and will usually have RDD actions in it that will force the computation of the streaming RDDs.
 
 #### 3.6.1、Design Patterns for using foreachRDD
