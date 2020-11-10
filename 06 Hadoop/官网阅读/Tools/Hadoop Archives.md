@@ -1,13 +1,6 @@
-# 官网：Hadoop Archives Guide
+# Hadoop Archives Guide
 
-- Overview
-- How to Create an Archive
-- How to Look Up Files in Archives
-- How to Unarchive an Archive
-- Archives Examples
-- Creating an Archive
-- Looking Up Files
-- Hadoop Archives and MapReduce
+[TOC]
 
 ## 一、Overview
 

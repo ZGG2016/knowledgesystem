@@ -1,4 +1,4 @@
-# hdfs 架构
+# HDFS Architecture 架构
 
 [TOC]
 
