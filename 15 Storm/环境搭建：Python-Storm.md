@@ -14,7 +14,7 @@
 
 (1)  `wget https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein`
 
-(2)  将其放到$PATH目录下。（ ~/bin）
+(2)  将其放到$PATH目录下。(`~/bin`)
 
 (3)  `chmod a+x ~/bin/lein`
 

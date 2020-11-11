@@ -2,7 +2,7 @@
 
 ![mapreduce01](https://s1.ax1x.com/2020/06/22/NGO3ZD.jpg)
 
-(1)FileSplit读取输入文件后，将其切分成多个逻辑InputSplit实例，
+(1)InputFormat读入文件，其中，FileSplit将其切分成多个逻辑InputSplit实例，
 经过RecordReader[LineRecordReader]将InputSplit转化成键值对形式。
 一个InputSplit实例由一个Mapper任务处理。
 
@@ -12,7 +12,7 @@
 (3)通过调用 context.write(WritableComparable, Writable)可以收集map方法输出的键值对。
 然后写到outputcollector收集器中。
 
-(4)经过outputcollector收集器之后会写入到环形缓缓区中。在环形缓冲区中会做几件事情:
+(4)经过outputcollector收集器之后会写入到环形缓存区中。在环形缓冲区中会做几件事情:
 
 	A:分区：hashpartitioner，(key.hashCode() & Integer.MAX_VALUE) % numReduceTasks;
 	        相同的结果进入相同的分区
