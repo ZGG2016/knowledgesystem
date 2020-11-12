@@ -1,27 +1,28 @@
 # 在Windows上使用IDEA本地调试Hadoop程序
 
-(1)下载hadoop-2.7.7.tar.gz
+(1)下载 hadoop-2.7.7.tar.gz
 
-(2)解压，放在D:\software\hadoop-2.7.7
+(2)解压，放在 `D:\software\hadoop-2.7.7`
 
 (3)配置环境变量：
 
-HADOOP_HOME=D:\software\hadoop-2.7.7
+    HADOOP_HOME=D:\software\hadoop-2.7.7
 
-在Path环境变量后追加 ;%HADOOP_HOME%\bin
+在 Path 环境变量后追加 `;%HADOOP_HOME%\bin`
 
-(4)下载winutils.exe和hadoop.dll文件，放在D:\software\hadoop-2.7.7\bin目录下
+(4)下载`winutils.exe`和`hadoop.dll`文件，放在`D:\software\hadoop-2.7.7\bin`目录下
 
-(5)IDEA下新建MAVEN工程
+(5)IDEA 下新建 MAVEN 工程
 
 ![1](https://s1.ax1x.com/2020/05/31/t3lVtU.png)
 
-(6)编写pom.xml文件
-（如果写完pom.xml，依赖没有添加成功，点击如下图标）
+(6)编写 pom.xml 文件
+
+（如果写完 pom.xml，依赖没有添加成功，点击如下图标）
 
 ![2](https://s1.ax1x.com/2020/05/31/t3lZhF.png)
 
-(7)写个wordcount测试
+(7)写个 wordcount 测试
 
 ```java
     import java.io.FileWriter;

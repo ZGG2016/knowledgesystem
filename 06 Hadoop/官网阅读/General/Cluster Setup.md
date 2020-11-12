@@ -116,6 +116,8 @@ See `etc/hadoop/hadoop-env.sh` for other examples.
 
 	可以使用上面列出的 `_OPTS` 变量在每个守护进程上重写这个值。例如，设置 `HADOOP_HEAPSIZE_MAX=1g` 和 `HADOOP_NAMENODE_OPTS="-Xmx5g"` 将配置NameNode为5GB堆。
 
+	【Daemons will prefer any Xmx setting in their respective `_OPT` variable】
+
 大多数情况下，你可以指定 `HADOOP_PID_DIR` 和 `HADOOP_LOG_DIR` ，因为这两个设置仅能被用户设置。否则就有 symlink 攻击的可能。
 
 <font color="grey">In most cases, you should specify the HADOOP_PID_DIR and HADOOP_LOG_DIR directories such that they can only be written to by the users that are going to run the hadoop daemons. Otherwise there is the potential for a symlink attack.</font>
