@@ -345,6 +345,49 @@ The HiveCLI (deprecated) and Beeline command 'SET' can be used to set any Hadoop
 
 ### 1.8、Hive Logging
 
+<font color="grey">Hive uses log4j for logging. By default logs are not emitted to the console by the CLI. The default logging level is WARN for Hive releases prior to 0.13.0. Starting with Hive 0.13.0, the default logging level is INFO.</font>
+
+<font color="grey">The logs are stored in the directory /tmp/<user.name>:</font>
+
+	/tmp/<user.name>/hive.log
+
+<font color="grey">Note: In local mode, prior to Hive 0.13.0 the log file name was ".log" instead of "hive.log". This bug was fixed in release 0.13.0 (see HIVE-5528 and HIVE-5676).
+To configure a different log location, set hive.log.dir in $HIVE_HOME/conf/hive-log4j.properties. Make sure the directory has the sticky bit set (chmod 1777 <dir>).</font>
+
+	hive.log.dir=<other_location>
+
+<font color="grey">If the user wishes, the logs can be emitted to the console by adding the arguments shown below:</font>
+
+	bin/hive --hiveconf hive.root.logger=INFO,console  //for HiveCLI (deprecated)
+	
+	bin/hiveserver2 --hiveconf hive.root.logger=INFO,console
+
+<font color="grey">Alternatively, the user can change the logging level only by using:</font>
+
+	bin/hive --hiveconf hive.root.logger=INFO,DRFA //for HiveCLI (deprecated)
+
+	bin/hiveserver2 --hiveconf hive.root.logger=INFO,DRFA
+
+<font color="grey">Another option for logging is TimeBasedRollingPolicy (applicable for Hive 1.1.0 and above, HIVE-9001) by providing DAILY option as shown below:</font>
+
+	bin/hive --hiveconf hive.root.logger=INFO,DAILY //for HiveCLI (deprecated)
+
+	bin/hiveserver2 --hiveconf hive.root.logger=INFO,DAILY
+
+<font color="grey">Note that setting hive.root.logger via the 'set' command does not change logging properties since they are determined at initialization time.</font>
+
+<font color="grey">Hive also stores query logs on a per Hive session basis in /tmp/<user.name>/, but can be configured in hive-site.xml with the hive.querylog.location property.  Starting with Hive 1.1.0, EXPLAIN EXTENDED output for queries can be logged at the INFO level by setting the hive.log.explain.output property to true.</font>
+
+<font color="grey">Logging during Hive execution on a Hadoop cluster is controlled by Hadoop configuration. Usually Hadoop will produce one log file per map and reduce task stored on the cluster machine(s) where the task was executed. The log files can be obtained by clicking through to the Task Details page from the Hadoop JobTracker Web UI.</font>
+
+<font color="grey">When using local mode (using mapreduce.framework.name=local), Hadoop/Hive execution logs are produced on the client machine itself. Starting with release 0.6 – Hive uses the hive-exec-log4j.properties (falling back to hive-log4j.properties only if it's missing) to determine where these logs are delivered by default. The default configuration file produces one log file per query executed in local mode and stores it under /tmp/<user.name>. The intent of providing a separate configuration file is to enable administrators to centralize execution log capture if desired (on a NFS file server for example). Execution logs are invaluable for debugging run-time errors.</font>
+
+<font color="grey">For information about WebHCat errors and logging, see Error Codes and Responses and Log Files in the WebHCat manual.</font>
+
+<font color="grey">Error logs are very useful to debug problems. Please send them with any bugs (of which there are many!) to hive-dev@hadoop.apache.org.</font>
+
+<font color="grey">From Hive 2.1.0 onwards (with HIVE-13027), Hive uses Log4j2's asynchronous logger by default. Setting hive.async.log.enabled to false will disable asynchronous logging and fallback to synchronous logging. Asynchronous logging can give significant performance improvement as logging will be handled in a separate thread that uses the LMAX disruptor queue for buffering log messages. Refer to https://logging.apache.org/log4j/2.x/manual/async.html for benefits and drawbacks.</font>
+
 #### 1.8.1、HiveServer2 Logs
 
 #### 1.8.2、Audit Logs
