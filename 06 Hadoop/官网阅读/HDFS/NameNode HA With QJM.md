@@ -85,7 +85,8 @@ SecondryNameNode、CheckpointNode、BackupNode。 In fact, to do so would be an 
 - dfs.nameservices：**新的 nameservice 的逻辑名称**，例如"mycluster"。这个名称用在配置文件中，
 或作为 HDFS 路径的一部分(as the authority component of absolute HDFS paths in the cluster.)
 注意：如果也在使用 HDFS federation，这个配置的设置应该包含其他 nameservices，用逗号分隔。
-```
+
+```xml
 <property>
 	<name>dfs.nameservices</name>
 	<value>mycluster</value>
