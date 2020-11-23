@@ -22,7 +22,7 @@
 	
 结果：数据按照partition为单位聚集在一起，同一partition内的按照key有序。
 
-(5)对中间过程的输出进行本地的聚集，即combine，以降低从 Mapper 到 Reducer 数据传输量。【可选步骤】
+(5)对中间过程的输出进行本地的聚集，即combine，以降低从 Mapper 到 Reducer 数据传输量。【可选步骤】【在环形缓存区中执行】
 
 (6)每次环形缓冲区容量达80%时，就会新建一个溢出文件(磁盘上)。
 在将中间输出结果写磁盘的过程中，可以进行压缩，这样的话，写入磁盘的速度会加快。
@@ -30,21 +30,15 @@
 (7)在溢写到磁盘之后会进行归并排序，将多个小文件合并成大文件的。
 所以合并之后的大文件还是分区、有序的。
 
-(8)reduce端从map端按照相同的分区复制数据，放到磁盘或内存中。
+(8)reduce端从map端按照相同的分区复制数据，放到内存中，超过阈值会溢写。
 
 (9)取数据的同时，会按照相同的分区，再将取过来的数据进行归并排序，
 大文件的内容按照key有序进行排序。如果前面进行了压缩，此阶段需要解压缩。
 
-(10)如果在reduce前，想要将中间的键的分组规则与键的分组等价规则不同，
-那么可以通过 Job.setSortComparatorClass(Class) 来指定一个Comparator，
-控制中间结果的key如何被分组，所以结合两者可以实现按**值的二次排序**。
-[If equivalence rules for grouping the intermediate keys are required to be 
-different from those for grouping keys before reduction]
-
-(11)会调用groupingcomparator进行分组，之后的reduce中会按照这个分组，
+(10)会调用groupingcomparator进行分组，之后的reduce中会按照这个分组，
 每次取出一组数据，调用reduce中自定义的方法进行处理。（一个分组，一个reduce方法）
 
-(12)调用outputformat会将内容写入到文件中。
+(11)调用outputformat会将内容写入到文件中。
 
 
 参考：

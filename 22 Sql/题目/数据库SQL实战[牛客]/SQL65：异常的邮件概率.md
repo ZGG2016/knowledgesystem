@@ -45,9 +45,8 @@
 
 
 ```sql
--- 还未测试
 select date,
-cast(sum(case when type='completed' then 1 else 0 end)/count(type) as decimal(10,3)) p
+cast(sum(case when type='no_completed' then 1 else 0 end)*1.0/count(type) as decimal(10,3)) p
 from email
 where send_id in (select id from user where is_blacklist=0)
 and receive_id in (select id from user where is_blacklist=0)
