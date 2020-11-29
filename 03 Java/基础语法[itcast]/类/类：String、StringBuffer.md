@@ -80,7 +80,7 @@ public static void main(String[] args) {
 
 ```
 
-![java26](https://s1.ax1x.com/2020/07/05/USs04s.png)
+![class01](./image/class01.png)
 
 
 （2）String s = new String(“hello”)和String s = “hello”;的区别?
