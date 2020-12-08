@@ -73,3 +73,5 @@ EXPLAIN字段解析：
 **见到Using temporary和Using filesort，就意味着MySQL根本不能使用索引，结果是检索会很慢，需要优化sql了。**
 
 [原文链接](https://www.cnblogs.com/deverz/p/11066043.html)
+
+[参考](https://blog.csdn.net/jiadajing267/article/details/81269067)
