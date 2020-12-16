@@ -15,7 +15,7 @@
 在环形缓冲区中会做几件事情:
 
 	A:分区：hashpartitioner，(key.hashCode() & Integer.MAX_VALUE) % numReduceTasks;
-	        相同的结果进入相同的分区
+	        相同的结果进入相同的分区 （一个分区，一个reduce任务）
 	B:排序：快速排序法
 	排序的时候的两个依据是分区号和key两个作为依据的。
 	同一个partition中是按照key进行排序的。

@@ -67,8 +67,7 @@ EXPLAIN字段解析：
 
 	range checked for eache record(index map:N)： 没有好的索引可以使用。
 
-	Using index for group-by：表明可以在索引中找到分组所需的所有数据，不需要查询实际的表。explain select 
-	user_id from t_order group by user_id;
+	Using index for group-by：表明可以在索引中找到分组所需的所有数据，不需要查询实际的表。explain select user_id from t_order group by user_id;
 
 **见到Using temporary和Using filesort，就意味着MySQL根本不能使用索引，结果是检索会很慢，需要优化sql了。**
 
