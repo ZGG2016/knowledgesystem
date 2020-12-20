@@ -1,4 +1,4 @@
-# collections.Counter
+# Counter类
 
 collections 是 Python 内建的一个集合模块，提供了许多有用的集合类，如 Counter。
 
@@ -186,3 +186,9 @@ print(c)  # 输出：Counter()
 - Multiset多集合方法只为正值的使用情况设计。输入可以是负数或者0，但只输出计数为正的值。没有类型限制，但值类型需要支持加，减和比较操作。
 
 - elements() 方法要求正整数计数。忽略0和负数计数。
+
+------------------------------------------------
+
+[英文官方文档](https://docs.python.org/3.8/library/collections.html#collections.Counter)
+
+[中文官方文档](https://docs.python.org/zh-cn/3.8/library/collections.html#collections.Counter)

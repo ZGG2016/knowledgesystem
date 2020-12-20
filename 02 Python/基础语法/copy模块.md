@@ -135,8 +135,6 @@ print(dc)  # [6, 2, 3, [4, 5]]
 **列表的浅拷贝使用切片:`copied_list = original_list[:]`**
 
 ```python
-import copy
-
 # 字典
 d = {'a':1,'b':2}
 

@@ -274,7 +274,7 @@ $
 
 下面快速浏览其他部署模式。
 
-## 2.3. Pseudo-Distributed Local Install
+### 2.3. Pseudo-Distributed Local Install
 
 > After working your way through quickstart standalone mode, you can re-configure HBase to run in pseudo-distributed mode. Pseudo-distributed mode means that HBase still runs completely on a single host, but each HBase daemon (HMaster, HRegionServer, and ZooKeeper) runs as a separate process: in standalone mode all daemons ran in one jvm process/instance. By default, unless you configure the hbase.rootdir property as described in quickstart, your data is still stored in /tmp/. In this walk-through, we store your data in HDFS instead, assuming you have HDFS available. You can skip the HDFS configuration to continue storing your data in the local filesystem.
 
@@ -425,7 +425,7 @@ You can stop HBase the same way as in the quickstart procedure, using the bin/st
 
 使用 `bin/stop-hbase.sh` 停止 HBase
 
-## 2.4. Advanced - Fully Distributed
+### 2.4. Advanced - Fully Distributed
 
 > In reality, you need a fully-distributed configuration to fully test HBase and to use it in real-world scenarios. In a distributed configuration, the cluster contains multiple nodes, each of which runs one or more HBase daemon. These include primary and backup Master instances, multiple ZooKeeper nodes, and multiple RegionServer nodes.
 
@@ -631,6 +631,6 @@ With a three-node cluster you have configured, things will not be very resilient
 
 5.测试当节点或服务消失后，发生了什么。
 
-## 2.5. Where to go next
+### 2.5. Where to go next
 
 > The next chapter, configuration, gives more information about the different HBase run modes, system requirements for running HBase, and critical configuration areas for setting up a distributed HBase cluster.
