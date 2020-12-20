@@ -10,6 +10,6 @@ Hbase 官网阅读整理：[https://hbase.apache.org/2.2/book.html](https://hbas
 
 - Preface
 
-- Getting Started
+- [Getting Started](https://github.com/ZGG2016/knowledgesystem/blob/master/09%20HBase/%E5%AE%98%E7%BD%91%E9%98%85%E8%AF%BB/Getting%20Started.md)
 
-- HBase and Schema Design
+- [HBase and Schema Design](https://github.com/ZGG2016/knowledgesystem/blob/master/09%20HBase/%E5%AE%98%E7%BD%91%E9%98%85%E8%AF%BB/HBase%20and%20Schema%20Design/0%E7%9B%AE%E5%BD%95.md)
