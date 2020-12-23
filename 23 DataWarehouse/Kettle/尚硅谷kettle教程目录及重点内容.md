@@ -149,8 +149,74 @@ Kettle 中使用 转换 完成数据 ETL 全部工作。
 
 #### 3.1.4 XML 输入
 
+![kettle16](./image/kettle16.png)
+
+要注意：xpath匹配规则
+
 #### 3.1.5 JSON 输入
+
+![kettle17](./image/kettle17.png)
+
+要注意：[jsonpath匹配规则](https://blog.csdn.net/lwg_1540652358/article/details/84111339)
 
 #### 3.1.6 表输入
 
+见 [kettle初体验：windows环境下安装和使用.md](https://github.com/ZGG2016/knowledgesystem/blob/master/23%20DataWarehouse/Kettle/kettle%E5%88%9D%E4%BD%93%E9%AA%8C%EF%BC%9Awindows%E7%8E%AF%E5%A2%83%E4%B8%8B%E5%AE%89%E8%A3%85%E5%92%8C%E4%BD%BF%E7%94%A8.md)
+
 ### 3.2 Kettle 输出控件
+
+#### 3.2.1 Excel 输出
+
+Kettle 中自带了两个 Excel 输出，一个 Excel 输出，另一个是 Microsoft Excel 输出。
+
+	Excel 输出只能输出 xls 文件（适合 Excel2003）;
+
+	Microsoft Excel 输出可以输出 xls 和 xlsx 文件（适合 Excel2007 及以后）
+
+![kettle18](./image/kettle18.png)
+
+#### 3.2.2 文本文件输出
+
+![kettle19](./image/kettle19.png)
+
+要注意：分隔符
+
+
+#### 3.2.3 SQL 文件输出
+
+SQL 文件输出一般跟表输入做连接，然后将数据库表的表结构和数据以 sql 文件的形式导出，然后做数据库备份的这么一个工作。
+
+![kettle20](./image/kettle20.png)
+
+
+#### 3.2.4 表输出
+
+![kettle21](./image/kettle21.png)
+
+
+#### 3.2.5 更新&插入/更新
+
+将数据库已经存在的记录与数据流里面的记录进行对比的控件。企业级 ETL 经常会用到这两个控件来进行数据库更新的操作。
+
+两者区别：
+
+- 更新是将数据库表中的数据和数据流中的数据做对比，如果不同就更新，如果数据流中的数据比数据库表中的数据多，那么就报错。
+
+- 插入/更新的功能和更新一样，只不过优化了数据不存在就插入的功能，因此企业里更多的也是使用插入/更新
+
+![kettle22](./image/kettle22.png)
+
+![kettle23](./image/kettle23.png)
+
+注意：哪个是表中字段，哪个是流中字段
+
+#### 3.2.6 删除
+
+删除控件可以删除数据库表中指定条件的数据，企业里一般用此控件做数据库表数据删除或者跟另外一个表数据做对比，然后进行去重的操作。
+
+（按照 apps_bk 表对 apps_bk2 表数据进行去重）
+
+![kettle24](./image/kettle24.png)
+
+
+### 3.3 Kettle 转换控件
