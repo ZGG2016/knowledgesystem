@@ -1,0 +1,1 @@
+# Appendix D: Compression and Data Block Encoding In HBase
