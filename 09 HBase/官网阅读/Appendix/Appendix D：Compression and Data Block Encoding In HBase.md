@@ -317,25 +317,49 @@ bzip2:  true /lib64/libbz2.so.1
 
 > Before HBase can use a given compressor, its libraries need to be available. Due to licensing issues, only GZ compression is available to HBase (via native Java libraries) in a default installation. Other compression libraries are available via the shared library bundled with your hadoop. The hadoop native library needs to be findable when HBase starts. See
 
+在 HBase 使用给定的压缩器之前，它的库必须是可用的。由于许可问题，在默认的安装中只有 GZip 压缩对 HBase 可用(通过本地Java库)。
+
+其他压缩库可以通过与 hadoop 绑定的共享库获得。hadoop 本地库需要在 HBase 启动时被找到。
+
 #### Compressor Support On the Master
 
 > A new configuration setting was introduced in HBase 0.95, to check the Master to determine which data block encoders are installed and configured on it, and assume that the entire cluster is configured the same. This option, hbase.master.check.compression, defaults to true. This prevents the situation described in [HBASE-6370](https://issues.apache.org/jira/browse/HBASE-6370), where a table is created or modified to support a codec that a region server does not support, leading to failures that take a long time to occur and are difficult to debug.
 
+HBase 0.95 中引入了一个新的配置设置，**检查 Master 以确定在它上安装和配置了哪些数据块编码器**，并假设整个集群的配置相同。
+
+这个选项 **`hbase.master.check.compression` 默认为 true**。这就避免了 HBASE-6370 中描述的情况，即创建或修改一个表，来支持一个区域服务器不支持的编解码器【？？？】，从而导致花费很长时间发生的故障，并且很难调试。
+
 > If hbase.master.check.compression is enabled, libraries for all desired compressors need to be installed and configured on the Master, even if the Master does not run a region server.
+
+如果启用了 `hbase.master.check.compression`，所有需要的压缩器的库都需要安装、配置在 Master 上，即使 Master 没有运行 region server。
 
 #### Install GZ Support Via Native Libraries
 
 > HBase uses Java’s built-in GZip support unless the native Hadoop libraries are available on the CLASSPATH. The recommended way to add libraries to the CLASSPATH is to set the environment variable HBASE_LIBRARY_PATH for the user running HBase. If native libraries are not available and Java’s GZIP is used, Got brand-new compressor reports will be present in the logs. See [brand.new.compressor](https://hbase.apache.org/2.2/book.html#brand.new.compressor)).
 
+除非类路径上有可用的本地 Hadoop 库，否则**HBase 使用 Java 内置的 GZip 支持**。
+
+在类路径中添加库的建议方法是，为运行 HBase 的用户设置环境变量 `HBASE_LIBRARY_PATH`，。如果本地库不可用，并且使用了 Java 的 GZIP，则日志中将显示获得的全新压缩器报告。
+
 #### Install LZO Support
 
 > HBase cannot ship with LZO because of incompatibility between HBase, which uses an Apache Software License (ASL) and LZO, which uses a GPL license. See the [Hadoop-LZO](https://github.com/twitter/hadoop-lzo/blob/master/README.md) at Twitter for information on configuring LZO support for HBase.
 
+**由于使用 ASL 的 HBase 和使用 GPL 许可的 LZO 不兼容，HBase 不能和 LZO 一起使用。关于配置对 HBase 的 LZO 支持的信息，请参阅 Twitter 上的 Hadoop-LZO**。
+
 > If you depend upon LZO compression, consider configuring your RegionServers to fail to start if LZO is not available. See [hbase.regionserver.codecs](https://hbase.apache.org/2.2/book.html#hbase.regionserver.codecs).
+
+如果你依赖于 LZO 压缩，且 LZO 不可用，请考虑将你的 regionserver 配置为启动失败。
 
 #### Configure LZ4 Support
 
 > LZ4 support is bundled with Hadoop. Make sure the hadoop shared library (libhadoop.so) is accessible when you start HBase. After configuring your platform (see [hadoop.native.lib](https://hbase.apache.org/2.2/book.html#hadoop.native.lib)), you can make a symbolic link from HBase to the native Hadoop libraries. This assumes the two software installs are colocated. For example, if my 'platform' is Linux-amd64-64:
+
+**LZ4 支持与 Hadoop 捆绑在一起的。启动 HBase 时，请确保 hadoop 共享库(libhadoop.so)是可访问的**。
+
+在配置好平台之后，你可以创建一个从 HBase 到本地 Hadoop 库的符号链接。
+
+这假设两个软件安装是并行的。例如，如果我的“平台”是 Linux-amd64-64:
 
 	$ cd $HBASE_HOME
 	$ mkdir lib/native
@@ -343,23 +367,43 @@ bzip2:  true /lib64/libbz2.so.1
 
 > Use the compression tool to check that LZ4 is installed on all nodes. Start up (or restart) HBase. Afterward, you can create and alter tables to enable LZ4 as a compression codec.:
 
+使用压缩工具检查 LZ4 是否安装在所有节点上。
+
+启动(或重启)HBase。之后，你可以创建和修改表，来启用 LZ4 作为压缩编解码器。
+
 	hbase(main):003:0> alter 'TestTable', {NAME => 'info', COMPRESSION => 'LZ4'}
 
 #### Install Snappy Support
 
 > HBase does not ship with Snappy support because of licensing issues. You can install Snappy binaries (for instance, by using yum install snappy on CentOS) or build Snappy from source. After installing Snappy, search for the shared library, which will be called libsnappy.so.X where X is a number. If you built from source, copy the shared library to a known location on your system, such as /opt/snappy/lib/.
 
+由于许可问题，**HBase 不支持 Snappy。你可以安装 Snappy 的二进制文件(例如，在 CentOS 上使用 yum install Snappy)或者从源代码构建 Snappy**。
+
+安装完 Snappy 之后，搜索它，名为 libsnappy.so.X，X是一个数字。
+
+如果从源代码构建，则将它复制到系统上的已知位置，例如`/opt/snappy/lib/`。
+
 > In addition to the Snappy library, HBase also needs access to the Hadoop shared library, which will be called something like libhadoop.so.X.Y, where X and Y are both numbers. Make note of the location of the Hadoop library, or copy it to the same location as the Snappy library.
+
+**除了 Snappy 库，HBase还需要访问 Hadoop 共享库，它将被称为 `libhadoop.so.X` 之类的东西**， X 和 Y 都是数字。注意 Hadoop 库的位置，或者将其复制到与 Snappy 库相同的位置。
 
 > The Snappy and Hadoop libraries need to be available on each node of your cluster. See [compression.test](https://hbase.apache.org/2.2/book.html#compression.test) to find out how to test that this is the case.
 
+Snappy 和 Hadoop 库需要在集群的每个节点上可用。
+
 > See [hbase.regionserver.codecs](https://hbase.apache.org/2.2/book.html#hbase.regionserver.codecs) to configure your RegionServers to fail to start if a given compressor is not available.
 
+如果给定的压缩器不可用，配置 RegionServers 的编解码器将无法启动。
+
 > Each of these library locations need to be added to the environment variable HBASE_LIBRARY_PATH for the operating system user that runs HBase. You need to restart the RegionServer for the changes to take effect.
+
+每个库的位置都需要添加到运行 HBase 的操作系统用户的环境变量 `HBASE_LIBRARY_PATH` 中。需要重新启动 RegionServer ，使更改生效。
 
 #### CompressionTest
 
 > You can use the CompressionTest tool to verify that your compressor is available to HBase:
+
+你可以**使用 CompressionTest 工具来验证你的压缩器是否对 HBase 可用:**
 
 	$ hbase org.apache.hadoop.hbase.util.CompressionTest hdfs://host/path/to/hbase snappy
 
@@ -367,9 +411,15 @@ bzip2:  true /lib64/libbz2.so.1
 
 > You can configure a RegionServer so that it will fail to restart if compression is configured incorrectly, by adding the option hbase.regionserver.codecs to the hbase-site.xml, and setting its value to a comma-separated list of codecs that need to be available. For example, if you set this property to lzo,gz, the RegionServer would fail to start if both compressors were not available. This would prevent a new server from being added to the cluster without having codecs configured properly.
 
+**可以通过在 `hbase-site.xml` 中添加选项 `hbase.regionserver.codecs`，并将其值设置为可用的编解码器的逗号分隔列表，来配置 RegionServer，这样如果压缩配置错误，它将无法重新启动**。
+
+例如，如果将此属性设置为 `lzo,gz`，那么如果两个压缩器都不可用，RegionServer 将无法启动。这将防止在没有正确配置编解码器的情况下，将新服务器添加到集群中。
+
 ### D.3.2. Enable Compression On a ColumnFamily
 
 > To enable compression for a ColumnFamily, use an alter command. You do not need to re-create the table or copy data. If you are changing codecs, be sure the old codec is still available until all the old StoreFiles have been compacted.
+
+**要启用对列族的压缩，请使用 `alter` 命令**。你不需要重新创建表或复制数据。如果你正在更改编解码器，请确保旧的编解码器仍然可用，直到所有旧的 StoreFiles 都已 compacted。
 
 #### Enabling Compression on a ColumnFamily of an Existing Table using HBaseShell
 
@@ -394,6 +444,10 @@ DESCRIPTION                                          ENABLED
 ### D.3.3. Testing Compression Performance
 
 > HBase includes a tool called LoadTestTool which provides mechanisms to test your compression performance. You must specify either -write or -update-read as your first parameter, and if you do not specify another parameter, usage advice is printed for each option.
+
+HBase 有一个名为 **LoadTestTool 的工具，它可以测试你的压缩性能**。
+
+必须指定 `-write` 或 `-update-read` 作为第一个参数，如果不指定其他参数，则会为每个选项打印使用建议。
 
 #### LoadTestTool Usage
 
@@ -461,6 +515,12 @@ $ hbase org.apache.hadoop.hbase.util.LoadTestTool -write 1:10:100 -num_keys 1000
 ## D.4. Enable Data Block Encoding
 
 > Codecs are built into HBase so no extra configuration is needed. Codecs are enabled on a table by setting the DATA_BLOCK_ENCODING property. Disable the table before altering its DATA_BLOCK_ENCODING setting. Following is an example using HBase Shell:
+
+**编解码器内置在 HBase 中，因此不需要额外的配置**。
+
+**通过设置 `DATA_BLOCK_ENCODING` 属性，可以在表上启用编解码器**。在更改表的 `DATA_BLOCK_ENCODING` 设置之前禁用该表。
+
+HBase Shell 使用示例如下:
 
 #### Enable Data Block Encoding On a Table
 
