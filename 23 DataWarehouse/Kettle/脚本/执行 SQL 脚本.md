@@ -18,6 +18,8 @@ mysql> select * from employees_bk3;
 5 rows in set (0.01 sec)
 ```
 
+操作过程：
+
 <img src="../image/kettle脚本01.png" alt="kettle脚本01" height="470" width="370" >
 
 <img src="../image/kettle脚本02.png" alt="kettle脚本02" height="370" width="530" >
