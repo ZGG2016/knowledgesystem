@@ -378,3 +378,7 @@ for chunk in json.JSONEncoder().iterencode(bigobject):
 ```
 
 -------------------------------------------------------------------------------
+
+[英文官方文档](https://docs.python.org/3.8/library/json.html)
+
+[中文官方文档](https://docs.python.org/zh-cn/3.8/library/json.html)

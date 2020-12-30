@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<students Description="students of atguigu">
+    <group groupID="1">
+         <student>
+            <name>孙悟空</name>
+            <gender>男</gender>
+            <age>500</age>
+         </student>
+         <student>
+            <name>猪八戒</name>
+            <gender>男</gender>
+            <age>250</age>
+         </student>
+         <student>
+            <name>沙和尚</name>
+            <gender>男</gender>
+            <age>150</age>
+         </student>
+    </group>
+    <group groupID="2">
+         <student>
+            <name>武大郎</name>
+            <gender>男</gender>
+            <age>48</age>
+         </student>
+         <student>
+            <name>潘金莲</name>
+            <gender>女</gender>
+            <age>18</age>
+         </student>
+    </group>
+</students>  

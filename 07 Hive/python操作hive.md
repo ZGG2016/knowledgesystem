@@ -165,7 +165,7 @@ with pyhs2.connect(host='zgg',
 beeline> !connect jdbc:hive2://zgg:10001/default;transportMode=http;httpPath=cliservice
 Connecting to jdbc:hive2://zgg:10001/default;transportMode=http;httpPath=cliservice
 Enter username for jdbc:hive2://zgg:10001/default: root
-Enter password for jdbc:hive2://zgg:10001/default: ****   
+Enter password for jdbc:hive2://zgg:10001/default: ****   【hive】
 2020-12-14 23:14:30,056 INFO jdbc.Utils: Supplied authorities: zgg:10001
 2020-12-14 23:14:30,057 INFO jdbc.Utils: Resolved authority: zgg:10001
 Connected to: Apache Hive (version 3.1.2)
