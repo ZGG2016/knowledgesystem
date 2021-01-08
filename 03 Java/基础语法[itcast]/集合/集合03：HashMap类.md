@@ -48,7 +48,6 @@ public class HashMapDemo01 {
         hm.put(28, "刘意");
         hm.put(29, "林青霞");
 
-
         //public HashMap(Map<? extends K,? extends V> m)
         // 构造一个映射关系与指定 Map 相同的新 HashMap。
         // 所创建的 HashMap 具有默认加载因子 (0.75) 和足以容纳指定 Map 中映射关系的初始容量。
