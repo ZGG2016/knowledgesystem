@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>12_删除_mysql_mysql</name>
+    <name>mysql输出</name>
     <description/>
     <extended_description/>
     <trans_version/>
     <trans_type>Normal</trans_type>
+    <trans_status>0</trans_status>
     <directory>/</directory>
     <parameters>
     </parameters>
@@ -427,10 +428,10 @@
     <clusterschemas>
     </clusterschemas>
     <created_user>-</created_user>
-    <created_date>2020/12/23 15:18:10.851</created_date>
+    <created_date>2020/12/23 14:36:28.095</created_date>
     <modified_user>-</modified_user>
-    <modified_date>2020/12/23 15:18:10.851</modified_date>
-    <key_for_session_key/>
+    <modified_date>2020/12/23 14:36:28.095</modified_date>
+    <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA=</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
@@ -501,7 +502,7 @@
   <order>
     <hop>
       <from>表输入</from>
-      <to>删除</to>
+      <to>表输出</to>
       <enabled>Y</enabled>
     </hop>
   </order>
@@ -517,113 +518,12 @@
       <schema_name/>
     </partitioning>
     <connection>mysql</connection>
-    <sql>SELECT
-  id
-, app_name
-, url
-, country
-FROM users.apps_bk
-</sql>
+    <sql>select * from apps;</sql>
     <limit>0</limit>
     <lookup/>
     <execute_each_row>N</execute_each_row>
     <variables_active>N</variables_active>
     <lazy_conversion_active>N</lazy_conversion_active>
-    <cached_row_meta_active>N</cached_row_meta_active>
-    <row-meta>
-      <value-meta>
-        <type>Integer</type>
-        <storagetype>normal</storagetype>
-        <name>id</name>
-        <length>9</length>
-        <precision>0</precision>
-        <origin>表输入</origin>
-        <comments>id</comments>
-        <conversion_Mask>####0;-####0</conversion_Mask>
-        <decimal_symbol>.</decimal_symbol>
-        <grouping_symbol>,</grouping_symbol>
-        <currency_symbol/>
-        <trim_type>none</trim_type>
-        <case_insensitive>N</case_insensitive>
-        <collator_disabled>Y</collator_disabled>
-        <collator_strength>0</collator_strength>
-        <sort_descending>N</sort_descending>
-        <output_padding>N</output_padding>
-        <date_format_lenient>N</date_format_lenient>
-        <date_format_locale>zh_CN</date_format_locale>
-        <date_format_timezone>Asia/Shanghai</date_format_timezone>
-        <lenient_string_to_number>N</lenient_string_to_number>
-      </value-meta>
-      <value-meta>
-        <type>String</type>
-        <storagetype>normal</storagetype>
-        <name>app_name</name>
-        <length>20</length>
-        <precision>-1</precision>
-        <origin>表输入</origin>
-        <comments>app_name</comments>
-        <conversion_Mask/>
-        <decimal_symbol>.</decimal_symbol>
-        <grouping_symbol>,</grouping_symbol>
-        <currency_symbol/>
-        <trim_type>none</trim_type>
-        <case_insensitive>N</case_insensitive>
-        <collator_disabled>Y</collator_disabled>
-        <collator_strength>0</collator_strength>
-        <sort_descending>N</sort_descending>
-        <output_padding>N</output_padding>
-        <date_format_lenient>N</date_format_lenient>
-        <date_format_locale>zh_CN</date_format_locale>
-        <date_format_timezone>Asia/Shanghai</date_format_timezone>
-        <lenient_string_to_number>N</lenient_string_to_number>
-      </value-meta>
-      <value-meta>
-        <type>String</type>
-        <storagetype>normal</storagetype>
-        <name>url</name>
-        <length>255</length>
-        <precision>-1</precision>
-        <origin>表输入</origin>
-        <comments>url</comments>
-        <conversion_Mask/>
-        <decimal_symbol>.</decimal_symbol>
-        <grouping_symbol>,</grouping_symbol>
-        <currency_symbol/>
-        <trim_type>none</trim_type>
-        <case_insensitive>N</case_insensitive>
-        <collator_disabled>Y</collator_disabled>
-        <collator_strength>0</collator_strength>
-        <sort_descending>N</sort_descending>
-        <output_padding>N</output_padding>
-        <date_format_lenient>N</date_format_lenient>
-        <date_format_locale>zh_CN</date_format_locale>
-        <date_format_timezone>Asia/Shanghai</date_format_timezone>
-        <lenient_string_to_number>N</lenient_string_to_number>
-      </value-meta>
-      <value-meta>
-        <type>String</type>
-        <storagetype>normal</storagetype>
-        <name>country</name>
-        <length>10</length>
-        <precision>-1</precision>
-        <origin>表输入</origin>
-        <comments>country</comments>
-        <conversion_Mask/>
-        <decimal_symbol>.</decimal_symbol>
-        <grouping_symbol>,</grouping_symbol>
-        <currency_symbol/>
-        <trim_type>none</trim_type>
-        <case_insensitive>N</case_insensitive>
-        <collator_disabled>Y</collator_disabled>
-        <collator_strength>0</collator_strength>
-        <sort_descending>N</sort_descending>
-        <output_padding>N</output_padding>
-        <date_format_lenient>N</date_format_lenient>
-        <date_format_locale>zh_CN</date_format_locale>
-        <date_format_timezone>Asia/Shanghai</date_format_timezone>
-        <lenient_string_to_number>N</lenient_string_to_number>
-      </value-meta>
-    </row-meta>
     <attributes/>
     <cluster_schema/>
     <remotesteps>
@@ -633,14 +533,14 @@ FROM users.apps_bk
       </output>
     </remotesteps>
     <GUI>
-      <xloc>112</xloc>
-      <yloc>80</yloc>
+      <xloc>64</xloc>
+      <yloc>64</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
-    <name>删除</name>
-    <type>Delete</type>
+    <name>表输出</name>
+    <type>TableOutput</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -650,35 +550,40 @@ FROM users.apps_bk
       <schema_name/>
     </partitioning>
     <connection>mysql</connection>
-    <commit>100</commit>
-    <lookup>
-      <schema>users</schema>
-      <table>apps_bk2</table>
-      <key>
-        <name>id</name>
-        <field>id</field>
-        <condition>=</condition>
-        <name2/>
-      </key>
-      <key>
-        <name>app_name</name>
-        <field>app_name</field>
-        <condition>=</condition>
-        <name2/>
-      </key>
-      <key>
-        <name>url</name>
-        <field>url</field>
-        <condition>=</condition>
-        <name2/>
-      </key>
-      <key>
-        <name>country</name>
-        <field>country</field>
-        <condition>=</condition>
-        <name2/>
-      </key>
-    </lookup>
+    <schema/>
+    <table>apps_bk</table>
+    <commit>1000</commit>
+    <truncate>N</truncate>
+    <ignore_errors>N</ignore_errors>
+    <use_batch>Y</use_batch>
+    <specify_fields>N</specify_fields>
+    <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
+    <partitioning_daily>N</partitioning_daily>
+    <partitioning_monthly>Y</partitioning_monthly>
+    <tablename_in_field>N</tablename_in_field>
+    <tablename_field/>
+    <tablename_in_table>Y</tablename_in_table>
+    <return_keys>N</return_keys>
+    <return_field/>
+    <fields>
+      <field>
+        <column_name>aid</column_name>
+        <stream_name>aid</stream_name>
+      </field>
+      <field>
+        <column_name>site_id</column_name>
+        <stream_name>site_id</stream_name>
+      </field>
+      <field>
+        <column_name>count</column_name>
+        <stream_name>count</stream_name>
+      </field>
+      <field>
+        <column_name>date</column_name>
+        <stream_name>date</stream_name>
+      </field>
+    </fields>
     <attributes/>
     <cluster_schema/>
     <remotesteps>
@@ -688,8 +593,8 @@ FROM users.apps_bk
       </output>
     </remotesteps>
     <GUI>
-      <xloc>352</xloc>
-      <yloc>112</yloc>
+      <xloc>272</xloc>
+      <yloc>64</yloc>
       <draw>Y</draw>
     </GUI>
   </step>

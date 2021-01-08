@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>09_sql文件输出_mysql_sql文件</name>
+    <name>MExcel输出</name>
     <description/>
     <extended_description/>
     <trans_version/>
     <trans_type>Normal</trans_type>
+    <trans_status>0</trans_status>
     <directory>/</directory>
     <parameters>
     </parameters>
@@ -427,10 +428,10 @@
     <clusterschemas>
     </clusterschemas>
     <created_user>-</created_user>
-    <created_date>2020/12/23 14:28:45.295</created_date>
+    <created_date>2020/12/23 13:57:30.944</created_date>
     <modified_user>-</modified_user>
-    <modified_date>2020/12/23 14:28:45.295</modified_date>
-    <key_for_session_key/>
+    <modified_date>2020/12/23 13:57:30.944</modified_date>
+    <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA=</key_for_session_key>
     <is_key_private>N</is_key_private>
   </info>
   <notepads>
@@ -501,13 +502,18 @@
   <order>
     <hop>
       <from>表输入</from>
-      <to>SQL 文件输出</to>
+      <to>Microsoft Excel 输出</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>表输入</from>
+      <to>Excel输出</to>
       <enabled>Y</enabled>
     </hop>
   </order>
   <step>
-    <name>表输入</name>
-    <type>TableInput</type>
+    <name>Microsoft Excel 输出</name>
+    <type>TypeExitExcelWriterStep</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -516,108 +522,120 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
+    <header>Y</header>
+    <footer>N</footer>
+    <makeSheetActive>Y</makeSheetActive>
+    <rowWritingMethod>overwrite</rowWritingMethod>
+    <startingCell>A1</startingCell>
+    <appendOmitHeader>N</appendOmitHeader>
+    <appendOffset>0</appendOffset>
+    <appendEmpty>0</appendEmpty>
+    <rowWritingMethod>overwrite</rowWritingMethod>
+    <forceFormulaRecalculation>N</forceFormulaRecalculation>
+    <leaveExistingStylesUnchanged>N</leaveExistingStylesUnchanged>
+    <appendLines>N</appendLines>
+    <add_to_result_filenames>Y</add_to_result_filenames>
+    <file>
+      <name>C:\Users\zgg\Desktop\knowledgesystem\23 DataWarehouse\Kettle\KettleCode\output\07_MExcel输出</name>
+      <extention>xlsx</extention>
+      <do_not_open_newfile_init>N</do_not_open_newfile_init>
+      <split>N</split>
+      <add_date>N</add_date>
+      <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <sheetname>Sheet1</sheetname>
+      <autosizecolums>N</autosizecolums>
+      <stream_data>N</stream_data>
+      <protect_sheet>N</protect_sheet>
+      <password>Encrypted </password>
+      <protected_by/>
+      <splitevery>0</splitevery>
+      <if_file_exists>new</if_file_exists>
+      <if_sheet_exists>new</if_sheet_exists>
+    </file>
+    <template>
+      <enabled>N</enabled>
+      <sheet_enabled>N</sheet_enabled>
+      <filename>template.xls</filename>
+      <sheetname/>
+      <hidden>N</hidden>
+    </template>
+    <fields>
+      <field>
+        <name>aid</name>
+        <type>Integer</type>
+        <format>0</format>
+        <title/>
+        <titleStyleCell/>
+        <styleCell/>
+        <commentField/>
+        <commentAuthorField/>
+        <formula>N</formula>
+        <hyperlinkField/>
+      </field>
+      <field>
+        <name>site_id</name>
+        <type>Integer</type>
+        <format>0</format>
+        <title/>
+        <titleStyleCell/>
+        <styleCell/>
+        <commentField/>
+        <commentAuthorField/>
+        <formula>N</formula>
+        <hyperlinkField/>
+      </field>
+      <field>
+        <name>count</name>
+        <type>Integer</type>
+        <format>0</format>
+        <title/>
+        <titleStyleCell/>
+        <styleCell/>
+        <commentField/>
+        <commentAuthorField/>
+        <formula>N</formula>
+        <hyperlinkField/>
+      </field>
+    </fields>
+    <attributes/>
+    <cluster_schema/>
+    <remotesteps>
+      <input>
+      </input>
+      <output>
+      </output>
+    </remotesteps>
+    <GUI>
+      <xloc>272</xloc>
+      <yloc>64</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+  <step>
+    <name>表输入</name>
+    <type>TableInput</type>
+    <description/>
+    <distribute>N</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
     <connection>mysql</connection>
-    <sql>select * from users.access_log;</sql>
+    <sql>SELECT
+  aid
+, site_id
+, count
+FROM access_log
+</sql>
     <limit>0</limit>
     <lookup/>
     <execute_each_row>N</execute_each_row>
     <variables_active>N</variables_active>
     <lazy_conversion_active>N</lazy_conversion_active>
-    <cached_row_meta_active>N</cached_row_meta_active>
-    <row-meta>
-      <value-meta>
-        <type>Integer</type>
-        <storagetype>normal</storagetype>
-        <name>aid</name>
-        <length>9</length>
-        <precision>0</precision>
-        <origin>表输入</origin>
-        <comments>aid</comments>
-        <conversion_Mask>####0;-####0</conversion_Mask>
-        <decimal_symbol>.</decimal_symbol>
-        <grouping_symbol>,</grouping_symbol>
-        <currency_symbol/>
-        <trim_type>none</trim_type>
-        <case_insensitive>N</case_insensitive>
-        <collator_disabled>Y</collator_disabled>
-        <collator_strength>0</collator_strength>
-        <sort_descending>N</sort_descending>
-        <output_padding>N</output_padding>
-        <date_format_lenient>N</date_format_lenient>
-        <date_format_locale>zh_CN</date_format_locale>
-        <date_format_timezone>Asia/Shanghai</date_format_timezone>
-        <lenient_string_to_number>N</lenient_string_to_number>
-      </value-meta>
-      <value-meta>
-        <type>Integer</type>
-        <storagetype>normal</storagetype>
-        <name>site_id</name>
-        <length>9</length>
-        <precision>0</precision>
-        <origin>表输入</origin>
-        <comments>site_id</comments>
-        <conversion_Mask>####0;-####0</conversion_Mask>
-        <decimal_symbol>.</decimal_symbol>
-        <grouping_symbol>,</grouping_symbol>
-        <currency_symbol/>
-        <trim_type>none</trim_type>
-        <case_insensitive>N</case_insensitive>
-        <collator_disabled>Y</collator_disabled>
-        <collator_strength>0</collator_strength>
-        <sort_descending>N</sort_descending>
-        <output_padding>N</output_padding>
-        <date_format_lenient>N</date_format_lenient>
-        <date_format_locale>zh_CN</date_format_locale>
-        <date_format_timezone>Asia/Shanghai</date_format_timezone>
-        <lenient_string_to_number>N</lenient_string_to_number>
-      </value-meta>
-      <value-meta>
-        <type>Integer</type>
-        <storagetype>normal</storagetype>
-        <name>count</name>
-        <length>9</length>
-        <precision>0</precision>
-        <origin>表输入</origin>
-        <comments>count</comments>
-        <conversion_Mask>####0;-####0</conversion_Mask>
-        <decimal_symbol>.</decimal_symbol>
-        <grouping_symbol>,</grouping_symbol>
-        <currency_symbol/>
-        <trim_type>none</trim_type>
-        <case_insensitive>N</case_insensitive>
-        <collator_disabled>Y</collator_disabled>
-        <collator_strength>0</collator_strength>
-        <sort_descending>N</sort_descending>
-        <output_padding>N</output_padding>
-        <date_format_lenient>N</date_format_lenient>
-        <date_format_locale>zh_CN</date_format_locale>
-        <date_format_timezone>Asia/Shanghai</date_format_timezone>
-        <lenient_string_to_number>N</lenient_string_to_number>
-      </value-meta>
-      <value-meta>
-        <type>Date</type>
-        <storagetype>normal</storagetype>
-        <name>date</name>
-        <length>-1</length>
-        <precision>-1</precision>
-        <origin>表输入</origin>
-        <comments>date</comments>
-        <conversion_Mask/>
-        <decimal_symbol>.</decimal_symbol>
-        <grouping_symbol>,</grouping_symbol>
-        <currency_symbol/>
-        <trim_type>none</trim_type>
-        <case_insensitive>N</case_insensitive>
-        <collator_disabled>Y</collator_disabled>
-        <collator_strength>0</collator_strength>
-        <sort_descending>N</sort_descending>
-        <output_padding>N</output_padding>
-        <date_format_lenient>N</date_format_lenient>
-        <date_format_locale>zh_CN</date_format_locale>
-        <date_format_timezone>Asia/Shanghai</date_format_timezone>
-        <lenient_string_to_number>N</lenient_string_to_number>
-      </value-meta>
-    </row-meta>
     <attributes/>
     <cluster_schema/>
     <remotesteps>
@@ -627,14 +645,14 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>176</xloc>
-      <yloc>176</yloc>
+      <xloc>80</xloc>
+      <yloc>64</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
   <step>
-    <name>SQL 文件输出</name>
-    <type>SQLFileOutput</type>
+    <name>Excel输出</name>
+    <type>ExcelOutput</type>
     <description/>
     <distribute>Y</distribute>
     <custom_distribution/>
@@ -643,27 +661,69 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <connection>mysql</connection>
-    <schema>users</schema>
-    <table>access_log</table>
-    <truncate>N</truncate>
-    <create>Y</create>
-    <encoding>UTF-8</encoding>
-    <dateformat>yyyy-MM-dd</dateformat>
-    <addtoresult>N</addtoresult>
-    <startnewline>Y</startnewline>
+    <header>Y</header>
+    <footer>N</footer>
+    <encoding/>
+    <append>N</append>
+    <add_to_result_filenames>Y</add_to_result_filenames>
     <file>
-      <name>C:\Users\zgg\Desktop\KettleCode\output\09_sql文件输出</name>
-      <extention>sql</extention>
-      <append>N</append>
+      <name>C:\Users\zgg\Desktop\knowledgesystem\23 DataWarehouse\Kettle\KettleCode\output\07_MExcel输出</name>
+      <extention>xls</extention>
+      <do_not_open_newfile_init>N</do_not_open_newfile_init>
+      <create_parent_folder>N</create_parent_folder>
       <split>N</split>
-      <haspartno>N</haspartno>
       <add_date>N</add_date>
       <add_time>N</add_time>
+      <SpecifyFormat>N</SpecifyFormat>
+      <date_time_format/>
+      <sheetname>Sheet1</sheetname>
+      <autosizecolums>N</autosizecolums>
+      <nullisblank>N</nullisblank>
+      <protect_sheet>N</protect_sheet>
+      <password>Encrypted </password>
       <splitevery>0</splitevery>
-      <create_parent_folder>N</create_parent_folder>
-      <DoNotOpenNewFileInit>N</DoNotOpenNewFileInit>
+      <usetempfiles>N</usetempfiles>
+      <tempdirectory/>
     </file>
+    <template>
+      <enabled>N</enabled>
+      <append>N</append>
+      <filename>template.xls</filename>
+    </template>
+    <fields>
+      <field>
+        <name>aid</name>
+        <type>Integer</type>
+        <format>0</format>
+      </field>
+      <field>
+        <name>site_id</name>
+        <type>Integer</type>
+        <format>0</format>
+      </field>
+      <field>
+        <name>count</name>
+        <type>Integer</type>
+        <format>0</format>
+      </field>
+    </fields>
+    <custom>
+      <header_font_name>arial</header_font_name>
+      <header_font_size>10</header_font_size>
+      <header_font_bold>N</header_font_bold>
+      <header_font_italic>N</header_font_italic>
+      <header_font_underline>no</header_font_underline>
+      <header_font_orientation>horizontal</header_font_orientation>
+      <header_font_color>black</header_font_color>
+      <header_background_color>none</header_background_color>
+      <header_row_height>255</header_row_height>
+      <header_alignment>left</header_alignment>
+      <header_image/>
+      <row_font_name>arial</row_font_name>
+      <row_font_size>10</row_font_size>
+      <row_font_color>black</row_font_color>
+      <row_background_color>none</row_background_color>
+    </custom>
     <attributes/>
     <cluster_schema/>
     <remotesteps>
@@ -673,7 +733,7 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>512</xloc>
+      <xloc>272</xloc>
       <yloc>208</yloc>
       <draw>Y</draw>
     </GUI>
