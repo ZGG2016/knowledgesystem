@@ -183,7 +183,12 @@ task 级别: hadoop 允许 task 失败后再在另外节点上尝试运行，如
 
 监听来自客户端请求的namenode rpc服务线程数，默认10：
 
-	dfs.namenode.handler.count	
+	dfs.namenode.handler.count=20 * log2(Cluster Size)，
+	比如集群规模为 8 台时，此参数设置为 60	
+
+	NameNode 有一个工作线程池，
+	用来处理不同 DataNode 的并发心跳以及客户端并发的元数据操作。
+	对于大集群或者有大量客户端的集群来说，通常需要增大参数
 
 监听来自datanodes请求的namenode rpc服务线程数，默认10：
 
@@ -193,7 +198,17 @@ datanode上用于处理RPC的线程数。默认为10:
 
 	dfs.datanode.handler.count 
 
-####
+#### Hadoop 宕机
+
+（1）如果 MR 造成系统宕机。
+
+此时要控制 Yarn 同时运行的任务数，和每个任务申请的最大内存。
+
+调整参数：yarn.scheduler.maximum-allocation-mb（单个任务可申请的最多物理内存量，默认是 8192MB） 
+
+（2）如果写入文件过量造成 NameNode 宕机。
+
+那么调高 Kafka 的存储大小，控制从 Kafka 到 HDFS 的写入速度。高峰期的时候用 Kafka 进行缓存，高峰期过去数据同步会自动跟上。
 
 #### 调整JVM堆的最大可用内存
 
@@ -314,6 +329,23 @@ reduce 从map端复制数据的并行度，默认5：
 分配给container的最大虚拟cpu内核数量，默认4：
 
 	yarn.scheduler.maximum-allocation-vcores
+
+
+情景描述：
+
+总共 7 台机器，每天几亿条数据，数据源->Flume->Kafka->HDFS->Hive面临问题：数据统计主要用 HiveSQL，没有数据倾斜，小文件已经做了合并处理，开启的 JVM 重用，而且 IO 没有阻塞，内存用了不到 50%。但是还是跑的非常慢，而且数据量洪峰过来时，整个集群都会宕掉。基于这种情况有没有优化方案。
+
+解决办法：
+
+内存利用率不够。这个一般是 Yarn 的 2 个配置造成的，单个任务可以申请的最大内存大小，和 Hadoop 单个节点可用内存大小。调节这两个参数能提高系统内存的利用率。
+
+（a）yarn.nodemanager.resource.memory-mb
+
+表示该节点上 YARN 可使用的物理内存总量，默认是 8192（MB），注意，如果你的节点内存资源不够 8GB，则需要调减小这个值，而 YARN 不会智能的探测节点的物理内存总量。
+
+（b）yarn.scheduler.maximum-allocation-mb
+
+单个任务可申请的最多物理内存量，默认是 8192（MB）。
 
 #### 硬件选择
 

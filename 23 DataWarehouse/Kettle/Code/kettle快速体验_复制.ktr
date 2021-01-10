@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <transformation>
   <info>
-    <name>02_kettle快速体验_csv_excel_复制</name>
+    <name>kettle快速体验_复制</name>
     <description/>
     <extended_description/>
     <trans_version/>
@@ -459,7 +459,7 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <filename>C:\Users\zgg\Desktop\KettleCode\data\input\01_kettle快速体验.csv</filename>
+    <filename>C:\Users\zgg\Desktop\knowledgesystem\23 DataWarehouse\Kettle\KettleCode\input\01_kettle快速体验.csv</filename>
     <filename_field/>
     <rownum_field/>
     <include_filename>N</include_filename>
@@ -471,7 +471,6 @@
     <add_filename_result>N</add_filename_result>
     <parallel>N</parallel>
     <newline_possible>N</newline_possible>
-    <format>mixed</format>
     <encoding/>
     <fields>
       <field>
@@ -528,8 +527,8 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>128</xloc>
-      <yloc>256</yloc>
+      <xloc>80</xloc>
+      <yloc>96</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -550,7 +549,7 @@
     <append>N</append>
     <add_to_result_filenames>Y</add_to_result_filenames>
     <file>
-      <name>C:\Users\zgg\Desktop\KettleCode\data\output\02_kettle快速体验_复制02</name>
+      <name>C:\Users\zgg\Desktop\knowledgesystem\23 DataWarehouse\Kettle\KettleCode\output\02_kettle快速体验_复制02</name>
       <extention>xls</extention>
       <do_not_open_newfile_init>N</do_not_open_newfile_init>
       <create_parent_folder>N</create_parent_folder>
@@ -621,8 +620,8 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>336</xloc>
-      <yloc>352</yloc>
+      <xloc>304</xloc>
+      <yloc>192</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
@@ -643,7 +642,7 @@
     <append>N</append>
     <add_to_result_filenames>Y</add_to_result_filenames>
     <file>
-      <name>C:\Users\zgg\Desktop\KettleCode\data\output\02_kettle快速体验_复制01.xls</name>
+      <name>C:\Users\zgg\Desktop\knowledgesystem\23 DataWarehouse\Kettle\KettleCode\output\02_kettle快速体验_复制01</name>
       <extention>xls</extention>
       <do_not_open_newfile_init>N</do_not_open_newfile_init>
       <create_parent_folder>N</create_parent_folder>
@@ -714,8 +713,8 @@
       </output>
     </remotesteps>
     <GUI>
-      <xloc>336</xloc>
-      <yloc>192</yloc>
+      <xloc>304</xloc>
+      <yloc>32</yloc>
       <draw>Y</draw>
     </GUI>
   </step>
