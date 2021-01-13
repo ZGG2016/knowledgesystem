@@ -58,14 +58,16 @@ public class DefaultSpeculator extends AbstractService implements
   private final Set<TaskId> mayHaveSpeculated = new HashSet<TaskId>();
 
   private final Configuration conf;
+
+  //在 YARN 应用程序中，用于在组件间共享信息的上下文环境接口
   private AppContext context;
   private Thread speculationBackgroundThread = null;
   private volatile boolean stopped = false;
-  private TaskRuntimeEstimator estimator;  //
+  private TaskRuntimeEstimator estimator;  
 
   private BlockingQueue<Object> scanControl = new LinkedBlockingQueue<Object>();
 
-  private final Clock clock;
+  private final Clock clock;  // A simple clock interface that gives you time.
 
   private final EventHandler<Event> eventHandler;
 
@@ -91,6 +93,7 @@ public class DefaultSpeculator extends AbstractService implements
       Constructor<? extends TaskRuntimeEstimator> estimatorConstructor
           = estimatorClass.getConstructor();
 
+      // 通过反射创建一个对象
       estimator = estimatorConstructor.newInstance();
 
       estimator.contextualize(conf, context);
@@ -114,6 +117,7 @@ public class DefaultSpeculator extends AbstractService implements
   // This constructor is designed to be called by other constructors.
   //  However, it's public because we do use it in the test cases.
   // Normally we figure out our own estimator.
+  // 这个构造器是要由其他构造器调用
   public DefaultSpeculator
       (Configuration conf, AppContext context,
        TaskRuntimeEstimator estimator, Clock clock) {
@@ -124,18 +128,23 @@ public class DefaultSpeculator extends AbstractService implements
     this.estimator = estimator;
     this.clock = clock;
     this.eventHandler = context.getEventHandler();
+    // 如果这轮没有推测任务，进行下一轮推测任务的等待时间(ms)。
     this.soonestRetryAfterNoSpeculate =
         conf.getLong(MRJobConfig.SPECULATIVE_RETRY_AFTER_NO_SPECULATE,
                 MRJobConfig.DEFAULT_SPECULATIVE_RETRY_AFTER_NO_SPECULATE);
+    // 如果这轮有推测任务，进行下一轮推测任务的等待时间(ms)。
     this.soonestRetryAfterSpeculate =
         conf.getLong(MRJobConfig.SPECULATIVE_RETRY_AFTER_SPECULATE,
                 MRJobConfig.DEFAULT_SPECULATIVE_RETRY_AFTER_SPECULATE);
+    // 可以在任何时间推测地重新执行的正在运行任务的最大百分比(0-1)。
     this.proportionRunningTasksSpeculatable =
         conf.getDouble(MRJobConfig.SPECULATIVECAP_RUNNING_TASKS,
                 MRJobConfig.DEFAULT_SPECULATIVECAP_RUNNING_TASKS);
+    // 可以在任何时间推测地重新执行的所有任务的最大百分比(0-1)。
     this.proportionTotalTasksSpeculatable =
         conf.getDouble(MRJobConfig.SPECULATIVECAP_TOTAL_TASKS,
                 MRJobConfig.DEFAULT_SPECULATIVECAP_TOTAL_TASKS);
+    // 允许在任何时间推测地重新执行的最小任务数。
     this.minimumAllowedSpeculativeTasks =
         conf.getInt(MRJobConfig.SPECULATIVE_MINIMUM_ALLOWED_TASKS,
                 MRJobConfig.DEFAULT_SPECULATIVE_MINIMUM_ALLOWED_TASKS);
@@ -146,7 +155,8 @@ public class DefaultSpeculator extends AbstractService implements
   // This is the task-mongering that creates the two new threads -- one for
   //  processing events from the event queue and one for periodically
   //  looking for speculation opportunities
-
+  // 两个线程，
+  // 一个用于处理来自事件队列的处理事件，一个用来周期地寻找推测机会
   @Override
   protected void serviceStart() throws Exception {
     Runnable speculationBackgroundCore
@@ -157,10 +167,13 @@ public class DefaultSpeculator extends AbstractService implements
                 long backgroundRunStartTime = clock.getTime();
                 try {
                   int speculations = computeSpeculations();
+                  // 如果推测任务执行成功或失败，下轮执行推测任务的等待时间
                   long mininumRecomp
-                      = speculations > 0 ? soonestRetryAfterSpeculate
-                                         : soonestRetryAfterNoSpeculate;
+                      = speculations > 0 ? soonestRetryAfterSpeculate    // 成功
+                                         : soonestRetryAfterNoSpeculate; // 失败
 
+                  // 如果当前等待的时间超过了 `理论等待时间`   
+                  // 那么从开始到当前的时间就是等待的时间            
                   long wait = Math.max(mininumRecomp,
                         clock.getTime() - backgroundRunStartTime);
 
@@ -169,6 +182,7 @@ public class DefaultSpeculator extends AbstractService implements
                         + " speculations.  Sleeping " + wait + " milliseconds.");
                   }
 
+                  // 等到 wait 时间，检索并移除队列头部元素
                   Object pollResult
                       = scanControl.poll(wait, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
@@ -200,7 +214,7 @@ public class DefaultSpeculator extends AbstractService implements
   @Override
   public void handleAttempt(TaskAttemptStatus status) {
     long timestamp = clock.getTime();
-    statusUpdate(status, timestamp);
+    statusUpdate(status, timestamp);  // 更新状态
   }
 
   // This section is not part of the Speculator interface; it's used only for
@@ -224,14 +238,24 @@ public class DefaultSpeculator extends AbstractService implements
 /*   *************************************************************    */
 
   // This section contains the code that gets run for a SpeculatorEvent
+  // 运行一个SpeculatorEvent的代码
 
+ 
   private AtomicInteger containerNeed(TaskId taskID) {
+
+    // 返回相关的 JobId
     JobId jobID = taskID.getJobId();
+
+    // 获取任务类型，是map还是reduce
     TaskType taskType = taskID.getTaskType();
 
+// mapContainerNeeds、reduceContainerNeeds
+// 对每个job，这些记录了已经存在的以及正在积极等待容器的尝试的次数(而不是正在运行或已完成)。
+    
     ConcurrentMap<JobId, AtomicInteger> relevantMap
         = taskType == TaskType.MAP ? mapContainerNeeds : reduceContainerNeeds;
 
+    // 获取这个job的已经存在的以及正在积极等待容器的尝试的次数
     AtomicInteger result = relevantMap.get(jobID);
 
     if (result == null) {
@@ -243,6 +267,7 @@ public class DefaultSpeculator extends AbstractService implements
   }
 
   private synchronized void processSpeculatorEvent(SpeculatorEvent event) {
+    // 判断事件类型
     switch (event.getType()) {
       case ATTEMPT_STATUS_UPDATE:
         statusUpdate(event.getReportedStatus(), event.getTimestamp());
@@ -251,6 +276,7 @@ public class DefaultSpeculator extends AbstractService implements
       case TASK_CONTAINER_NEED_UPDATE:
       {
         AtomicInteger need = containerNeed(event.getTaskID());
+        // addAndGet：将一个值加到当前值，并返回更新后的值
         need.addAndGet(event.containersNeededChange());
         break;
       }
@@ -273,25 +299,31 @@ public class DefaultSpeculator extends AbstractService implements
   }
 
   /**
-   * Absorbs one TaskAttemptStatus
-   *
+   * Absorbs one TaskAttemptStatus 
+   *       
+   *    我们从一个任务尝试中得到的状态报告，我们想把它调入这个任务的推测数据
    * @param reportedStatus the status report that we got from a task attempt
    *        that we want to fold into the speculation data for this job
    * @param timestamp the time this status corresponds to.  This matters
-   *        because statuses contain progress.
+   *        because statuses contain progress. 这个状态对应的时间
    */
   protected void statusUpdate(TaskAttemptStatus reportedStatus, long timestamp) {
 
+    // 将任务尝试状态转成字符串形式
     String stateString = reportedStatus.taskState.toString();
 
+    
     TaskAttemptId attemptID = reportedStatus.id;
+    // 由 任务尝试id 取出 任务id，
     TaskId taskID = attemptID.getTaskId();
+    // 再由 任务id 取出其所属的job对象
     Job job = context.getJob(taskID.getJobId());
 
     if (job == null) {
       return;
     }
 
+    // 由 任务id 获取对应的 task对象
     Task task = job.getTask(taskID);
 
     if (task == null) {
@@ -300,10 +332,12 @@ public class DefaultSpeculator extends AbstractService implements
 
     estimator.updateAttempt(reportedStatus, timestamp);
 
+    // 如果任务尝试的状态是运行中，则将这个任务放到runningTasks这个map中
     if (stateString.equals(TaskAttemptState.RUNNING.name())) {
       runningTasks.putIfAbsent(taskID, Boolean.TRUE);
     } else {
-      runningTasks.remove(taskID, Boolean.TRUE);
+      runningTasks.remove(taskID, Boolean.TRUE); // 不在运行中，将其从runningTasks移除
+      // 如果也不是在启动状态，就将这个任务尝试id从runningTaskAttemptStatistics中移除
       if (!stateString.equals(TaskAttemptState.STARTING.name())) {
         runningTaskAttemptStatistics.remove(attemptID);
       }
@@ -314,7 +348,15 @@ public class DefaultSpeculator extends AbstractService implements
 
 // This is the code section that runs periodically and adds speculations for
 //  those jobs that need them.
+// 这是定期运行，并为需要它们的作业添加推测的代码部分。
 
+
+// 这可以为不应该进行推测的任务返回一些神奇的值:
+//   如果thresholdRuntime(taskID)表示不应该考虑推测这个任务，则返回ON_SCHEDULE
+//   如果为真，则返回ALREADY_SPECULATING。这优先。
+//   如果我们的同伴任务没有得到任何信息，返回TOO_NEW
+//   如果任务顺利通过，则返回PROGRESS_IS_GOOD
+//   如果任务没有运行，则返回NOT_RUNNING
 
   // This can return a few magic values for tasks that shouldn't speculate:
   //  returns ON_SCHEDULE if thresholdRuntime(taskID) says that we should not
@@ -326,6 +368,8 @@ public class DefaultSpeculator extends AbstractService implements
   //
   // All of these values are negative.  Any value that should be allowed to
   //  speculate is 0 or positive.
+  // 所有这些值都是负的。
+  // 允许推测的任何值都是0或正值。
   private long speculationValue(TaskId taskID, long now) {
     Job job = context.getJob(taskID.getJobId());
     Task task = job.getTask(taskID);
@@ -437,6 +481,10 @@ public class DefaultSpeculator extends AbstractService implements
   }
 
 
+// public enum TaskType {
+//     MAP, REDUCE
+// }
+
   private int maybeScheduleAMapSpeculation() {
     return maybeScheduleASpeculation(TaskType.MAP);
   }
@@ -450,6 +498,7 @@ public class DefaultSpeculator extends AbstractService implements
 
     long now = clock.getTime();
 
+    // 判断调度是map任务还是reduce任务
     ConcurrentMap<JobId, AtomicInteger> containerNeeds
         = type == TaskType.MAP ? mapContainerNeeds : reduceContainerNeeds;
 
@@ -460,6 +509,9 @@ public class DefaultSpeculator extends AbstractService implements
       // Also, if we miss the fact that the number of containers needed was
       //  zero but increased due to a failure it's not too bad to launch one
       //  container prematurely.
+      // 这个竞争条件是可以的。
+      // 如果我们跳过一个本应该尝试的推测尝试，因为需要的容器数量降低到零的事件还没有通过，那么下次就会通过。
+      // 另外，如果我们忽略了这样一个事实，即需要的容器数量为零，但由于故障而增加了，那么过早地启动一个容器也不是太糟糕。
       if (jobEntry.getValue().get() > 0) {
         continue;
       }
@@ -514,6 +566,7 @@ public class DefaultSpeculator extends AbstractService implements
 
   private int computeSpeculations() {
     // We'll try to issue one map and one reduce speculation per job per run
+    // 一个map、一个reduce
     return maybeScheduleAMapSpeculation() + maybeScheduleAReduceSpeculation();
   }
 

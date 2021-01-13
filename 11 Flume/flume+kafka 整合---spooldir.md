@@ -43,7 +43,8 @@
 7、新开一个终端，在test目录下追加文件
 
 	echo "1" > /usr/local/test/1.txt
- 	echo "2" > /usr/local/test/2.txt
- 	echo "3" > /usr/local/test/3.txt
- 	....
+	echo "2" > /usr/local/test/2.txt
+	echo "3" > /usr/local/test/3.txt
+	....
+
 8、在kafka消费端会一直有数字输出。
