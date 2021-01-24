@@ -46,6 +46,7 @@ Found 4 items
 -rw-r--r--   1 root supergroup        877 2021-01-14 13:46 /flume-out/avro-source/210114-1346/events-.1610603183170
 -rw-r--r--   1 root supergroup       1072 2021-01-14 13:46 /flume-out/avro-source/210114-1346/events-.1610603216540
 -rw-r--r--   1 root supergroup        877 2021-01-14 13:47 /flume-out/avro-source/210114-1346/events-.1610603216541
+
 [root@zgg data]# hadoop fs -text /flume-out/exec-source/210114-1346/events-.1610603216541
 2021-01-14 13:48:14,420 INFO sasl.SaslDataTransferClient: SASL encryption trust check: localHostTrusted = false, remoteHostTrusted = false
 ```
