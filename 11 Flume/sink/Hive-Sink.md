@@ -103,3 +103,4 @@ Found 5 items
 -rw-r--r--   1 root supergroup        757 2021-01-21 11:09 /user/hive/warehouse/weblogs/send_time=2021-01-21-11-05/delta_0000801_0000900/bucket_00004
 -rw-r--r--   1 root supergroup         16 2021-01-21 11:09 /user/hive/warehouse/weblogs/send_time=2021-01-21-11-05/delta_0000801_0000900/bucket_00004_flush_length
 ```
+

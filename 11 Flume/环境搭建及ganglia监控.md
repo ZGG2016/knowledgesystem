@@ -1,6 +1,8 @@
 # Flume安装及ganglia监控
 
-## Flume安装
+[TOC]
+
+## 1、Flume安装
 
 1、下载、解压、重命名
 
@@ -76,7 +78,7 @@ export JAVA_HOME=/opt/jdk1.8.0_271
 
 输入 hellooooooooo
 
-## ganglia安装
+## 2、ganglia安装
 
 1、安装 httpd 服务与 php
 
