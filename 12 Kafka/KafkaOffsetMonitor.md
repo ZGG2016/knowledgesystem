@@ -1,10 +1,10 @@
 # KafkaOffsetMonitor
 
-## 1
+## 1、下载 jar 包
 
-下载`KafkaOffsetMonitor-assembly-0.2.0.jar`包
+下载 `KafkaOffsetMonitor-assembly-0.2.0.jar` 包
 
-新建目录，将jar包复制到这个目录下
+新建目录，将 jar 包复制到这个目录下
 
 ```sh
 [root@zgg kafka_2.11-2.4.1]# mkdir kafka-offset-console
@@ -15,9 +15,7 @@ Transferring KafkaOffsetMonitor-assembly-0.2.0.jar...
   100%   56553 KB    5141 KB/sec    00:00:11       0 Errors  
 ```
 
-## 2
-
-写启动、暂停脚本
+## 2、写启动暂停脚本
 
 ```sh
 [root@zgg script]# vi kafka_monitor_start.sh
@@ -44,9 +42,7 @@ echo "OK...."
 
 **注意路径**
 
-## 3
-
-启动
+## 3、启动
 	
 ```sh
 [root@zgg script]# chmod +x kafka_monitor_start.sh
@@ -67,3 +63,7 @@ echo "OK...."
 ![monitor03](./image/monitor03.png)
 
 出现的问题：如果界面一直处在 `loading` 的状态，可能是启动脚本有错误。
+
+-----------------------------------------------------------------
+
+另一种监控：[KafkaManager](https://www.bilibili.com/video/BV1L4411K7hW?p=38)
