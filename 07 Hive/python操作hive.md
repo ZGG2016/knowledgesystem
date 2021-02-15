@@ -26,7 +26,7 @@ Beeline version 2.3.7 by Apache Hive
 
 # 复制到命令行下，就连接失败
 ------------------------------------------------
-
+         
 beeline> !connect jdbc:hive2://zgg:10000/default;auth=noSasl
 Connecting to jdbc:hive2://zgg:10000/default;auth=noSasl
 
@@ -153,7 +153,7 @@ with pyhs2.connect(host='zgg',
 
 [https://github.com/BradRuderman/pyhs2](https://github.com/BradRuderman/pyhs2)
 
----------------------------------------------------------------------------
+------------------------------------------------------------------------
 
 ```sh
 ----------------------------------------------------------
