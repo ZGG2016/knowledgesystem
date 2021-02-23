@@ -1,6 +1,6 @@
 # Hadoop Map中如何处理跨行Block和InputSplit
 
-比如对于那么对于一个记录行形式的文本大于128M时，HDFS将会分成多块存储（block）
+么对于一个记录行形式的文本大于128M时，HDFS将会分成多块存储（block）
 ，同时分片并非到每行行尾。这样就会产生两个问题：
 
 	A：Hadoop的一个Block默认是128M，那么对于一个记录行形式的文本，
@@ -21,7 +21,9 @@
 		长度（由start和length决定）。
 
 因此以行记录形式的文本，可能存在一行记录被划分到不同的Block，
-甚至不同的DataNode上去。通过分析FileInputFormat里面的getSplits方法，
+甚至不同的DataNode上去。
+
+通过分析FileInputFormat里面的getSplits方法，
 可以得出，某一行记录同样也可能被划分到不同的InputSplit。
 
 从org.apache.hadoop.mapreduce.lib.input.FileInputFormat源码分析
@@ -82,10 +84,11 @@ public List<InputSplit> getSplits(JobContext job) throws IOException {
 }  
 
 ```
+
 从上面的代码可以看出，对文件进行切分其实很简单：获取文件在HDFS上的路径
 和Block信息，然后根据splitSize对文件进行切分，
 `splitSize = computeSplitSize(blockSize, minSize, maxSize);`
-maxSize，minSize，blockSize都可以配置，**默认splitSize 就等于blockSize的默认值（128m）。 **
+maxSize，minSize，blockSize都可以配置，**默认splitSize 就等于blockSize的默认值（128m）**
 
 FileInputFormat对文件的切分是严格按照偏移量来的，因此 **一行记录比较长的话，可能被切分到不同的InputSplit**。 
 但这并不会对Map造成影响，尽管一行记录可能被拆分到不同的InputSplit，
@@ -131,15 +134,15 @@ public boolean nextKeyValue() throws IOException {
 ```
 
 1、其读取文件是通过LineReader（in就是一个LineReader实例）的readLine方法完成的。
+
 关键的逻辑就在这个readLine方法里，这个方法主要的逻辑归纳起来是3点:
 
-- 总是从buffer里读取数据,如果buffer里的数据读完了，先加载下一批数据到buffer
+- 总是从buffer里读取数据，如果buffer里的数据读完了，先加载下一批数据到buffer
 
-- 在buffer中查找”行尾”,将开始位置至行尾处的数据拷贝给str(也就是最后的Value).
-如果为遇到”行尾”，继续加载新的数据到buffer进行查找
+- 在buffer中查找”行尾”，将开始位置至行尾处的数据拷贝给str(也就是最后的Value)。如果为遇到”行尾”，继续加载新的数据到buffer进行查找
 
 - 关键点在于:给到buffer的数据是直接从文件中读取的，完全不会考虑是否超过了
-split的界限,而是一直读取到当前行结束为止。
+split的界限，而是一直读取到当前行结束为止。
 
 ```java
 /** 
@@ -230,12 +233,13 @@ throws IOException {
 }  
 ```
 
-2、按照readLine的上述行为，**在遇到跨split的行时,会将下一个split开始行数据读取出来构成一行完整的数据**，
-那么下一个split怎么判定开头的一行有没有被上一个split的LineRecordReader读取过
-从而避免漏读或重复读取开头一行呢?这方面LineRecordReader使用了一个简单而巧妙的方法:
+2、按照readLine的上述行为，**在遇到跨split的行时，会将下一个split开始行数据读取出来构成一行完整的数据**，那么下一个split怎么判定开头的一行有没有被上一个split的LineRecordReader读取过从而避免漏读或重复读取开头一行呢?这方面LineRecordReader使用了一个简单而巧妙的方法:
+
 既然无法断定每一个split开始的一行是独立的一行还是被切断的一行的一部分，
 **那就跳过每个split的开始一行(当然要除第一个split之外)，从第二行开始读取,然后在到达split的结尾端时总是再多读一行**，
-这样数据既能接续起来又避开了断行带来的麻烦.以下是相关的源码:
+这样数据既能接续起来又避开了断行带来的麻。
+
+以下是相关的源码:
 
 ```java
 // If this is not the first split, we always throw away first record

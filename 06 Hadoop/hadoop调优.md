@@ -20,6 +20,12 @@ key 是各个文件的名称，value 是文件内容。 SequenceFile 文件还�
 
 在 mapper 中将多个文件合成一个分片作为输入。
 
+**(4)将小文件存储到类似于 HBase 的 KV 数据库里**
+
+将 Key 设置为小文件的文件名，Value 设置为小文件的内容，相比使用 
+SequenceFile 存储小文件，使用 HBase 的时候我们可以对文件进行修改，甚至能拿到
+所有的历史修改版本。
+
 #### 开启 JVM 重用
 
 为了实现任务隔离，hadoop 将每个 task 放到一个单独的 JVM 中执行，而对于执行时间较短的 task ，JVM 启动和关闭的时间将占用很大比例时间，为此，用户可以启用 JVM 重用功能，这样一个 JVM 可连续启动多个同类型的任务。
@@ -35,12 +41,6 @@ key 是各个文件的名称，value 是文件内容。 SequenceFile 文件还�
 ```
 
 开启 JVM 重用将一直占用使用到的 task 插槽，以便进行重用，直到任务完成后才能释放。如果某个"不平衡的" job 中有某几个 reduce task 执行的时间要比其他 reduce task 消耗的时间多的多的话，那么保留的插槽就会一直空闲着却无法被其他的 job 使用，直到所有的 task 都结束了才会释放。
-
-**(5)将小文件存储到类似于 HBase 的 KV 数据库里**
-
-将 Key 设置为小文件的文件名，Value 设置为小文件的内容，相比使用 
-SequenceFile 存储小文件，使用 HBase 的时候我们可以对文件进行修改，甚至能拿到
-所有的历史修改版本。
 
 #### 合理设置map和reduce任务数
 
@@ -218,13 +218,15 @@ datanode上用于处理RPC的线程数。默认为10:
 
 #### 调整分片大小
 
+【和块的关系】
+
 一个分片对应一个map任务，所以也间接决定了map任务的数量。
 
-map输入的最大的分片数量
+map输入的最大的分片大小
 
 	mapreduce.input.fileinputformat.split.maxsize [mapred-site.xml]
 
-map输入的最小的分片数量，默认是0
+map输入的最小的分片大小，默认是0
 
 	mapreduce.input.fileinputformat.split.minsize [mapred-site.xml]
 
@@ -355,7 +357,7 @@ master 维护全局元数据信息的重要性远远大于 slave。在较低 Had
 
 (1) noatime 和 nodiratime属性
 
-文件挂载时设置这两个属性可以明显提高性能。。默认情况下，Linuxext2/ext3 文件系统在文件被访问、创建、修改时会记录下文件的时间戳，比如：文件创建时间、最近一次修改时间和最近一次访问时间。如果系统运行时要访问大量文件，关闭这些操作，可提升文件系统的性能。Linux 提供了 noatime 这个参数来禁止记录最近一次访问时间戳。
+文件挂载时设置这两个属性可以明显提高性能。默认情况下，Linuxext2/ext3 文件系统在文件被访问、创建、修改时会记录下文件的时间戳，比如：文件创建时间、最近一次修改时间和最近一次访问时间。如果系统运行时要访问大量文件，关闭这些操作，可提升文件系统的性能。Linux 提供了 noatime 这个参数来禁止记录最近一次访问时间戳。
 
 	vi /etc/fstab
 	/dev/sda2    /data     ext3  noatime,nodiratime  0 0 
