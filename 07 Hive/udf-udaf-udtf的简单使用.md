@@ -10,25 +10,6 @@
 package hive.udf;
 
 import org.apache.hadoop.hive.ql.exec.Description;
-import org.apache.hadoop.hive.ql.exec.UDF;
-
-@Description(name="GetLength",
-        value="_FUNC_(str) - Returns the length of this string.",
-        extended = "Example:\n"
-                + " > SELECT _FUNC_('abc') FROM src; \n")
-
-public class GetLength extends UDF {
-    public int evaluate(String s) {
-        return s.length();
-    }
-}
-
-```
-
-```java
-package hive.udf;
-
-import org.apache.hadoop.hive.ql.exec.Description;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentException;
 import org.apache.hadoop.hive.ql.exec.UDFArgumentLengthException;
 import org.apache.hadoop.hive.ql.metadata.HiveException;
@@ -70,7 +51,31 @@ public class GetLengthG extends GenericUDF {
     }
 }
 
-```    
+```   
+
+-----------------------------------------
+
+```java
+// UDF类被弃用了
+package hive.udf;
+
+import org.apache.hadoop.hive.ql.exec.Description;
+import org.apache.hadoop.hive.ql.exec.UDF;
+
+@Description(name="GetLength",
+        value="_FUNC_(str) - Returns the length of this string.",
+        extended = "Example:\n"
+                + " > SELECT _FUNC_('abc') FROM src; \n")
+
+public class GetLength extends UDF {
+    public int evaluate(String s) {
+        return s.length();
+    }
+}
+
+```
+
+------------------------------------------ 
 
 (2)将代码打成 jar 包，并将这个 jar 包添加到 Hive classpath。
 
@@ -107,7 +112,7 @@ OK
 Time taken: 0.018 seconds
 ```
 
-## 2、UDF
+## 2、UDTF
 
 (1)建一个新类，继承GenericUDTF，实现initialize、process和close方法。
 
