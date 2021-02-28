@@ -10,7 +10,9 @@
 
 此实现为基本操作（add、remove 和 contains）提供受保证的 log(n) 时间开销。 
 
-注意，如果要正确实现 Set 接口，则 set 维护的顺序（无论是否提供了显式比较器）必须与 equals 一致。（关于与 equals 一致 的精确定义，请参阅 Comparable 或 Comparator。）这是因为 Set 接口是按照 equals 操作定义的，但 TreeSet 实例使用它的 compareTo（或 compare）方法对所有元素进行比较，因此从 set 的观点来看，此方法认为相等的两个元素就是相等的。即使 set 的顺序与 equals 不一致，其行为也是 定义良好的；它只是违背了 Set 接口的常规协定。 
+注意，如果要正确实现 Set 接口，则 set 维护的顺序（无论是否提供了显式比较器）必须与 equals 一致。（关于与 equals 一致 的精确定义，请参阅 Comparable 或 Comparator。）
+
+这是因为 Set 接口是按照 equals 操作定义的，但 TreeSet 实例使用它的 compareTo（或 compare）方法对所有元素进行比较，因此从 set 的观点来看，此方法认为相等的两个元素就是相等的。即使 set 的顺序与 equals 不一致，其行为也是定义良好的；它只是违背了 Set 接口的常规协定。 
 
 注意，此实现**不是同步的**。如果多个线程同时访问一个 TreeSet，而其中至少一个线程修改了该 set，那么它必须 外部同步。这一般是通过对自然封装该 set 的对象执行同步操作来完成的。如果不存在这样的对象，则应该**使用 Collections.synchronizedSortedSet 方法**来“包装”该 set。此操作最好在创建时进行，以防止对 set 的意外非同步访问： 
 
@@ -106,7 +108,9 @@ public class Student implements Comparable<Student> {
 		//public int compareTo(String anotherString)按字典顺序比较两个字符串。
 	}
 }
+```
 
+```java
 import java.util.TreeSet;
 
 /*

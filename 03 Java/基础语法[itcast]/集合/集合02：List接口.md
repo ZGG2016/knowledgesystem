@@ -45,7 +45,8 @@ public class ListDemo01 {
         list.add("java");
 
         /*
-        * 1. void add(int index,Object element):在指定位置添加元素
+        * 1. void add(int index,Object element):
+        *    在指定位置添加元素
         * */
          list.add(1, "android");//没有问题
          //IndexOutOfBoundsException
@@ -63,7 +64,7 @@ public class ListDemo01 {
 
         /*
         * 3. Object remove(int index)：
-        *     根据索引删除元素,返回被删除的元素
+        *     根据索引删除元素，返回被删除的元素
         * */
          System.out.println("remove:" + list.remove(1));
          //IndexOutOfBoundsException
@@ -71,7 +72,7 @@ public class ListDemo01 {
 
         /*
         * 4. Object set(int index,Object element):
-        *     根据索引修改元素，返回被修饰的元素
+        *     根据索引修改元素，返回被修改的元素
         * */
         System.out.println("set:" + list.set(1, "javaee"));
 

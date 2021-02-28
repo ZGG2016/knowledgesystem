@@ -5,7 +5,11 @@
 	public interface Set<E>
 	extends Collection<E>
 
-一个**不包含重复元素**的 collection。更确切地讲，set 不包含满足 e1.equals(e2) 的元素对 e1 和 e2，并且**最多包含一个 null 元素**。正如其名称所暗示的，此接口模仿了数学上的 set 抽象。 
+一个**不包含重复元素**的 collection。
+
+更确切地讲，set 不包含满足 e1.equals(e2) 的元素对 e1 和 e2，并且**最多包含一个 null 元素**。
+
+正如其名称所暗示的，此接口模仿了数学上的 set 抽象。 
 
 在所有构造方法以及 add、equals 和 hashCode 方法的协定上，Set 接口还加入了其他规定，这些规定超出了从 Collection 接口所继承的内容。出于方便考虑，它还包括了其他继承方法的声明（这些声明的规范已经专门针对 Set 接口进行了修改，但是没有包含任何其他的规定）。 
 

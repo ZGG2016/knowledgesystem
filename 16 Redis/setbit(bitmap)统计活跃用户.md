@@ -1,6 +1,8 @@
 # setbit(bitmap) 统计活跃用户
 
-redis用setbit(bitmap)统计活跃用户
+[TOC]
+
+redis 用 setbit(bitmap) 统计活跃用户
 
 ## 1、用 bitmap 实时统计数据
 
